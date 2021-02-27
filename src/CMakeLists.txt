@@ -1,4 +1,4 @@
 add_subdirectory(host/)
+add_subdirectory(kernel/)
 add_subdirectory(machine/)
-add_subdirectory(monitor/)
 add_subdirectory(rom/)
