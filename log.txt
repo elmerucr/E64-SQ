@@ -1,0 +1,2 @@
+
+2021-02-27: In Signing & Capabilities (Xcode), sandbox completely removed to allow file acces outside app bundle
