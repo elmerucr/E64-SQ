@@ -140,10 +140,9 @@ void E64::video_t::init_palette()
 	 */
 	palette = new uint32_t[0x10000];
 	for (int i = 0x0; i<0x10000; i++) {
-		/* rgb444 format and swapped because big-endian internally */
-		uint8_t red   = (i & 0x000f);
-		uint8_t green = (i & 0xf000) >> 12;
-		uint8_t blue  = (i & 0x0f00) >> 8;
+		uint8_t red   = (i & 0x0f00) >> 8;
+		uint8_t green = (i & 0x00f0) >> 4;
+		uint8_t blue  = (i & 0x000f);
 
 		palette[i] =	0xff000000 |
 				((red * 0x11) << 16) |

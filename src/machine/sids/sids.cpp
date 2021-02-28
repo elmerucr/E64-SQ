@@ -9,56 +9,6 @@
 
 E64::sids_ic::sids_ic()
 {
-    // Remapping registers, rewiring necessary to have big endian support
-    // and even addresses for word access. NEEDS WORK: where in documentation?
-
-    // voice 1
-    register_index[0x00] = 0x01;    // frequency high byte
-    register_index[0x01] = 0x00;    // frequency low byte
-    register_index[0x02] = 0x03;    // pulsewidth high byte
-    register_index[0x03] = 0x02;    // pulsewidth low byte
-    register_index[0x04] = 0x04;    // control register
-    register_index[0x05] = 0x05;    // attack decay
-    register_index[0x06] = 0x06;    // sustain release
-    
-    register_index[0x07] = 0x1f;    // PADDING BYTE
-
-    // voice 2
-    register_index[0x08] = 0x08;    // frequency high byte
-    register_index[0x09] = 0x07;    // frequency low byte
-    register_index[0x0a] = 0x0a;    // pulsewidth high byte
-    register_index[0x0b] = 0x09;    // pulsewidth low byte
-    register_index[0x0c] = 0x0b;    // control register
-    register_index[0x0d] = 0x0c;    // attack decay
-    register_index[0x0e] = 0x0d;    // sustain release
-    
-    register_index[0x0f] = 0x1f;    // PADDING BYTE
-    
-    // voice 3
-    register_index[0x10] = 0x0f;    // frequency high byte
-    register_index[0x11] = 0x0e;    // frequency low byte
-    register_index[0x12] = 0x11;    // pulsewidth high byte
-    register_index[0x13] = 0x10;    // pulsewidth low byte
-    register_index[0x14] = 0x12;    // control register
-    register_index[0x15] = 0x13;    // attack decay
-    register_index[0x16] = 0x14;    // sustain release
-    
-    register_index[0x17] = 0x1f;    // PADDING BYTE
-    
-    // filter
-    register_index[0x18] = 0x15;    // filter cutoff low byte  (bits 0-2)
-    register_index[0x19] = 0x16;    // filter cutoff high byte (bits 3-10)
-    register_index[0x1a] = 0x17;    // res filt
-    register_index[0x1b] = 0x18;    // filtermode / volume
-    
-    // misc
-    register_index[0x1c] = 0x19;    // pot x
-    register_index[0x1d] = 0x1a;    // pot y
-    register_index[0x1e] = 0x1b;    // osc3_random
-    register_index[0x1f] = 0x1c;    // env3
-    
-    
-    
     for(int i = 0; i<2; i++)
     {
         // set chip model
@@ -105,7 +55,7 @@ uint8_t E64::sids_ic::read_byte(uint8_t address)
     }
     else
     {
-        return sid[(address & 0x60) >> 5].read( register_index[address & 0x1f] ); // NEEDS CHECKING!!!
+        return sid[(address & 0x60) >> 5].read(address & 0x1f); // NEEDS CHECKING!!!
     }
 }
 
@@ -122,7 +72,7 @@ void E64::sids_ic::write_byte(uint8_t address, uint8_t byte)
     else
     {
         // nb change 0x20 into 0x60 if four SID chips are being used
-        sid[ (address & 0x20) >> 5 ].write( register_index[address & 0x1f], byte); // NEEDS CHECKING!!!
+        sid[ (address & 0x20) >> 5 ].write(address & 0x1f, byte); // NEEDS CHECKING!!!
     }
 }
 

@@ -45,6 +45,8 @@
  * Speeds up a little.
  */
 
+
+// NEEDS WORK!!!
 static void alpha_blend(uint16_t *destination, uint16_t *source)
 {
 	uint16_t r_dest, g_dest, b_dest;

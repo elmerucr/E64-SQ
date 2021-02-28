@@ -23,9 +23,6 @@ namespace E64
         cycle_count delta_t_sid1;
         int16_t sample_buffer_mono_sid1[65536];
         int16_t sample_buffer_stereo[131072];
-
-        // used to exchange freq lo/hi registers for big_endian system
-        uint8_t register_index[32];
     public:
         sids_ic();
         ~sids_ic();
