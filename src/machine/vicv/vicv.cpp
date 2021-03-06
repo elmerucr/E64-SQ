@@ -61,7 +61,8 @@ void E64::vicv_ic::run(uint32_t cycles)
 		if (!blank) {
 			if (hborder) {
 				host.video->framebuffer[dot_clock] =
-					host.video->palette[*((uint16_t *)(&registers[VICV_REG_HOR_BOR_COL_HIGH]))];
+					//host.video->palette[*((uint16_t *)(&registers[VICV_REG_HOR_BOR_COL_HIGH]))];
+					host.video->palette[registers[0x04] | (registers[0x05] << 8)];
 			} else {
 				host.video->framebuffer[dot_clock] =
 					host.video->palette[frontbuffer[dot_clock]];
@@ -174,9 +175,9 @@ void E64::vicv_ic::write_byte(uint8_t address, uint8_t byte)
 		break;
 	case VICV_REG_BUFFERSWAP:
 		if (byte & 0b00000001) {
-			if (machine.blitter->current_state != IDLE) {
-				machine.blitter->current_state = IDLE;
-				printf("[VICV] warning: blitter was not finished when swapping buffers\n");
+			if (machine.blitter->blitter_state != IDLE) {
+				machine.blitter->blitter_state = IDLE;
+				printf("[blitter] warning: blitter was not finished when swapping buffers\n");
 			}
 			swap_buffers();
 		}
@@ -197,4 +198,20 @@ void E64::vicv_ic::swap_buffers()
 	uint16_t *tempbuffer = frontbuffer;
 	frontbuffer = backbuffer;
 	backbuffer = tempbuffer;
+}
+
+void E64::vicv_ic::set_horizontal_border_color(uint16_t color)
+{
+	write_byte(0x04, color & 0xff);
+	write_byte(0x05, (color & 0xff00) >> 8);
+}
+
+uint8_t E64::vicv_ic::get_horizontal_border_size()
+{
+	return read_byte(VICV_REG_BORDER_SIZE);
+}
+
+void E64::vicv_ic::set_horizontal_border_size(uint8_t size)
+{
+	write_byte(VICV_REG_BORDER_SIZE, size);
 }

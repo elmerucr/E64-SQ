@@ -20,13 +20,15 @@ static void do_frame()
 {
 	for (;;) {
 		machine.run(63);
-		if (machine.vicv->frame_done) break;
+		if (machine.vicv->frame_done) {
+			break;
+		}
 	}
 	machine.vicv->frame_done = false;
 	if (E64::sdl2_process_events() == E64::QUIT_EVENT) {
 		machine.turned_on = false;
 	}
-	machine.kernel->run();
+	machine.kernel->execute();
 	stats.process_parameters();
 	/*
 	 * If vsync is enabled, the update screen function takes more

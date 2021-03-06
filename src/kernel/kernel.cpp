@@ -3,27 +3,41 @@
 
 E64::kernel_t::kernel_t()
 {
-	memory_manager = new allocation(&machine.mmu->ram[0x000000], &machine.mmu->ram[0xf00000]);
 	v = sq_open(1024); // creates a squirrel VM with initial stack size 1024
-	
-	void *test = memory_manager->malloc(31);
-	
-	printf("address of *test: %016x\n", test);
-	
-	memory_manager->realloc(test, 677);
-	
-	memory_manager->free(test);
+	init_chars();
+	tty = new tty_t(0x56, chars, C64_LIGHTBLUE, C64_BLUE);
 }
 
 E64::kernel_t::~kernel_t()
 {
+	delete tty;
 	sq_close(v);
-	delete memory_manager;
 }
 
 void E64::kernel_t::reset()
 {
-	machine.vicv->registers[VICV_REG_BORDER_SIZE] = 16;
+	machine.vicv->set_horizontal_border_color(C64_BLACK);
+	machine.vicv->set_horizontal_border_size(16);
+	machine.blitter->set_clearcolor(C64_BLUE);
+	
+	probeersel = (surface_t *)machine.mmu->malloc(sizeof(surface_t));
+	
+	probeersel->flags_0 = 0x05;
+	probeersel->flags_1 = 0x05;
+	probeersel->foreground_color = C64_LIGHTBLUE;
+	probeersel->background_color = C64_RED;
+	probeersel->size_in_tiles_log2 = 0x00;
+	probeersel->pixel_data = (uint16_t *)machine.mmu->malloc(64);
+	probeersel->pixel_data = &chars[64*64];
+	probeersel->pixel_data[0] = C64_BLACK;
+	probeersel->pixel_data[9] = C64_BLACK;
+	probeersel->pixel_data[18] = C64_BLACK;
+	probeersel->pixel_data[63] = C64_GREEN;
+	
+	xje = -16;
+	
+	tty->puts("elmer\n");
+	tty->printf("$%08x\tis een test\n", 0xdeadbeef);
 	
 	// startup sound
 	for (int i=0; i<128; i++) {
@@ -50,13 +64,12 @@ void E64::kernel_t::reset()
 	machine.sids->write_byte(0x25, 0b00001001);	// attack/decay
 	machine.sids->write_byte(0x22, 0x0f);		// pulsewidth
 	machine.sids->write_byte(0x23, 0x0f);
-	machine.sids->write_byte(0x82, 0x10);		// sid0 left
-	machine.sids->write_byte(0x83, 0xff);		// sid0 right
+	machine.sids->write_byte(0x82, 0x10);		// sid1 left
+	machine.sids->write_byte(0x83, 0xff);		// sid1 right
 	machine.sids->write_byte(0x24, 0b01000001);	// voice control
-	
 }
 
-void E64::kernel_t::run()
+void E64::kernel_t::execute()
 {
 	//
 }
@@ -64,9 +77,33 @@ void E64::kernel_t::run()
 void E64::kernel_t::vblank_event()
 {
 	machine.vicv->swap_buffers();
+	machine.blitter->clear_framebuffer();
+	machine.blitter->add_blit(probeersel, xje, xje);
+	xje++;
+	if (xje > 288) xje = -16;
+	
+	machine.blitter->add_blit(tty->text_screen, 0, 16);
+	tty->putsymbol(xje & 0xff);
 }
 
 void E64::kernel_t::timer_event()
 {
 	//
+}
+
+void E64::kernel_t::init_chars()
+{
+	chars = (uint16_t *)machine.mmu->malloc(64 * 256 * sizeof(uint16_t));
+	
+	uint16_t *dest = chars;
+	
+	for (int i=0; i<2048; i++) {
+		uint8_t byte = cbm_cp437_font[i];
+		uint8_t count = 8;
+		while (count--) {
+			*dest = (byte & 0b10000000) ? C64_GREY : 0x0000;
+			dest++;
+			byte = byte << 1;
+		}
+	}
 }

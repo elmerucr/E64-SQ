@@ -1,13 +1,13 @@
 //  blitter.cpp
-//  E64
+//  E64-SQ
 //
-//  Copyright © 2020 elmerucr. All rights reserved.
+//  Copyright © 2020-2021 elmerucr. All rights reserved.
 
 #include "blitter.hpp"
 #include "common.hpp"
 
 /*
- * alpha_blend function takes the current color (destination, which is
+ * The alpha_blend function takes the current color (destination, which is
  * also the destination) and the color that must be blended (source). It
  * returns the value of the blend which, normally, will be written to the
  * destination.
@@ -45,36 +45,37 @@
  * Speeds up a little.
  */
 
+/*
+ * Update 2021-03-04, adapted for little endian usage
+ */
 
-// NEEDS WORK!!!
 static void alpha_blend(uint16_t *destination, uint16_t *source)
 {
 	uint16_t r_dest, g_dest, b_dest;
 	uint16_t a_src, a_src_inv, r_src, g_src, b_src;
     
-	r_dest = (*destination & 0x000f);
-	g_dest = (*destination & 0xf000);   // bitshift >>12 done in final step
-	b_dest = (*destination & 0x0f00);   // bitshift >> 8 done in final step
+	r_dest = (*destination & 0x0f00);   // bitshift >>8 done in final step
+	g_dest = (*destination & 0x00f0);   // bitshift >>4 done in final step
+	b_dest = (*destination & 0x000f);
 
-	a_src = ((*source & 0x00f0) >> 4) + 1;
-	r_src =  (*source & 0x000f);
-	g_src =  (*source & 0xf000); // bitshift of >>12 is done in final step
-	b_src =  (*source & 0x0f00); // bitshift of >> 8 is done in final step
+	a_src = ((*source & 0xf000) >> 12) + 1;
+	r_src =  (*source & 0x0f00);   // bitshift >>8 done in final step
+	g_src =  (*source & 0x00f0);   // bitshift >>4 done in final step
+	b_src =  (*source & 0x000f);
     
 	a_src_inv = 17 - a_src;
 
-	r_dest = ((a_src * r_src) + (a_src_inv * r_dest)) >> 4;
-	g_dest = ((a_src * g_src) + (a_src_inv * g_dest)) >> (4 + 12);
-	b_dest = ((a_src * b_src) + (a_src_inv * b_dest)) >> (4 + 8);
+	r_dest = ((a_src * r_src) + (a_src_inv * r_dest)) >> (4 + 8);
+	g_dest = ((a_src * g_src) + (a_src_inv * g_dest)) >> (4 + 4);
+	b_dest = ((a_src * b_src) + (a_src_inv * b_dest)) >> 4;
 
-	//  Anything being returned has always an alpha value of 0xf
-	//  Note the format: gbar4444
-	*destination = (g_dest << 12) | (b_dest << 8) | 0x00f0 | r_dest;
+	// Anything being returned has always an alpha value of 0xf
+	*destination = 0xf000 | (r_dest << 8) | (g_dest << 4) | b_dest;
 }
 
 void E64::blitter_ic::reset()
 {
-	current_state = IDLE;
+	blitter_state = IDLE;
 
 	head = 0;
 	tail = 0;
@@ -87,131 +88,92 @@ inline void E64::blitter_ic::check_new_operation()
 {
 	if (head != tail) {
 		switch (operations[tail].type) {
-		case CLEAR_FRAMEBUFFER:
-		    current_state = CLEARING_FRAMEBUFFER;
-		    width_on_screen = VICV_PIXELS_PER_SCANLINE;
-		    height_on_screen = VICV_SCANLINES;
-		    total_no_of_pix = (width_on_screen * height_on_screen);
-		    pixel_no = 0;
-		    clear_color = (registers[6] | registers[7] << 8) | 0x00f0;
-		    tail++;
-		    break;
-		case BLIT:
-		    current_state = BLITTING;
+			case CLEAR:
+				blitter_state = CLEARING;
+				width_on_screen = VICV_PIXELS_PER_SCANLINE;
+				height_on_screen = VICV_SCANLINES;
+				total_no_of_pix = (width_on_screen * height_on_screen);
+				pixel_no = 0;
+				tail++;
+				break;
+			case BLIT:
+				blitter_state = BLITTING;
 		    
-		    // set up the blitting finite state machine
+				// set up the blitting finite state machine
 		    
-		    // check flags 0
-		    bitmap_mode     = (operations[tail].this_blit.flags_0 & 0b00000001) ? true : false;
-		    background      = (operations[tail].this_blit.flags_0 & 0b00000010) ? true : false;
-		    multicolor_mode = (operations[tail].this_blit.flags_0 & 0b00000100) ? true : false;
-		    color_per_tile  = (operations[tail].this_blit.flags_0 & 0b00001000) ? true : false;
+				// check flags 0
+				bitmap_mode     = (operations[tail].this_blit.flags_0 & 0b00000001) ? true : false;
+				background      = (operations[tail].this_blit.flags_0 & 0b00000010) ? true : false;
+				multicolor_mode = (operations[tail].this_blit.flags_0 & 0b00000100) ? true : false;
+				color_per_tile  = (operations[tail].this_blit.flags_0 & 0b00001000) ? true : false;
 		    
-		    // check flags 1
-		    double_width    = (operations[tail].this_blit.flags_1 & 0b00000001) ? 1 : 0;
-		    double_height   = (operations[tail].this_blit.flags_1 & 0b00000100) ? 1 : 0;
-		    hor_flip = (operations[tail].this_blit.flags_1 & 0b00010000) ? true : false;
-		    ver_flip = (operations[tail].this_blit.flags_1 & 0b00100000) ? true : false;
+				// check flags 1
+				double_width    = (operations[tail].this_blit.flags_1 & 0b00000001) ? 1 : 0;
+				double_height   = (operations[tail].this_blit.flags_1 & 0b00000100) ? 1 : 0;
+				hor_flip = (operations[tail].this_blit.flags_1 & 0b00010000) ? true : false;
+				ver_flip = (operations[tail].this_blit.flags_1 & 0b00100000) ? true : false;
 		    
-		    width_in_tiles_log2  = operations[tail].this_blit.size_in_tiles_log2  & 0b00000111;
-		    height_in_tiles_log2 = (operations[tail].this_blit.size_in_tiles_log2 & 0b01110000) >> 4;
+				width_in_tiles_log2  = operations[tail].this_blit.size_in_tiles_log2  & 0b00000111;
+				height_in_tiles_log2 = (operations[tail].this_blit.size_in_tiles_log2 & 0b01110000) >> 4;
 		    
-		    width_log2 = width_in_tiles_log2 + 3;
-		    height_log2 = height_in_tiles_log2 + 3;
+				width_log2 = width_in_tiles_log2 + 3;
+				height_log2 = height_in_tiles_log2 + 3;
 		    
-		    width_on_screen_log2  = width_log2 + double_width;
-		    height_on_screen_log2 = height_log2 + double_height;
+				width_on_screen_log2  = width_log2 + double_width;
+				height_on_screen_log2 = height_log2 + double_height;
 		    
-		    width = 1 << width_log2;
-		    height = 1 << height_log2;
+				width = 1 << width_log2;
+				height = 1 << height_log2;
 		    
-		    width_on_screen  = 1 << width_on_screen_log2;
-		    height_on_screen = 1 << height_on_screen_log2;
+				width_on_screen  = 1 << width_on_screen_log2;
+				height_on_screen = 1 << height_on_screen_log2;
 		    
-		    width_mask = width - 1;
-		    width_on_screen_mask = width_on_screen - 1;
+				width_mask = width - 1;
+				width_on_screen_mask = width_on_screen - 1;
 		    
-		    pixel_no = 0;
-		    total_no_of_pix = width_on_screen * height_on_screen;
+				pixel_no = 0;
+				total_no_of_pix = width_on_screen * height_on_screen;
 		    
-		    x = operations[tail].this_blit.x_low_byte |
-			    operations[tail].this_blit.x_high_byte << 8;
-		    y = operations[tail].this_blit.y_low_byte |
-			    operations[tail].this_blit.y_high_byte << 8;
+				x = operations[tail].x_pos;
+				y = operations[tail].y_pos;
+				foreground_color = operations[tail].this_blit.foreground_color;
+				background_color = operations[tail].this_blit.background_color;
+				pixel_data = (uint32_t)((uint64_t)operations[tail].this_blit.pixel_data - (uint64_t)machine.mmu->ram);
+				tile_data = (uint32_t)((uint64_t)operations[tail].this_blit.tile_data - (uint64_t)machine.mmu->ram);
+				tile_color_data = (uint32_t)((uint64_t)operations[tail].this_blit.tile_color_data - (uint64_t)machine.mmu->ram);
+				tile_background_color_data = (uint32_t)((uint64_t)operations[tail].this_blit.tile_background_color_data - (uint64_t)machine.mmu->ram);
+				user_data = operations[tail].this_blit.user_data;
 		    
-		    foreground_color =
-			operations[tail].this_blit.foreground_color__0__7       |
-			operations[tail].this_blit.foreground_color__8_15 <<  8;
+				tail++;
 		    
-		    background_color =
-			operations[tail].this_blit.background_color__0__7       |
-			operations[tail].this_blit.background_color__8_15 <<  8;
-		    
-		    pixel_data =
-			operations[tail].this_blit.pixel_data__0__7       |
-			operations[tail].this_blit.pixel_data__8_15 <<  8 |
-			operations[tail].this_blit.pixel_data_16_23 << 16 |
-			operations[tail].this_blit.pixel_data_24_31 << 24;
-		    
-		    tile_data =
-			operations[tail].this_blit.tile_data__0__7       |
-			operations[tail].this_blit.tile_data__8_15 <<  8 |
-			operations[tail].this_blit.tile_data_16_23 << 16 |
-			operations[tail].this_blit.tile_data_24_31 << 24;
-		    
-		    tile_color_data =
-			operations[tail].this_blit.tile_color_data__0__7       |
-			operations[tail].this_blit.tile_color_data__8_15 <<  8 |
-			operations[tail].this_blit.tile_color_data_16_23 << 16 |
-			operations[tail].this_blit.tile_color_data_24_31 << 24;
-		    
-		    tile_background_color_data =
-			operations[tail].this_blit.tile_background_color_data__0__7       |
-			operations[tail].this_blit.tile_background_color_data__8_15 <<  8 |
-			operations[tail].this_blit.tile_background_color_data_16_23 << 16 |
-			operations[tail].this_blit.tile_background_color_data_24_31 << 24;
-		    
-		    user_data =
-			operations[tail].this_blit.user_data__0__7       |
-			operations[tail].this_blit.user_data__8_15 <<  8 |
-			operations[tail].this_blit.user_data_16_23 << 16 |
-			operations[tail].this_blit.user_data_24_31 << 24;
-		    
-		    tail++;
-		    
-		    break;
+				break;
 		}
 	}
 }
 
 void E64::blitter_ic::run(int no_of_cycles)
 {
-    while(no_of_cycles > 0)
-    {
-        no_of_cycles--;
+	while (no_of_cycles > 0) {
+		no_of_cycles--;
         
-        switch( current_state )
-        {
-            case IDLE:
-                cycles_idle++;
-		check_new_operation();
-                break;
-            case CLEARING_FRAMEBUFFER:
-                cycles_busy++;
+        switch (blitter_state) {
+		case IDLE:
+			cycles_idle++;
+			check_new_operation();
+			break;
+		case CLEARING:
+			cycles_busy++;
+			if (!(pixel_no == total_no_of_pix)) {
+				machine.vicv->backbuffer[pixel_no] = clear_color;
+				pixel_no++;
+			} else {
+				blitter_state = IDLE;
+			}
+			break;
+		case BLITTING:
+			cycles_busy++;
                 
-                if (!(pixel_no == total_no_of_pix)) {
-                    machine.vicv->backbuffer[pixel_no] = clear_color;
-                    pixel_no++;
-                }
-                else {
-                    current_state = IDLE;
-                }
-                break;
-            case BLITTING:
-                cycles_busy++;
-                
-                if( !(pixel_no == total_no_of_pix) )
-                {
+			if (!(pixel_no == total_no_of_pix)) {
                     scrn_x = x + (hor_flip ? (width_on_screen - (pixel_no & width_on_screen_mask) - 1) : (pixel_no & width_on_screen_mask) );
                     
                     if( scrn_x < VICV_PIXELS_PER_SCANLINE )                     // clipping check horizontally
@@ -266,7 +228,7 @@ void E64::blitter_ic::run(int no_of_cycles)
                              *  tile, and if so, the value of foreground and respectively
                              *  background color have been replaced accordingly.
                              */
-                            if( source_color & 0x00f0 )
+                            if( source_color & 0xf000 )
                             {
                                 if( !multicolor_mode ) source_color = foreground_color;
                             }
@@ -283,64 +245,42 @@ void E64::blitter_ic::run(int no_of_cycles)
                 }
                 else
                 {
-                    current_state = IDLE;
+                    blitter_state = IDLE;
                 }
                 break;
         }
     }
 }
 
-uint8_t E64::blitter_ic::read_byte(uint8_t address)
+bool E64::blitter_ic::busy()
 {
-	switch (address) {
-	case 0x00:
-		if (current_state == IDLE)
-			return 0b00000000;
-		else
-			return 0b00000001;
-		break;
-	default:
-		return registers[address];
-		break;
-	}
-}
-
-void E64::blitter_ic::write_byte(uint8_t address, uint8_t byte)
-{
-	switch (address) {
-	case 0x00:
-		if (byte & 0b00000001) { // add operation
-			uint32_t ptr_to_blit_struct =
-				(registers[2]<<24) |
-				(registers[3]<<16) |
-				(registers[4]<<8) |
-				registers[5];
-			if (ptr_to_blit_struct & 0x80000000) {
-				operations[head].type = CLEAR_FRAMEBUFFER;
-			} else {
-				operations[head].type = BLIT;
-
-				// make sure word aligned and equal or below 0xffffe0
-				ptr_to_blit_struct &= 0xfffffe;
-				if (ptr_to_blit_struct > 0xffffe0)
-					ptr_to_blit_struct = 0xffffe0;
-
-				// copy the structure into the operations list
-				operations[head].this_blit = *(struct surface_blit *)&machine.mmu->ram[ptr_to_blit_struct];
-			}
-			head++;
-		}
-		break;
-	default:
-		registers[address] = byte;
-		break;
-	}
+	return blitter_state == IDLE ? false : true;
 }
 
 double E64::blitter_ic::fraction_busy()
 {
-	double percentage =
+	double fraction =
 		(double)cycles_busy / (double)(cycles_busy + cycles_idle);
 	cycles_busy = cycles_idle = 0;
-	return percentage;
+	return fraction;
+}
+
+void E64::blitter_ic::set_clearcolor(uint16_t color)
+{
+	clear_color = color | 0xf000;
+}
+
+void E64::blitter_ic::clear_framebuffer()
+{
+	operations[head].type = CLEAR;
+	head++;
+}
+
+void E64::blitter_ic::add_blit(struct surface_t *blit, int16_t x, int16_t y)
+{
+	operations[head].type = BLIT;
+	operations[head].this_blit = *blit;
+	operations[head].x_pos = x;
+	operations[head].y_pos = y;
+	head++;
 }

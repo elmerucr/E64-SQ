@@ -85,7 +85,6 @@ void E64::machine_t::run(uint16_t cycles)
 void E64::machine_t::reset()
 {
 	host.video->reset();
-	mmu->reset();
 	sids->reset();
 	vicv->reset();
 	blitter->reset();    // sometimes warning message blitter not finished

@@ -1,6 +1,6 @@
 /*
  * common.hpp
- * E64-II
+ * E64-SQ
  *
  * Copyright © 2017-2021 elmerucr. All rights reserved.
  *
@@ -19,7 +19,7 @@
 
 #define E64_SQ_MAJOR_VERSION    0
 #define E64_SQ_MINOR_VERSION    1
-#define E64_SQ_BUILD            20210227
+#define E64_SQ_BUILD            20210306
 #define E64_SQ_YEAR             2021
 
 /* Global objects */

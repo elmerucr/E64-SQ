@@ -19,7 +19,6 @@
 		4606BC4D25EB9A4800CA73D4 /* sqfuncstate.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4606BC3A25EB9A4700CA73D4 /* sqfuncstate.cpp */; };
 		4606BC4E25EB9A4800CA73D4 /* sqapi.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4606BC4125EB9A4800CA73D4 /* sqapi.cpp */; };
 		4606BC4F25EB9A4800CA73D4 /* sqvm.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4606BC4225EB9A4800CA73D4 /* sqvm.cpp */; };
-		4606BC5225EBA57200CA73D4 /* allocation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4606BC5025EBA57200CA73D4 /* allocation.cpp */; };
 		4656012025EACBBB00276691 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 4656011F25EACBBB00276691 /* Assets.xcassets */; };
 		4656012325EACBBB00276691 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 4656012225EACBBB00276691 /* Preview Assets.xcassets */; };
 		4656013925EACDED00276691 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4656013825EACDED00276691 /* main.cpp */; };
@@ -56,6 +55,7 @@
 		46B74D3325EAD62F00766C1D /* log.txt in Resources */ = {isa = PBXBuildFile; fileRef = 46B74D3225EAD62F00766C1D /* log.txt */; };
 		46B74D3825EAD81000766C1D /* SDL2.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 46B74D2F25EAD19200766C1D /* SDL2.framework */; };
 		46B74D3925EAD81000766C1D /* SDL2.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 46B74D2F25EAD19200766C1D /* SDL2.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		46F9547B25F291F7009C9E65 /* tty.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 46F9547925F291F7009C9E65 /* tty.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -109,8 +109,6 @@
 		4606BC4125EB9A4800CA73D4 /* sqapi.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = sqapi.cpp; path = ../../src/kernel/squirrel3/squirrel/sqapi.cpp; sourceTree = "<group>"; };
 		4606BC4225EB9A4800CA73D4 /* sqvm.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = sqvm.cpp; path = ../../src/kernel/squirrel3/squirrel/sqvm.cpp; sourceTree = "<group>"; };
 		4606BC4325EB9A4800CA73D4 /* sqpcheader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = sqpcheader.h; path = ../../src/kernel/squirrel3/squirrel/sqpcheader.h; sourceTree = "<group>"; };
-		4606BC5025EBA57200CA73D4 /* allocation.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = allocation.cpp; path = ../../src/kernel/allocation.cpp; sourceTree = "<group>"; };
-		4606BC5125EBA57200CA73D4 /* allocation.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = allocation.hpp; path = ../../src/kernel/allocation.hpp; sourceTree = "<group>"; };
 		4656011825EACBBA00276691 /* E64-SQ.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "E64-SQ.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		4656011F25EACBBB00276691 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		4656012225EACBBB00276691 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
@@ -174,6 +172,8 @@
 		4656019825EAD0F600276691 /* settings.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = settings.hpp; path = ../../src/host/settings.hpp; sourceTree = "<group>"; };
 		46B74D2F25EAD19200766C1D /* SDL2.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SDL2.framework; path = ../../../../../Library/Frameworks/SDL2.framework; sourceTree = "<group>"; };
 		46B74D3225EAD62F00766C1D /* log.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = log.txt; path = ../../log.txt; sourceTree = "<group>"; };
+		46F9547925F291F7009C9E65 /* tty.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = tty.cpp; path = ../../src/kernel/tty.cpp; sourceTree = "<group>"; };
+		46F9547A25F291F7009C9E65 /* tty.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = tty.hpp; path = ../../src/kernel/tty.hpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -313,8 +313,8 @@
 				4606BC1D25EB99DC00CA73D4 /* squirrel3 */,
 				4656018C25EAD0D700276691 /* kernel.hpp */,
 				4656018B25EAD0D700276691 /* kernel.cpp */,
-				4606BC5125EBA57200CA73D4 /* allocation.hpp */,
-				4606BC5025EBA57200CA73D4 /* allocation.cpp */,
+				46F9547A25F291F7009C9E65 /* tty.hpp */,
+				46F9547925F291F7009C9E65 /* tty.cpp */,
 			);
 			name = kernel;
 			sourceTree = "<group>";
@@ -507,7 +507,6 @@
 				4656017525EAD01300276691 /* wave8580_PST.cc in Sources */,
 				4656019925EAD0F600276691 /* sdl2.cpp in Sources */,
 				4656018925EAD0B200276691 /* blitter.cpp in Sources */,
-				4606BC5225EBA57200CA73D4 /* allocation.cpp in Sources */,
 				4656014225EACE8D00276691 /* cbm_cp437_font.cpp in Sources */,
 				4606BC4D25EB9A4800CA73D4 /* sqfuncstate.cpp in Sources */,
 				4606BC4F25EB9A4800CA73D4 /* sqvm.cpp in Sources */,
@@ -520,6 +519,7 @@
 				4606BC4925EB9A4800CA73D4 /* sqstate.cpp in Sources */,
 				4656019A25EAD0F600276691 /* video.cpp in Sources */,
 				4656013925EACDED00276691 /* main.cpp in Sources */,
+				46F9547B25F291F7009C9E65 /* tty.cpp in Sources */,
 				4656017425EAD01300276691 /* filter.cc in Sources */,
 				4656016B25EAD01300276691 /* wave6581_PS_.cc in Sources */,
 				4656017125EAD01300276691 /* wave6581_PST.cc in Sources */,

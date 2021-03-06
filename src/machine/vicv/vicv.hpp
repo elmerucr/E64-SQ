@@ -7,8 +7,8 @@
 
 #include <cstdint>
 
-#ifndef vicv_hpp
-#define vicv_hpp
+#ifndef VICV_HPP
+#define VICV_HPP
 
 /*
  * Register 0x00 is interrupt status register. Write to bit 0 means
@@ -34,8 +34,8 @@
  * Registers 0x04-0x05 combined: 16 bit color value for the current
  * horizontal border color.
  */
-#define VICV_REG_HOR_BOR_COL_HIGH	0x04
-#define VICV_REG_HOR_BOR_COL_LOW	0x05
+#define VICV_REG_HOR_BOR_COL_LOW	0x04
+#define VICV_REG_HOR_BOR_COL_HIGH	0x05
 
 /* Registers 0x06-0x07 currently reserved for left/right border color */
 
@@ -70,8 +70,7 @@ private:
 public:
 	void swap_buffers();
 	void toggle_stats();
-	void set_stats(char *text)
-		{ stats_text = text; }
+	void set_stats(char *text) { stats_text = text; }
     
 public:
 	vicv_ic();
@@ -101,6 +100,11 @@ public:
 	// Register access to vicv
 	uint8_t read_byte(uint8_t address);
 	void write_byte(uint8_t address, uint8_t byte);
+	
+	// for E64-SQ
+	void set_horizontal_border_color(uint16_t color);
+	uint8_t get_horizontal_border_size();
+	void set_horizontal_border_size(uint8_t size);
 };
 
 }
