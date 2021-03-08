@@ -4,31 +4,48 @@
 #include "squirrel.h"
 #include "blitter.hpp"
 #include "tty.hpp"
+#include "devices.hpp"
 
 #ifndef KERNEL_HPP
 #define KERNEL_HPP
+
+#define MAXINPUT 1024
 
 namespace E64 {
 
 class kernel_t {
 private:
-	HSQUIRRELVM v;
+	devices_t devices;
+	void build_character_ram();
 	
-	surface_t *probeersel;
-	int16_t xje;
+	SQInteger blocks;
+	SQInteger string;
+	SQInteger retval;
+	SQInteger done;
 	
-	void init_chars();
 public:
 	kernel_t();
 	~kernel_t();
 	
+	HSQUIRRELVM v;
+	
 	tty_t *tty;
-	uint16_t *chars;
+	uint16_t *cbm_font;
 	
 	void reset();
-	void vblank_event();
-	void timer_event();
 	void execute();
+	void process_keypress();
+	
+	// events
+	void vblank_event();
+	void timer_0_event();
+	void timer_1_event();
+	void timer_2_event();
+	void timer_3_event();
+	void timer_4_event();
+	void timer_5_event();
+	void timer_6_event();
+	void timer_7_event();
 };
 
 }

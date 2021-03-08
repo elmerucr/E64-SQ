@@ -1,7 +1,7 @@
 //  timer.hpp
-//  E64-II
+//  E64-SQ
 //
-//  Copyright © 2019-2020 elmerucr. All rights reserved.
+//  Copyright © 2019-2021 elmerucr. All rights reserved.
 
 /*
  * Register 0 - Status register
@@ -30,7 +30,7 @@
  *         | | +---- timer1 interrupts, 1=on, 0=off
  *         | +------ timer2 interrupts, 1=on, 0=off
  *         +-------- timer3 interrupts, 1=on, 0=off
- *
+ *                   etc...
  * bits 4-7: Reserved
  */
  

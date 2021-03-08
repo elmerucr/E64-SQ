@@ -55,6 +55,8 @@ E64::video_t::video_t()
 	SDL_GetWindowSize(window, &window_width, &window_height);
 	printf("[SDL Display] window dimensions are %u x %u pixels\n",
 	       window_width, window_height);
+	
+	update_title();
     
 	/* Create renderer and link it to window */
 

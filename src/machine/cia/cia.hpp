@@ -140,7 +140,7 @@ private:
     uint8_t last_key;
     uint8_t keyboard_repeat_delay;      // multiples of 10ms before keyboard starts repeating (60x = 0.6s)
     uint8_t keyboard_repeat_speed;      // multiples of 10ms between repeats (5x = 50ms -> 20Hz, or 4s to fill up screenline @ 80 columns)
-    uint8_t keyboard_repeat_counter;    //
+    uint8_t keyboard_repeat_counter;
     uint8_t keyboard_repeat_current_max;
     
     inline bool events_waiting()
@@ -163,11 +163,8 @@ public:
     void run(int no_of_cycles);
     
     // register access functions
-    
     uint8_t read_byte(uint8_t address);
-    
     void write_byte(uint8_t address, uint8_t byte);
-    
 };
 
 }

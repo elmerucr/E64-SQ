@@ -1,7 +1,7 @@
 //  timer.cpp
-//  E64-II
+//  E64-SQ
 //
-//  Copyright © 2019-2020 elmerucr. All rights reserved.
+//  Copyright © 2019-2021 elmerucr. All rights reserved.
 
 #include "timer.hpp"
 #include "common.hpp"
@@ -32,6 +32,32 @@ void E64::timer_ic::run(uint32_t number_of_cycles)
 			// NEEDS WORK: what if counter flips below 0?
 			// NEEDS WORK!
 			//machine.TTL74LS148->pull_line(interrupt_device_number);
+			switch (i) {
+				case 0:
+					machine.kernel->timer_0_event();
+					break;
+				case 1:
+					machine.kernel->timer_1_event();
+					break;
+				case 2:
+					machine.kernel->timer_2_event();
+					break;
+				case 3:
+					machine.kernel->timer_3_event();
+					break;
+				case 4:
+					machine.kernel->timer_4_event();
+					break;
+				case 5:
+					machine.kernel->timer_5_event();
+					break;
+				case 6:
+					machine.kernel->timer_6_event();
+					break;
+				case 7:
+					machine.kernel->timer_7_event();
+					break;
+			}
 			registers[0] |= (0b1 << i);
 		}
 	}

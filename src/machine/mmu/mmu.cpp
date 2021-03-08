@@ -34,7 +34,6 @@ void E64::mmu_ic::reset()
 	// fill alternating blocks with 0x00 and 0x10
 	for (int i=0; i<RAM_SIZE; i++)
 		ram[i] = (i & 64) ? 0x10 : 0x00;
-	
 	allocation_init();
 }
 
@@ -156,7 +155,7 @@ void E64::mmu_ic::merge()
 {
 	struct block *curr, *prev;
 	curr = block_list;
-	while ((curr->next) != NULL) {
+	while (curr && (curr->next)) {
 		if ((curr->free) && (curr->next->free)) {
 			curr->size += (curr->next->size) + sizeof(struct block);
 			curr->next = curr->next->next;
@@ -168,10 +167,7 @@ void E64::mmu_ic::merge()
 
 void E64::mmu_ic::free(void *ptr)
 {
-	// NEEDS WORK
-	// this is a very minimal implementation
-	// doesn't iterate through the blocks to check if the given pointer is valid
-	if ( (((void *)block_list) <= ptr) && (ptr <= ((void *)heap_end))) {
+	if ((((void *)block_list) <= ptr) && (ptr <= ((void *)heap_end))) {
 		struct block *curr = (struct block *)ptr;
 		--curr;
 		curr->free = 1;
