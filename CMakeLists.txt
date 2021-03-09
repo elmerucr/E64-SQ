@@ -11,6 +11,7 @@ include_directories(
     src/
     src/host/
     src/kernel/
+    src/kernel/lua-5.4.2/src/
     src/machine/
     src/machine/cia/
     src/machine/mmu/
@@ -25,4 +26,4 @@ add_subdirectory(src/)
 
 add_executable(E64-SC src/main.cpp)
 
-target_link_libraries(E64-SC host kernel machine rom ${SDL2_LIBRARIES})
+target_link_libraries(E64-SC host kernel lua machine rom ${SDL2_LIBRARIES})

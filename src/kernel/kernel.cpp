@@ -1,61 +1,39 @@
 #include "kernel.hpp"
 #include "common.hpp"
 
-#include "sqstdblob.h"
-#include "sqstdio.h"
-#include "sqstdaux.h"
-#include "sqstdsystem.h"
-#include "sqstdmath.h"
-#include "sqstdstring.h"
-
-SQInteger quit(HSQUIRRELVM v)
-{
-    int *done;
-    sq_getuserpointer(v,-1,(SQUserPointer*)&done);
-    *done=1;
-    return 0;
+static int l_my_print(lua_State* L) {
+	int nargs = lua_gettop(L);
+	for (int i=1; i <= nargs; ++i) {
+		machine.kernel->tty->puts(lua_tostring(L, 1));
+	}
+	return 0;
 }
 
-void printfunc(HSQUIRRELVM v,const SQChar *s,...)
-{
-	char buffer[1024];
-	va_list vl;
-	va_start(vl, s);
-	vsnprintf(buffer, 1024, s, vl);
-	va_end(vl);
-	machine.kernel->tty->puts(buffer);
-}
+static const struct luaL_Reg printlib [] = {
+	{ "print", l_my_print },
+	{ NULL, NULL } /* end of array */
+};
 
 E64::kernel_t::kernel_t()
 {
-	v = sq_open(1024); // creates a squirrel VM with initial stack size 1024
-	sq_setprintfunc(v, printfunc, printfunc);
-	sq_pushroottable(v);
-
-	sqstd_register_bloblib(v);
-	sqstd_register_iolib(v);
-	sqstd_register_systemlib(v);
-	sqstd_register_mathlib(v);
-	sqstd_register_stringlib(v);
-
-	 //aux library
-	 //sets error handlers
-	 sqstd_seterrorhandlers(v);
+	L = luaL_newstate();
+	luaL_openlibs(L);
+	luaopen_math(L);
+	luaopen_string(L);
+	
+	lua_getglobal(L, "_G");
+	luaL_setfuncs(L, printlib, 0);
+	lua_pop(L, 1);
 	
 	
 	build_character_ram();
 	tty = new tty_t(0x56, cbm_font, C64_LIGHTBLUE, C64_BLUE);
-	
-	blocks =0;
-	string=0;
-	retval=0;
-	done=0;
 }
 
 E64::kernel_t::~kernel_t()
 {
 	delete tty;
-	sq_close(v);
+	lua_close(L);
 }
 
 void E64::kernel_t::reset()
@@ -90,19 +68,10 @@ void E64::kernel_t::reset()
 	machine.sids->write_byte(0x24, 0b01000001);	// voice control
 	
 	tty->clear();
-	tty->puts("E64-SQ Virtual Computer System\n");
-	tty->printf("Copyright (C)%u elmerucr\n\n", E64_SQ_YEAR);
-	tty->printf(_SC("%s\n"),SQUIRREL_VERSION);
-	tty->printf(_SC("%s (%d bits)\n"),SQUIRREL_COPYRIGHT,((int)(sizeof(SQInteger)*8)));
+	tty->printf("E64-VM Computer System  Copyright (C)%u elmerucr\n\n", E64_SQ_YEAR);
+	tty->puts(LUA_COPYRIGHT);
+	tty->putchar('\n');
 	tty->prompt();
-	
-	sq_pushroottable(v);
-	sq_pushstring(v,_SC("quit"),-1);
-	sq_pushuserpointer(v,&done);
-	sq_newclosure(v,quit,1);
-	sq_setparamscheck(v,1,NULL);
-	sq_newslot(v,-3,SQFalse);
-	sq_pop(v,1);
 	
 	devices.cia_set_keyboard_repeat_delay(50);
 	devices.cia_set_keyboard_repeat_speed(5);
@@ -132,30 +101,20 @@ void E64::kernel_t::process_keypress()
 			tty->backspace();
 			break;
 		case ASCII_LF: {
-				char *buffer = tty->enter_command();
+			char *buffer = tty->enter_command();
 			tty->putchar('\n');
-			int i = strlen(buffer);
-			
-			SQInteger oldtop=sq_gettop(v);
-			if(SQ_SUCCEEDED(sq_compilebuffer(v,buffer,i,_SC("interactive console"),SQTrue))){
-			    sq_pushroottable(v);
-			    if(SQ_SUCCEEDED(sq_call(v,1,retval,SQTrue)) &&  retval){
-				tty->printf(_SC("\n"));
-				sq_pushroottable(v);
-				sq_pushstring(v,_SC("print"),-1);
-				sq_get(v,-2);
-				sq_pushroottable(v);
-				sq_push(v,-4);
-				sq_call(v,2,SQFalse,SQTrue);
-				retval=0;
-				tty->printf(_SC("\n"));
-			    }
-			}
-
-			sq_settop(v,oldtop);
-			
+			if (*buffer != '\0') {
+				if (luaL_loadstring(L, buffer) == LUA_OK) {
+					if (lua_pcall(L, 0, 1, 0) == LUA_OK) {
+						// If it was executed successfuly we
+						// remove the code from the stack
+						lua_pop(L, lua_gettop(L));
+					}
+				}
+				tty->putchar('\n');
 				tty->prompt();
-				//tty_reset_start_end_command();
+			}
+			//tty_reset_start_end_command();
 			}
 			break;
 		default:

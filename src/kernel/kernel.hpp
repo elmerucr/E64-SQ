@@ -1,7 +1,7 @@
 #include <cstdlib>
 #include <cstdint>
 
-#include "squirrel.h"
+#include "lua.hpp"
 #include "blitter.hpp"
 #include "tty.hpp"
 #include "devices.hpp"
@@ -18,16 +18,11 @@ private:
 	devices_t devices;
 	void build_character_ram();
 	
-	SQInteger blocks;
-	SQInteger string;
-	SQInteger retval;
-	SQInteger done;
-	
 public:
 	kernel_t();
 	~kernel_t();
 	
-	HSQUIRRELVM v;
+	lua_State *L;
 	
 	tty_t *tty;
 	uint16_t *cbm_font;
