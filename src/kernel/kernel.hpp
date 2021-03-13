@@ -25,6 +25,7 @@ public:
 	lua_State *L;
 	
 	tty_t *tty;
+	tty_t *message_box;
 	uint16_t *cbm_font;
 	
 	void reset();

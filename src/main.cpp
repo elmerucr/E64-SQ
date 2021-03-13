@@ -28,7 +28,9 @@ static void do_frame()
 	if (E64::sdl2_process_events() == E64::QUIT_EVENT) {
 		machine.turned_on = false;
 	}
+	
 	machine.kernel->execute();
+	
 	stats.process_parameters();
 	/*
 	 * If vsync is enabled, the update screen function takes more

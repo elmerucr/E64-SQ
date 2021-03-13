@@ -49,24 +49,48 @@
  * Update 2021-03-04, adapted for little endian usage
  */
 
+//static void alpha_blend(uint16_t *destination, uint16_t *source)
+//{
+//	uint16_t r_dest, g_dest, b_dest;
+//	uint16_t a_src, a_src_inv, r_src, g_src, b_src;
+//
+//	r_dest = (*destination & 0x0f00);   // bitshift >>8 done in final step
+//	g_dest = (*destination & 0x00f0);   // bitshift >>4 done in final step
+//	b_dest = (*destination & 0x000f);
+//
+//	a_src = ((*source & 0xf000) >> 12) + 1;
+//	r_src =  (*source & 0x0f00);   // bitshift >>8 done in final step
+//	g_src =  (*source & 0x00f0);   // bitshift >>4 done in final step
+//	b_src =  (*source & 0x000f);
+//
+//	a_src_inv = 17 - a_src;
+//
+//	r_dest = ((a_src * r_src) + (a_src_inv * r_dest)) >> (4 + 8);
+//	g_dest = ((a_src * g_src) + (a_src_inv * g_dest)) >> (4 + 4);
+//	b_dest = ((a_src * b_src) + (a_src_inv * b_dest)) >> 4;
+//
+//	// Anything being returned has always an alpha value of 0xf
+//	*destination = 0xf000 | (r_dest << 8) | (g_dest << 4) | b_dest;
+//}
+
 static void alpha_blend(uint16_t *destination, uint16_t *source)
 {
 	uint16_t r_dest, g_dest, b_dest;
 	uint16_t a_src, a_src_inv, r_src, g_src, b_src;
     
-	r_dest = (*destination & 0x0f00);   // bitshift >>8 done in final step
-	g_dest = (*destination & 0x00f0);   // bitshift >>4 done in final step
+	r_dest = (*destination & 0x0f00) >> 8;
+	g_dest = (*destination & 0x00f0) >> 4;
 	b_dest = (*destination & 0x000f);
 
 	a_src = ((*source & 0xf000) >> 12) + 1;
-	r_src =  (*source & 0x0f00);   // bitshift >>8 done in final step
-	g_src =  (*source & 0x00f0);   // bitshift >>4 done in final step
+	r_src =  (*source & 0x0f00) >> 8;
+	g_src =  (*source & 0x00f0) >> 4;
 	b_src =  (*source & 0x000f);
     
 	a_src_inv = 17 - a_src;
 
-	r_dest = ((a_src * r_src) + (a_src_inv * r_dest)) >> (4 + 8);
-	g_dest = ((a_src * g_src) + (a_src_inv * g_dest)) >> (4 + 4);
+	r_dest = ((a_src * r_src) + (a_src_inv * r_dest)) >> 4;
+	g_dest = ((a_src * g_src) + (a_src_inv * g_dest)) >> 4;
 	b_dest = ((a_src * b_src) + (a_src_inv * b_dest)) >> 4;
 
 	// Anything being returned has always an alpha value of 0xf

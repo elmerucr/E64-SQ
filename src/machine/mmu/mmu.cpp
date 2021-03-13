@@ -14,7 +14,7 @@ E64::mmu_ic::mmu_ic()
 	ram = new uint8_t[RAM_SIZE * sizeof(uint8_t)];
 	ram_as_words = (uint16_t *)ram;
 	
-	heap_start = &ram[0x000000];
+	heap_start = &ram[0x010000];	// starts at 64k (reserve 1st 64k)
 	heap_end = &ram[0xf00000];
 	
 	printf("[mmu allocation] size of memblock meta info: %lu\n",

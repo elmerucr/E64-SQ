@@ -19,7 +19,7 @@
 
 #define E64_SQ_MAJOR_VERSION    0
 #define E64_SQ_MINOR_VERSION    1
-#define E64_SQ_BUILD            20210309
+#define E64_SQ_BUILD            20210313
 #define E64_SQ_YEAR             2021
 
 /* Global objects */

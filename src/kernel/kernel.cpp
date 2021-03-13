@@ -1,19 +1,6 @@
 #include "kernel.hpp"
 #include "common.hpp"
 
-static int l_my_print(lua_State* L) {
-	int nargs = lua_gettop(L);
-	for (int i=1; i <= nargs; ++i) {
-		machine.kernel->tty->puts(lua_tostring(L, 1));
-	}
-	return 0;
-}
-
-static const struct luaL_Reg printlib [] = {
-	{ "print", l_my_print },
-	{ NULL, NULL } /* end of array */
-};
-
 E64::kernel_t::kernel_t()
 {
 	L = luaL_newstate();
@@ -21,17 +8,16 @@ E64::kernel_t::kernel_t()
 	luaopen_math(L);
 	luaopen_string(L);
 	
-	lua_getglobal(L, "_G");
-	luaL_setfuncs(L, printlib, 0);
-	lua_pop(L, 1);
-	
-	
 	build_character_ram();
-	tty = new tty_t(0x56, cbm_font, C64_LIGHTBLUE, C64_BLUE);
+	tty = new tty_t(0b00001000, 0b00000000, 0x56, cbm_font, COBALT_06, COBALT_02);
+	message_box = new tty_t(0b00001010, 0x00, 0x15, cbm_font, GREEN_06, (GREEN_02 & 0x0fff) | 0xa000);
+	message_box->clear();
+	message_box->printf("Here we have a piece of information");
 }
 
 E64::kernel_t::~kernel_t()
 {
+	delete message_box;
 	delete tty;
 	lua_close(L);
 }
@@ -40,7 +26,7 @@ void E64::kernel_t::reset()
 {
 	machine.vicv->set_horizontal_border_color(C64_BLACK);
 	machine.vicv->set_horizontal_border_size(16);
-	machine.blitter->set_clearcolor(C64_BLUE);
+	machine.blitter->set_clearcolor(COBALT_02);
 	
 	// clear sids
 	for (int i=0; i<128; i++) machine.sids->write_byte(i, 0);
@@ -67,17 +53,18 @@ void E64::kernel_t::reset()
 	machine.sids->write_byte(0x83, 0xff);		// sid1 right
 	machine.sids->write_byte(0x24, 0b01000001);	// voice control
 	
-	tty->clear();
-	tty->printf("E64-VM Computer System  Copyright (C)%u elmerucr\n\n", E64_SQ_YEAR);
-	tty->puts(LUA_COPYRIGHT);
-	tty->putchar('\n');
-	tty->prompt();
-	
 	devices.cia_set_keyboard_repeat_delay(50);
 	devices.cia_set_keyboard_repeat_speed(5);
 	devices.cia_generate_key_events();
 	
 	devices.timer_set(0, 3600);
+	
+	tty->clear();
+	tty->printf("E64 Virtual Computer System (C)%u elmerucr\n\n", E64_SQ_YEAR);
+	tty->puts(LUA_COPYRIGHT);
+	tty->putchar('\n');
+	tty->prompt();
+	//tty->reset_start_end_command();
 	tty->activate_cursor();
 }
 
@@ -102,19 +89,8 @@ void E64::kernel_t::process_keypress()
 			break;
 		case ASCII_LF: {
 			char *buffer = tty->enter_command();
-			tty->putchar('\n');
-			if (*buffer != '\0') {
-				if (luaL_loadstring(L, buffer) == LUA_OK) {
-					if (lua_pcall(L, 0, 1, 0) == LUA_OK) {
-						// If it was executed successfuly we
-						// remove the code from the stack
-						lua_pop(L, lua_gettop(L));
-					}
-				}
-				tty->putchar('\n');
-				tty->prompt();
-			}
-			//tty_reset_start_end_command();
+			tty->puts(buffer);
+			tty->prompt();
 			}
 			break;
 		default:
@@ -137,6 +113,7 @@ void E64::kernel_t::vblank_event()
 	machine.vicv->swap_buffers();
 	machine.blitter->clear_framebuffer();
 	machine.blitter->add_blit(tty->text_screen, 0, 16);
+	machine.blitter->add_blit(message_box->text_screen, 100, 100);
 }
 
 void E64::kernel_t::timer_0_event()
