@@ -47,9 +47,7 @@ public:
 	// this chip contains 256 registers (and are mapped to a specific page)
 	uint8_t registers[256];
 private:
-
-	
-	// framebuffer pointers inside the virtual machine
+	// framebuffer pointers
 	uint16_t *fb0;
 	uint16_t *fb1;
 
@@ -74,6 +72,7 @@ public:
     
 public:
 	vicv_ic();
+	~vicv_ic();
 
 	// framebuffer pointers inside the virtual machine
 	uint16_t *frontbuffer;

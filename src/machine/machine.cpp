@@ -24,8 +24,6 @@ E64::machine_t::machine_t()
 	// init clocks (frequency dividers, right no of cycles will run on different ic's)
 	vicv_to_blitter = new clocks(VICV_DOT_CLOCK_SPEED, BLITTER_DOT_CLOCK_SPEED);
 	vicv_to_sid   = new clocks(VICV_DOT_CLOCK_SPEED, SID_CLOCK_SPEED );
-	
-	reset();
 }
 
 E64::machine_t::~machine_t()

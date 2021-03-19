@@ -64,7 +64,6 @@ void E64::kernel_t::reset()
 	tty->puts(LUA_COPYRIGHT);
 	tty->putchar('\n');
 	tty->prompt();
-	//tty->reset_start_end_command();
 	tty->activate_cursor();
 }
 
@@ -87,11 +86,15 @@ void E64::kernel_t::process_keypress()
 		case ASCII_BACKSPACE:
 			tty->backspace();
 			break;
-		case ASCII_LF: {
+		case ASCII_LF:
+		{
 			char *buffer = tty->enter_command();
-			tty->puts(buffer);
-			tty->prompt();
+			tty->putchar('\n');
+			if (*buffer) {
+				tty->puts(buffer);
+				tty->prompt();
 			}
+		}
 			break;
 		default:
 			tty->putchar(key_value);
@@ -111,7 +114,7 @@ void E64::kernel_t::execute()
 void E64::kernel_t::vblank_event()
 {
 	machine.vicv->swap_buffers();
-	machine.blitter->clear_framebuffer();
+	machine.blitter->add_clear_framebuffer();
 	machine.blitter->add_blit(tty->text_screen, 0, 16);
 	machine.blitter->add_blit(message_box->text_screen, 100, 100);
 }

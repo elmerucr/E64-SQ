@@ -235,6 +235,13 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		4624B1C72604D10600FBBDD0 /* cpu */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = cpu;
+			sourceTree = "<group>";
+		};
 		4656010F25EACBBA00276691 = {
 			isa = PBXGroup;
 			children = (
@@ -312,6 +319,7 @@
 		4656013125EACCFC00276691 /* machine */ = {
 			isa = PBXGroup;
 			children = (
+				4624B1C72604D10600FBBDD0 /* cpu */,
 				4656014425EACFAF00276691 /* cia */,
 				4656014925EACFC900276691 /* mmu */,
 				4656014E25EACFE200276691 /* sids */,

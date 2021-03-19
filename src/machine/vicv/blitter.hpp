@@ -30,6 +30,68 @@ enum blitter_state_t {
  * into finite state machine data of the blitter.
  */
 
+struct __attribute__((packed)) blit_t {
+	/*  Flags 0
+	 *
+	 *  7 6 5 4 3 2 1 0
+	 *          | | | |
+	 *          | | | +-- Tile Mode (0) / Bitmap Mode (1)
+	 *          | | +---- Background (0 = off, 1 = on)
+	 *          | +------ Simple Color (0) / Multi Color (1)
+	 *          +-------- Color per tile (0 = off, 1 = on)
+	 *
+	 *  bits 4-7: Reserved
+	 */
+	uint8_t     flags_0;
+
+	/*  Flags 1 - Stretching & Flips
+	 *
+	 *  7 6 5 4 3 2 1 0
+	 *      | |   |   |
+	 *      | |   |   +-- Horizontal stretching (0 = off, 1 = on)
+	 *      | |   +------ Vertical stretching (0 = off, 1 = on)
+	 *      | +---------- Horizontal flip (0 = off, 1 = on)
+	 *      +------------ Vertical flip (0 = off, 1 = on)
+	 *
+	 *  bits 1, 3, 6 and 7: Reserved
+	 */
+	uint8_t     flags_1;
+    
+	/*  Size of blit in tiles log2, 8 bit unsigned number.
+	 *
+	 *  7 6 5 4 3 2 1 0
+	 *    | | |   | | |
+	 *    | | |   +-+-+-- Low nibble  (using 3 bits)
+	 *    | | |
+	 *    +-+-+---------- High nibble (using 3 bits)
+	 *
+	 *  Low nibble codes for width (in tiles log2) of the blit.
+	 *  High nibble codes for height.
+	 *
+	 *  Bits 3 and 7: Reserved.
+	 *
+	 *  The 3 least significant bits of each nibble indicate a number of
+	 *  0 - 7 (n). Finally, a bit shift occurs: 0b00000001 << n (2^n)
+	 *  Resulting in the final width/height in 'tiles' (8 pixels per tile)
+	 *  { 1, 2, 4, 8, 16, 32, 64, 128 }
+	 */
+	uint8_t     size_in_tiles_log2;
+	
+	/*  Reserved byte for future purposes related to e.g. wrapping
+	 */
+	uint8_t     currently_unused;
+    
+	/*
+	 * Contains the foreground color if single color.
+	 */
+	uint16_t foreground_color;
+    
+	/*
+	 * Contains the background color if single color.
+	 */
+	uint16_t background_color;
+};
+
 struct surface_t {
 	/*  Flags 0
 	 *
@@ -127,17 +189,24 @@ struct operation {
 
 class blitter_ic {
 public:
+	blitter_ic();
+	~blitter_ic();
+	
 	void reset();
 	void run(int no_of_cycles);
 	
 	void set_clearcolor(uint16_t color);
-	void clear_framebuffer();
+	void add_clear_framebuffer();
 	void add_blit(struct surface_t *blit, int16_t x, int16_t y);
 	bool busy();
 	
 	enum blitter_state_t blitter_state;
 	double fraction_busy(); /*  Returns the fraction of time the blitter was NOT idle */
 private:
+	uint8_t *blit_memory;
+	struct surface_t *blit;	// 2048 bytes (256 * 8) for E64, another 2048 for host
+	uint16_t *cbm_font;	// unpacked font
+	
 	/*
 	 * Keeping track of busy and idle cycles. This way, it is possible
 	 * to estimate the % of usage of the blitter chip. It is best to

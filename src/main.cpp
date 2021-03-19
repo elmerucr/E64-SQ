@@ -18,13 +18,11 @@ std::chrono::time_point<std::chrono::steady_clock> refresh_moment;
 
 static void do_frame()
 {
-	for (;;) {
+	while (!machine.vicv->frame_done) {
 		machine.run(63);
-		if (machine.vicv->frame_done) {
-			break;
-		}
 	}
 	machine.vicv->frame_done = false;
+	
 	if (E64::sdl2_process_events() == E64::QUIT_EVENT) {
 		machine.turned_on = false;
 	}
@@ -64,6 +62,8 @@ int main(int argc, char **argv)
 	E64::sdl2_init();
 
 	machine.turned_on = true;
+	
+	machine.reset();
 
 	stats.reset();
 	

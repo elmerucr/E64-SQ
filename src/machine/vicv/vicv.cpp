@@ -12,15 +12,21 @@
 E64::vicv_ic::vicv_ic()
 {
 	stats_visible = false;
-
-	fb0 = (uint16_t *)&machine.mmu->ram[VICV_FB0];
-	fb1 = (uint16_t *)&machine.mmu->ram[VICV_FB1];
+	
+	fb0 = new uint16_t[VICV_PIXELS_PER_SCANLINE * VICV_SCANLINES];
+	fb1 = new uint16_t[VICV_PIXELS_PER_SCANLINE * VICV_SCANLINES];
 
 	breakpoint_reached = false;
 	clear_scanline_breakpoints();
 	old_y_pos = 0;
 
 	stats_text = nullptr;
+}
+
+E64::vicv_ic::~vicv_ic()
+{
+	delete [] fb1;
+	delete [] fb0;
 }
 
 void E64::vicv_ic::reset()

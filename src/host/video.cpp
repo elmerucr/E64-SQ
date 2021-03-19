@@ -210,5 +210,5 @@ void E64::video_t::toggle_fullscreen()
 
 void E64::video_t::update_title()
 {
-	SDL_SetWindowTitle(window, "E64-VM");
+	SDL_SetWindowTitle(window, "E64");
 }

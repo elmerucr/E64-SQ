@@ -49,30 +49,6 @@
  * Update 2021-03-04, adapted for little endian usage
  */
 
-//static void alpha_blend(uint16_t *destination, uint16_t *source)
-//{
-//	uint16_t r_dest, g_dest, b_dest;
-//	uint16_t a_src, a_src_inv, r_src, g_src, b_src;
-//
-//	r_dest = (*destination & 0x0f00);   // bitshift >>8 done in final step
-//	g_dest = (*destination & 0x00f0);   // bitshift >>4 done in final step
-//	b_dest = (*destination & 0x000f);
-//
-//	a_src = ((*source & 0xf000) >> 12) + 1;
-//	r_src =  (*source & 0x0f00);   // bitshift >>8 done in final step
-//	g_src =  (*source & 0x00f0);   // bitshift >>4 done in final step
-//	b_src =  (*source & 0x000f);
-//
-//	a_src_inv = 17 - a_src;
-//
-//	r_dest = ((a_src * r_src) + (a_src_inv * r_dest)) >> (4 + 8);
-//	g_dest = ((a_src * g_src) + (a_src_inv * g_dest)) >> (4 + 4);
-//	b_dest = ((a_src * b_src) + (a_src_inv * b_dest)) >> 4;
-//
-//	// Anything being returned has always an alpha value of 0xf
-//	*destination = 0xf000 | (r_dest << 8) | (g_dest << 4) | b_dest;
-//}
-
 static void alpha_blend(uint16_t *destination, uint16_t *source)
 {
 	uint16_t r_dest, g_dest, b_dest;
@@ -93,9 +69,43 @@ static void alpha_blend(uint16_t *destination, uint16_t *source)
 	g_dest = ((a_src * g_src) + (a_src_inv * g_dest)) >> 4;
 	b_dest = ((a_src * b_src) + (a_src_inv * b_dest)) >> 4;
 
-	// Anything being returned has always an alpha value of 0xf
+	// Anything returned, has an alpha value of 0xf
 	*destination = 0xf000 | (r_dest << 8) | (g_dest << 4) | b_dest;
 }
+
+E64::blitter_ic::blitter_ic()
+{
+	blit_memory = new uint8_t[512 * 65536];
+	blit = new struct surface_t[512];
+	cbm_font = new uint16_t[256 * 64];
+	
+	for (int i=0; i<512; i++) {
+		blit[i].pixel_data                 = (uint16_t *)&blit_memory[(i << 16) | 0x0000];
+		blit[i].tile_data                  = (uint8_t  *)&blit_memory[(i << 16) | 0x8000];
+		blit[i].tile_color_data            = (uint16_t *)&blit_memory[(i << 16) | 0xc000];
+		blit[i].tile_background_color_data = (uint16_t *)&blit_memory[(i << 16) | 0xe000];
+	}
+	
+	// expand characters
+	uint16_t *dest = cbm_font;
+	for (int i=0; i<2048; i++) {
+		uint8_t byte = cbm_cp437_font[i];
+		uint8_t count = 8;
+		while (count--) {
+			*dest = (byte & 0b10000000) ? C64_GREY : 0x0000;
+			dest++;
+			byte = byte << 1;
+		}
+	}
+}
+
+E64::blitter_ic::~blitter_ic()
+{
+	delete [] cbm_font;
+	delete [] blit;
+	delete [] blit_memory;
+}
+
 
 void E64::blitter_ic::reset()
 {
@@ -179,8 +189,8 @@ void E64::blitter_ic::run(int no_of_cycles)
 {
 	while (no_of_cycles > 0) {
 		no_of_cycles--;
-        
-        switch (blitter_state) {
+
+		switch (blitter_state) {
 		case IDLE:
 			cycles_idle++;
 			check_new_operation();
@@ -208,14 +218,15 @@ void E64::blitter_ic::run(int no_of_cycles)
                         //if( (scrn_y >= 0) && (scrn_y < VICV_SCANLINES) )      // clipping check vertically
                         if( scrn_y < VICV_SCANLINES )      // clipping check vertically
                         {
-                            /*  Transformation of pixel_no to take into account double width and/or height. After
-                             *  this <complex> transformation, the normalized pixel_no points to a position in the
-                             *  source material.
-                             *  NEEDS WORK: document this transformation
+                            /*
+                             * Transformation of pixel_no to take into account double width and/or height. After
+                             * this <complex> transformation, the normalized pixel_no points to a position in the
+                             * source material.
+                             * NEEDS WORK: document this transformation
                              */
                             normalized_pixel_no = (((pixel_no >> double_height) & ~width_on_screen_mask) | (pixel_no & width_on_screen_mask)) >> double_width;
                             
-                            /*  Calculate the current x and y positions within the current blit source pixeldata */
+                            /* Calculate the current x and y positions within the current blit source pixeldata */
                             x_in_blit = normalized_pixel_no & width_mask;
                             y_in_blit = normalized_pixel_no >> width_log2;
                             
@@ -236,7 +247,7 @@ void E64::blitter_ic::run(int no_of_cycles)
                             
                             pixel_in_tile = (x_in_blit & 0b111) | ((y_in_blit & 0b111) << 3);
                             
-                            /*  Pick the right pixel depending on bitmap mode or tile mode */
+                            /* Pick the right pixel depending on bitmap mode or tile mode */
                             source_color = bitmap_mode ?
                                 machine.mmu->ram_as_words[((pixel_data >> 1) + normalized_pixel_no) & 0x007fffff]
                                 :
@@ -294,7 +305,7 @@ void E64::blitter_ic::set_clearcolor(uint16_t color)
 	clear_color = color | 0xf000;
 }
 
-void E64::blitter_ic::clear_framebuffer()
+void E64::blitter_ic::add_clear_framebuffer()
 {
 	operations[head].type = CLEAR;
 	head++;
