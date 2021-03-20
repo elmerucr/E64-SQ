@@ -4,14 +4,17 @@
 
 #define COMMAND_BUFFER_SIZE 63+(3*64)
 
-E64::tty_t::tty_t(uint8_t flags_0, uint8_t flags_1, uint8_t size_in_tiles_log2, uint16_t *pixeldata, uint16_t foreground_color, uint16_t background_color)
+E64::tty_t::tty_t(uint8_t flags_0, uint8_t flags_1, uint8_t size_in_tiles_log2, int _blit_no, uint16_t foreground_color, uint16_t background_color)
 {
-	text_screen = (surface_t *)machine.mmu->malloc(sizeof(surface_t));
+	//text_screen = (surface_t *)machine.mmu->malloc(sizeof(surface_t));
+	text_screen = &machine.blitter->blit[_blit_no];
+	
+	//blit_no = _blit_no;
 	
 	text_screen->flags_0 = flags_0;
 	text_screen->flags_1 = flags_1;
-	
 	text_screen->size_in_tiles_log2 = size_in_tiles_log2;
+	
 	columns = (0b1 << (size_in_tiles_log2 & 0b111));
 	rows = (0b1 << ((size_in_tiles_log2 & 0b1110000) >> 4));
 	tiles = columns * rows;
@@ -21,20 +24,20 @@ E64::tty_t::tty_t(uint8_t flags_0, uint8_t flags_1, uint8_t size_in_tiles_log2, 
 	current_foreground_color = foreground_color;
 	current_background_color = background_color;
 	
-	text_screen->pixel_data = pixeldata;
-	text_screen->tile_data = (uint8_t *)machine.mmu->malloc(tiles * sizeof(uint8_t));
-	text_screen->tile_color_data = (uint16_t *)machine.mmu->malloc(tiles * sizeof(uint16_t));
-	text_screen->tile_background_color_data = (uint16_t *)machine.mmu->malloc(tiles * sizeof(uint16_t));
+//	text_screen->pixel_data = pixeldata;
+//	text_screen->tile_data = (uint8_t *)machine.mmu->malloc(tiles * sizeof(uint8_t));
+//	text_screen->tile_color_data = (uint16_t *)machine.mmu->malloc(tiles * sizeof(uint16_t));
+//	text_screen->tile_background_color_data = (uint16_t *)machine.mmu->malloc(tiles * sizeof(uint16_t));
 }
 
 E64::tty_t::~tty_t()
 {
 	delete command_buffer;
 	
-	machine.mmu->free(text_screen->tile_background_color_data);
-	machine.mmu->free(text_screen->tile_color_data);
-	machine.mmu->free(text_screen->tile_data);
-	machine.mmu->free(text_screen);
+//	machine.mmu->free(text_screen->tile_background_color_data);
+//	machine.mmu->free(text_screen->tile_color_data);
+//	machine.mmu->free(text_screen->tile_data);
+//	machine.mmu->free(text_screen);
 }
 
 void E64::tty_t::clear()

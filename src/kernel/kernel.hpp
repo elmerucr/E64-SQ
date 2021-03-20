@@ -16,8 +16,6 @@ namespace E64 {
 class kernel_t {
 private:
 	devices_t devices;
-	void build_character_ram();
-	
 public:
 	kernel_t();
 	~kernel_t();
@@ -26,7 +24,6 @@ public:
 	
 	tty_t *tty;
 	tty_t *message_box;
-	uint16_t *cbm_font;
 	
 	void reset();
 	void execute();

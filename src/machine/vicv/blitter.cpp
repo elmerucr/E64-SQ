@@ -11,11 +11,8 @@
  * also the destination) and the color that must be blended (source). It
  * returns the value of the blend which, normally, will be written to the
  * destination.
- * The ordering (from little endian perspective) seems strange: GBAR4444
- * Actually, it isn't: inside the virtual machine (big endian) it is
- * in ARGB4444 format. At first, this function seemed to drag down total
- * emulation speed. But, with optimizations (minimum -O2) turned on, it
- * is ok.
+ * At first, this function seemed to drag down total emulation speed. But, with
+ * optimizations (minimum -O2) turned on, it is ok.
  *
  * The idea to use a function (and not a lookup table) comes from this website:
  * https://stackoverflow.com/questions/30849261/alpha-blending-using-table-lookup-is-not-as-fast-as-expected
@@ -32,9 +29,7 @@
  * Update 2020-06-10, check:
  * https://stackoverflow.com/questions/12011081/alpha-blending-2-rgba-colors-in-c
  *
- * Calculate inv_alpha, then makes use of a bit shift, no divisions anymore. Also
- * bit shifts are not performed immediately after assigning the initial values,
- * only during the last step.
+ * Calculate inv_alpha, then makes use of a bit shift, no divisions anymore.
  *
  * (1) isolate alpha value (0 - max) and add 1
  * (2) calculate inverse alpha by taking (max+1) - alpha
@@ -76,14 +71,17 @@ static void alpha_blend(uint16_t *destination, uint16_t *source)
 E64::blitter_ic::blitter_ic()
 {
 	blit_memory = new uint8_t[512 * 65536];
-	blit = new struct surface_t[512];
+	for (int i=0; i<(256*65536); i++) blit_memory[i] = i; // TEMP HACK TO SHOW SOMETHING
+	blit_memory_as_words = (uint16_t *)blit_memory;
+	blit = new struct blit_t[512];
 	cbm_font = new uint16_t[256 * 64];
 	
 	for (int i=0; i<512; i++) {
-		blit[i].pixel_data                 = (uint16_t *)&blit_memory[(i << 16) | 0x0000];
-		blit[i].tile_data                  = (uint8_t  *)&blit_memory[(i << 16) | 0x8000];
-		blit[i].tile_color_data            = (uint16_t *)&blit_memory[(i << 16) | 0xc000];
-		blit[i].tile_background_color_data = (uint16_t *)&blit_memory[(i << 16) | 0xe000];
+		//blit[i].pixel_data                 = (uint16_t *)&blit_memory[(i << 16) | 0x0000];
+		blit[i].pixel_data = cbm_font;
+		blit[i].tile_data                  = (uint8_t  *)&blit_memory[(i << 16) | 0x8000]; // 4k block
+		blit[i].tile_color_data            = (uint16_t *)&blit_memory[(i << 16) | 0xc000]; // 8k block
+		blit[i].tile_background_color_data = (uint16_t *)&blit_memory[(i << 16) | 0xe000]; // 8k block
 	}
 	
 	// expand characters
@@ -136,19 +134,19 @@ inline void E64::blitter_ic::check_new_operation()
 				// set up the blitting finite state machine
 		    
 				// check flags 0
-				bitmap_mode     = (operations[tail].this_blit.flags_0 & 0b00000001) ? true : false;
-				background      = (operations[tail].this_blit.flags_0 & 0b00000010) ? true : false;
-				multicolor_mode = (operations[tail].this_blit.flags_0 & 0b00000100) ? true : false;
-				color_per_tile  = (operations[tail].this_blit.flags_0 & 0b00001000) ? true : false;
+				bitmap_mode	= blit[operations[tail].blit_no].flags_0 & 0b00000001 ? true : false;
+				background      = blit[operations[tail].blit_no].flags_0 & 0b00000010 ? true : false;
+				multicolor_mode = blit[operations[tail].blit_no].flags_0 & 0b00000100 ? true : false;
+				color_per_tile  = blit[operations[tail].blit_no].flags_0 & 0b00001000 ? true : false;
 		    
 				// check flags 1
-				double_width    = (operations[tail].this_blit.flags_1 & 0b00000001) ? 1 : 0;
-				double_height   = (operations[tail].this_blit.flags_1 & 0b00000100) ? 1 : 0;
-				hor_flip = (operations[tail].this_blit.flags_1 & 0b00010000) ? true : false;
-				ver_flip = (operations[tail].this_blit.flags_1 & 0b00100000) ? true : false;
-		    
-				width_in_tiles_log2  = operations[tail].this_blit.size_in_tiles_log2  & 0b00000111;
-				height_in_tiles_log2 = (operations[tail].this_blit.size_in_tiles_log2 & 0b01110000) >> 4;
+				double_width	= blit[operations[tail].blit_no].flags_1 & 0b00000001 ? 1 : 0;
+				double_height   = blit[operations[tail].blit_no].flags_1 & 0b00000100 ? 1 : 0;
+				hor_flip = blit[operations[tail].blit_no].flags_1 & 0b00010000 ? true : false;
+				ver_flip = blit[operations[tail].blit_no].flags_1 & 0b00100000 ? true : false;
+
+				width_in_tiles_log2 = blit[operations[tail].blit_no].size_in_tiles_log2 & 0b00000111;
+				height_in_tiles_log2 = (blit[operations[tail].blit_no].size_in_tiles_log2 & 0b01110000) >> 4;
 		    
 				width_log2 = width_in_tiles_log2 + 3;
 				height_log2 = height_in_tiles_log2 + 3;
@@ -164,22 +162,17 @@ inline void E64::blitter_ic::check_new_operation()
 		    
 				width_mask = width - 1;
 				width_on_screen_mask = width_on_screen - 1;
-		    
 				pixel_no = 0;
 				total_no_of_pix = width_on_screen * height_on_screen;
-		    
 				x = operations[tail].x_pos;
 				y = operations[tail].y_pos;
-				foreground_color = operations[tail].this_blit.foreground_color;
-				background_color = operations[tail].this_blit.background_color;
-				pixel_data = (uint32_t)((uint64_t)operations[tail].this_blit.pixel_data - (uint64_t)machine.mmu->ram);
-				tile_data = (uint32_t)((uint64_t)operations[tail].this_blit.tile_data - (uint64_t)machine.mmu->ram);
-				tile_color_data = (uint32_t)((uint64_t)operations[tail].this_blit.tile_color_data - (uint64_t)machine.mmu->ram);
-				tile_background_color_data = (uint32_t)((uint64_t)operations[tail].this_blit.tile_background_color_data - (uint64_t)machine.mmu->ram);
-				user_data = operations[tail].this_blit.user_data;
-		    
+				foreground_color = blit[operations[tail].blit_no].foreground_color;
+				background_color = blit[operations[tail].blit_no].background_color;
+				pixel_data = blit[operations[tail].blit_no].pixel_data;
+				tile_data = blit[operations[tail].blit_no].tile_data;
+				tile_color_data = blit[operations[tail].blit_no].tile_color_data;
+				tile_background_color_data = blit[operations[tail].blit_no].tile_background_color_data;
 				tail++;
-		    
 				break;
 		}
 	}
@@ -208,14 +201,12 @@ void E64::blitter_ic::run(int no_of_cycles)
 			cycles_busy++;
                 
 			if (!(pixel_no == total_no_of_pix)) {
-                    scrn_x = x + (hor_flip ? (width_on_screen - (pixel_no & width_on_screen_mask) - 1) : (pixel_no & width_on_screen_mask) );
+				scrn_x = x + (hor_flip ? (width_on_screen - (pixel_no & width_on_screen_mask) - 1) : (pixel_no & width_on_screen_mask) );
                     
-                    if( scrn_x < VICV_PIXELS_PER_SCANLINE )                     // clipping check horizontally
-                    {
-                        scrn_y = y + (ver_flip ?
-                            (height_on_screen - (pixel_no >> width_on_screen_log2) - 1) : (pixel_no >> width_on_screen_log2) );
+				if (scrn_x < VICV_PIXELS_PER_SCANLINE) {        // clipping check horizontally
+					scrn_y = y + (ver_flip ?
+						      (height_on_screen - (pixel_no >> width_on_screen_log2) - 1) : (pixel_no >> width_on_screen_log2) );
                         
-                        //if( (scrn_y >= 0) && (scrn_y < VICV_SCANLINES) )      // clipping check vertically
                         if( scrn_y < VICV_SCANLINES )      // clipping check vertically
                         {
                             /*
@@ -235,23 +226,19 @@ void E64::blitter_ic::run(int no_of_cycles)
                             
                             tile_number = tile_x + (tile_y << width_in_tiles_log2);
                             
-                            tile_index = machine.mmu->ram[(tile_data + tile_number) & 0x00ffffff];
+				tile_index = tile_data[tile_number];
                             
                             /* Replace foreground and background colors if necessary */
-                            if( color_per_tile )
-                            {
-                                foreground_color = machine.mmu->ram_as_words[((tile_color_data >> 1) + tile_number) & 0x007fffff];
-                                
-                                background_color = machine.mmu->ram_as_words[ ((tile_background_color_data >> 1) + tile_number) & 0x007fffff ];
+                            if (color_per_tile) {
+				    foreground_color = tile_color_data[tile_number];
+				    background_color = tile_background_color_data[tile_number];
                             }
                             
                             pixel_in_tile = (x_in_blit & 0b111) | ((y_in_blit & 0b111) << 3);
                             
                             /* Pick the right pixel depending on bitmap mode or tile mode */
                             source_color = bitmap_mode ?
-                                machine.mmu->ram_as_words[((pixel_data >> 1) + normalized_pixel_no) & 0x007fffff]
-                                :
-                                machine.mmu->ram_as_words[((pixel_data >> 1) + ((tile_index << 6) | pixel_in_tile) ) & 0x007fffff];
+				pixel_data[normalized_pixel_no] : pixel_data[((tile_index << 6) | pixel_in_tile)];
                             
                             /*  If the source color has an alpha value of higher than 0x0 (there is a pixel),
                              *  and we're not in multicolor mode, replace with foreground color.
@@ -263,13 +250,10 @@ void E64::blitter_ic::run(int no_of_cycles)
                              *  tile, and if so, the value of foreground and respectively
                              *  background color have been replaced accordingly.
                              */
-                            if( source_color & 0xf000 )
-                            {
-                                if( !multicolor_mode ) source_color = foreground_color;
-                            }
-                            else
-                            {
-                                if( background ) source_color = background_color;
+                            if (source_color & 0xf000) {
+                                if (!multicolor_mode) source_color = foreground_color;
+                            } else {
+                                if (background) source_color = background_color;
                             }
                             
                             /*  Finally, call the alpha blend function */
@@ -277,9 +261,7 @@ void E64::blitter_ic::run(int no_of_cycles)
                         }
                     }
                     pixel_no++;
-                }
-                else
-                {
+                } else {
                     blitter_state = IDLE;
                 }
                 break;
@@ -311,10 +293,10 @@ void E64::blitter_ic::add_clear_framebuffer()
 	head++;
 }
 
-void E64::blitter_ic::add_blit(struct surface_t *blit, int16_t x, int16_t y)
+void E64::blitter_ic::add_blit(int blit_no, int16_t x, int16_t y)
 {
 	operations[head].type = BLIT;
-	operations[head].this_blit = *blit;
+	operations[head].blit_no = blit_no;
 	operations[head].x_pos = x;
 	operations[head].y_pos = y;
 	head++;

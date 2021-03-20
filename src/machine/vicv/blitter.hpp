@@ -30,69 +30,7 @@ enum blitter_state_t {
  * into finite state machine data of the blitter.
  */
 
-struct __attribute__((packed)) blit_t {
-	/*  Flags 0
-	 *
-	 *  7 6 5 4 3 2 1 0
-	 *          | | | |
-	 *          | | | +-- Tile Mode (0) / Bitmap Mode (1)
-	 *          | | +---- Background (0 = off, 1 = on)
-	 *          | +------ Simple Color (0) / Multi Color (1)
-	 *          +-------- Color per tile (0 = off, 1 = on)
-	 *
-	 *  bits 4-7: Reserved
-	 */
-	uint8_t     flags_0;
-
-	/*  Flags 1 - Stretching & Flips
-	 *
-	 *  7 6 5 4 3 2 1 0
-	 *      | |   |   |
-	 *      | |   |   +-- Horizontal stretching (0 = off, 1 = on)
-	 *      | |   +------ Vertical stretching (0 = off, 1 = on)
-	 *      | +---------- Horizontal flip (0 = off, 1 = on)
-	 *      +------------ Vertical flip (0 = off, 1 = on)
-	 *
-	 *  bits 1, 3, 6 and 7: Reserved
-	 */
-	uint8_t     flags_1;
-    
-	/*  Size of blit in tiles log2, 8 bit unsigned number.
-	 *
-	 *  7 6 5 4 3 2 1 0
-	 *    | | |   | | |
-	 *    | | |   +-+-+-- Low nibble  (using 3 bits)
-	 *    | | |
-	 *    +-+-+---------- High nibble (using 3 bits)
-	 *
-	 *  Low nibble codes for width (in tiles log2) of the blit.
-	 *  High nibble codes for height.
-	 *
-	 *  Bits 3 and 7: Reserved.
-	 *
-	 *  The 3 least significant bits of each nibble indicate a number of
-	 *  0 - 7 (n). Finally, a bit shift occurs: 0b00000001 << n (2^n)
-	 *  Resulting in the final width/height in 'tiles' (8 pixels per tile)
-	 *  { 1, 2, 4, 8, 16, 32, 64, 128 }
-	 */
-	uint8_t     size_in_tiles_log2;
-	
-	/*  Reserved byte for future purposes related to e.g. wrapping
-	 */
-	uint8_t     currently_unused;
-    
-	/*
-	 * Contains the foreground color if single color.
-	 */
-	uint16_t foreground_color;
-    
-	/*
-	 * Contains the background color if single color.
-	 */
-	uint16_t background_color;
-};
-
-struct surface_t {
+struct blit_t {
 	/*  Flags 0
 	 *
 	 *  7 6 5 4 3 2 1 0
@@ -137,11 +75,11 @@ struct surface_t {
 	 *  Resulting in the final width/height in 'tiles' (8 pixels per tile)
 	 *  { 1, 2, 4, 8, 16, 32, 64, 128 }
 	 */
-	uint8_t     size_in_tiles_log2;
+	uint8_t size_in_tiles_log2;
 	
 	/*  Reserved byte for future purposes related to e.g. wrapping
 	 */
-	uint8_t     currently_unused;
+	uint8_t currently_unused;
     
 	/*
 	 * Contains the foreground color if single color.
@@ -164,15 +102,6 @@ struct surface_t {
     
 	/*  32 bit pointer to start of tile background color */
 	uint16_t *tile_background_color_data;
-    
-	/*
-	 * And 4 bytes of user data. When this surface blit structure is
-	 * used as a data structure for the current text screen, this user
-	 * data may contain:
-	 * - current cursor position (16 bit unsigned): first 2 bytes
-	 * - current text color for new chars (16 bit unsigned): last 2 bytes
-	 */
-	uint32_t user_data;
 };
 
 enum operation_type {
@@ -182,7 +111,7 @@ enum operation_type {
 
 struct operation {
 	enum operation_type type;
-	struct surface_t this_blit;
+	int blit_no;
 	int16_t x_pos;
 	int16_t y_pos;
 };
@@ -195,16 +124,18 @@ public:
 	void reset();
 	void run(int no_of_cycles);
 	
+	struct blit_t *blit;	// 2048 bytes (256 * 8) for E64, another 2048 for host
+	
 	void set_clearcolor(uint16_t color);
 	void add_clear_framebuffer();
-	void add_blit(struct surface_t *blit, int16_t x, int16_t y);
+	void add_blit(int blit_no, int16_t x, int16_t y);
 	bool busy();
 	
 	enum blitter_state_t blitter_state;
 	double fraction_busy(); /*  Returns the fraction of time the blitter was NOT idle */
 private:
 	uint8_t *blit_memory;
-	struct surface_t *blit;	// 2048 bytes (256 * 8) for E64, another 2048 for host
+	uint16_t *blit_memory_as_words;
 	uint16_t *cbm_font;	// unpacked font
 	
 	/*
@@ -279,10 +210,10 @@ private:
 	uint16_t foreground_color;
 	uint16_t background_color;
     
-	uint32_t pixel_data;
-	uint32_t tile_data;
-	uint32_t tile_color_data;
-	uint32_t tile_background_color_data;
+	uint16_t *pixel_data;
+	uint8_t *tile_data;
+	uint16_t *tile_color_data;
+	uint16_t *tile_background_color_data;
 	uint32_t user_data;
 	
 	inline void check_new_operation();

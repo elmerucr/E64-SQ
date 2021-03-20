@@ -19,7 +19,7 @@
 
 #define E64_SQ_MAJOR_VERSION    0
 #define E64_SQ_MINOR_VERSION    1
-#define E64_SQ_BUILD            20210319
+#define E64_SQ_BUILD            20210320
 #define E64_SQ_YEAR             2021
 
 /* Global objects */
@@ -27,7 +27,7 @@ extern E64::host_t	host;
 extern E64::machine_t	machine;
 extern E64::stats_t	stats;
 
-#define	RAM_SIZE	0x01000000   // 16mb system, DO NOT CHANGE
+#define	RAM_SIZE	0x010000
 
 /*
  * System uses standard 720p60 HDMI output.
