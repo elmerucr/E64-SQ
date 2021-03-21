@@ -77,8 +77,8 @@ E64::blitter_ic::blitter_ic()
 	cbm_font = new uint16_t[256 * 64];
 	
 	for (int i=0; i<512; i++) {
-		//blit[i].pixel_data                 = (uint16_t *)&blit_memory[(i << 16) | 0x0000];
-		blit[i].pixel_data = cbm_font;
+		blit[i].pixel_data                 = (uint16_t *)&blit_memory[(i << 16) | 0x0000];
+		//blit[i].pixel_data = cbm_font;
 		blit[i].tile_data                  = (uint8_t  *)&blit_memory[(i << 16) | 0x8000]; // 4k block
 		blit[i].tile_color_data            = (uint16_t *)&blit_memory[(i << 16) | 0xc000]; // 8k block
 		blit[i].tile_background_color_data = (uint16_t *)&blit_memory[(i << 16) | 0xe000]; // 8k block
@@ -138,6 +138,7 @@ inline void E64::blitter_ic::check_new_operation()
 				background      = blit[operations[tail].blit_no].flags_0 & 0b00000010 ? true : false;
 				multicolor_mode = blit[operations[tail].blit_no].flags_0 & 0b00000100 ? true : false;
 				color_per_tile  = blit[operations[tail].blit_no].flags_0 & 0b00001000 ? true : false;
+				use_cbm_font    = blit[operations[tail].blit_no].flags_0 & 0b10000000 ? true : false;
 		    
 				// check flags 1
 				double_width	= blit[operations[tail].blit_no].flags_1 & 0b00000001 ? 1 : 0;
@@ -207,8 +208,7 @@ void E64::blitter_ic::run(int no_of_cycles)
 					scrn_y = y + (ver_flip ?
 						      (height_on_screen - (pixel_no >> width_on_screen_log2) - 1) : (pixel_no >> width_on_screen_log2) );
                         
-                        if( scrn_y < VICV_SCANLINES )      // clipping check vertically
-                        {
+					if (scrn_y < VICV_SCANLINES) {     // clipping check vertically
                             /*
                              * Transformation of pixel_no to take into account double width and/or height. After
                              * this <complex> transformation, the normalized pixel_no points to a position in the
@@ -230,15 +230,23 @@ void E64::blitter_ic::run(int no_of_cycles)
                             
                             /* Replace foreground and background colors if necessary */
                             if (color_per_tile) {
-				    foreground_color = tile_color_data[tile_number];
-				    background_color = tile_background_color_data[tile_number];
+				    foreground_color = tile_color_data[tile_number & 0xfff];
+				    background_color = tile_background_color_data[tile_number & 0xfff];
                             }
                             
                             pixel_in_tile = (x_in_blit & 0b111) | ((y_in_blit & 0b111) << 3);
                             
-                            /* Pick the right pixel depending on bitmap mode or tile mode */
+                            /*
+			     * Pick the right pixel depending on bitmap mode or tile mode,
+			     * and based on cbm_font or not
+			     */
+				if (use_cbm_font) {
+					source_color = bitmap_mode ?
+					cbm_font[normalized_pixel_no & 0x3fff] : cbm_font[((tile_index << 6) | pixel_in_tile) & 0x3fff];
+				} else {
                             source_color = bitmap_mode ?
-				pixel_data[normalized_pixel_no] : pixel_data[((tile_index << 6) | pixel_in_tile)];
+				pixel_data[normalized_pixel_no & 0x3fff] : pixel_data[((tile_index << 6) | pixel_in_tile) & 0x3fff];
+				}
                             
                             /*  If the source color has an alpha value of higher than 0x0 (there is a pixel),
                              *  and we're not in multicolor mode, replace with foreground color.

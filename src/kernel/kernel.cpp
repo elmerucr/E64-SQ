@@ -8,10 +8,10 @@ E64::kernel_t::kernel_t()
 	luaopen_math(L);
 	luaopen_string(L);
 	
-	tty = new tty_t(0b00001000, 0b00000000, 0x56, 256, COBALT_06, COBALT_02);
-	message_box = new tty_t(0b00001010, 0x00, 0x15, 257, GREEN_06, (GREEN_02 & 0x0fff) | 0xa000);
+	tty = new tty_t(0b10001000, 0b00110000, 0x56, 256, COBALT_06, COBALT_02);
+	message_box = new tty_t(0b10001010, 0b00000100, 0x05, 257, GREEN_06, (GREEN_02 & 0x0fff) | 0xa000);
 	message_box->clear();
-	message_box->printf("Here we have a piece of information");
+	message_box->printf("  Here we have a piece of info");
 }
 
 E64::kernel_t::~kernel_t()

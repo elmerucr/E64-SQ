@@ -34,11 +34,12 @@ struct blit_t {
 	/*  Flags 0
 	 *
 	 *  7 6 5 4 3 2 1 0
-	 *          | | | |
-	 *          | | | +-- Tile Mode (0) / Bitmap Mode (1)
-	 *          | | +---- Background (0 = off, 1 = on)
-	 *          | +------ Simple Color (0) / Multi Color (1)
-	 *          +-------- Color per tile (0 = off, 1 = on)
+	 *  |       | | | |
+	 *  |       | | | +-- Tile Mode (0) / Bitmap Mode (1)
+	 *  |       | | +---- Background (0 = off, 1 = on)
+	 *  |       | +------ Simple Color (0) / Multi Color (1)
+	 *  |       +-------- Color per tile (0 = off, 1 = on)
+	 *  +---------------- Pixel data in video ram (0) / Or cbm font (1)
 	 *
 	 *  bits 4-7: Reserved
 	 */
@@ -160,6 +161,7 @@ private:
 	bool        background;
 	bool        multicolor_mode;
 	bool        color_per_tile;
+	bool        use_cbm_font;
 	bool        hor_flip;
 	bool        ver_flip;
 	uint16_t    double_width;
