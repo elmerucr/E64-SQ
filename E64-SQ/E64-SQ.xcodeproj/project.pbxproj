@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		46478E6D2607E63A0000F661 /* mem.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 46478E6C2607E44C0000F661 /* mem.cpp */; };
 		4656012025EACBBB00276691 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 4656011F25EACBBB00276691 /* Assets.xcassets */; };
 		4656012325EACBBB00276691 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 4656012225EACBBB00276691 /* Preview Assets.xcassets */; };
 		4656013925EACDED00276691 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4656013825EACDED00276691 /* main.cpp */; };
@@ -40,6 +41,8 @@
 		4656019B25EAD0F600276691 /* settings.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4656019425EAD0F600276691 /* settings.cpp */; };
 		4656019C25EAD0F600276691 /* host.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4656019625EAD0F600276691 /* host.cpp */; };
 		4656019D25EAD0F600276691 /* stats.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4656019725EAD0F600276691 /* stats.cpp */; };
+		467CACE9260765E800581D83 /* cpu.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 467CACE2260765E700581D83 /* cpu.cpp */; };
+		467CACEA260765E800581D83 /* fake6502.c in Sources */ = {isa = PBXBuildFile; fileRef = 467CACE4260765E700581D83 /* fake6502.c */; };
 		4689303525F7D6020087BE61 /* loadlib.c in Sources */ = {isa = PBXBuildFile; fileRef = 46892FF925F7D5FF0087BE61 /* loadlib.c */; };
 		4689303625F7D6020087BE61 /* loslib.c in Sources */ = {isa = PBXBuildFile; fileRef = 46892FFB25F7D5FF0087BE61 /* loslib.c */; };
 		4689303725F7D6020087BE61 /* lgc.c in Sources */ = {isa = PBXBuildFile; fileRef = 46892FFC25F7D5FF0087BE61 /* lgc.c */; };
@@ -94,7 +97,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		4656011825EACBBA00276691 /* E64-SQ.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "E64-SQ.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		46478E6C2607E44C0000F661 /* mem.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = mem.cpp; path = ../../src/machine/cpu/mem.cpp; sourceTree = "<group>"; };
+		4656011825EACBBA00276691 /* E64.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = E64.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		4656011F25EACBBB00276691 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		4656012225EACBBB00276691 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		4656012425EACBBB00276691 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -155,6 +159,16 @@
 		4656019625EAD0F600276691 /* host.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = host.cpp; path = ../../src/host/host.cpp; sourceTree = "<group>"; };
 		4656019725EAD0F600276691 /* stats.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = stats.cpp; path = ../../src/host/stats.cpp; sourceTree = "<group>"; };
 		4656019825EAD0F600276691 /* settings.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = settings.hpp; path = ../../src/host/settings.hpp; sourceTree = "<group>"; };
+		467CACDF260765E700581D83 /* 65c02.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = 65c02.h; path = ../../src/machine/cpu/65c02.h; sourceTree = "<group>"; };
+		467CACE0260765E700581D83 /* instructions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = instructions.h; path = ../../src/machine/cpu/instructions.h; sourceTree = "<group>"; };
+		467CACE1260765E700581D83 /* cpu.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = cpu.hpp; path = ../../src/machine/cpu/cpu.hpp; sourceTree = "<group>"; };
+		467CACE2260765E700581D83 /* cpu.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = cpu.cpp; path = ../../src/machine/cpu/cpu.cpp; sourceTree = "<group>"; };
+		467CACE3260765E700581D83 /* mnemonics.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = mnemonics.h; path = ../../src/machine/cpu/mnemonics.h; sourceTree = "<group>"; };
+		467CACE4260765E700581D83 /* fake6502.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = fake6502.c; path = ../../src/machine/cpu/fake6502.c; sourceTree = "<group>"; };
+		467CACE5260765E800581D83 /* fake6502.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = fake6502.h; path = ../../src/machine/cpu/fake6502.h; sourceTree = "<group>"; };
+		467CACE6260765E800581D83 /* modes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = modes.h; path = ../../src/machine/cpu/modes.h; sourceTree = "<group>"; };
+		467CACE7260765E800581D83 /* support.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = support.h; path = ../../src/machine/cpu/support.h; sourceTree = "<group>"; };
+		467CACE8260765E800581D83 /* tables.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = tables.h; path = ../../src/machine/cpu/tables.h; sourceTree = "<group>"; };
 		46892FF725F7D5FF0087BE61 /* lopcodes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = lopcodes.h; path = "../../src/kernel/lua-5.4.2/src/lopcodes.h"; sourceTree = "<group>"; };
 		46892FF825F7D5FF0087BE61 /* llimits.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = llimits.h; path = "../../src/kernel/lua-5.4.2/src/llimits.h"; sourceTree = "<group>"; };
 		46892FF925F7D5FF0087BE61 /* loadlib.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = loadlib.c; path = "../../src/kernel/lua-5.4.2/src/loadlib.c"; sourceTree = "<group>"; };
@@ -238,6 +252,17 @@
 		4624B1C72604D10600FBBDD0 /* cpu */ = {
 			isa = PBXGroup;
 			children = (
+				46478E6C2607E44C0000F661 /* mem.cpp */,
+				467CACDF260765E700581D83 /* 65c02.h */,
+				467CACE2260765E700581D83 /* cpu.cpp */,
+				467CACE1260765E700581D83 /* cpu.hpp */,
+				467CACE4260765E700581D83 /* fake6502.c */,
+				467CACE5260765E800581D83 /* fake6502.h */,
+				467CACE0260765E700581D83 /* instructions.h */,
+				467CACE3260765E700581D83 /* mnemonics.h */,
+				467CACE6260765E800581D83 /* modes.h */,
+				467CACE7260765E800581D83 /* support.h */,
+				467CACE8260765E800581D83 /* tables.h */,
 			);
 			name = cpu;
 			sourceTree = "<group>";
@@ -254,7 +279,7 @@
 		4656011925EACBBA00276691 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				4656011825EACBBA00276691 /* E64-SQ.app */,
+				4656011825EACBBA00276691 /* E64.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -499,9 +524,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		4656011725EACBBA00276691 /* E64-SQ */ = {
+		4656011725EACBBA00276691 /* E64 */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 4656012825EACBBB00276691 /* Build configuration list for PBXNativeTarget "E64-SQ" */;
+			buildConfigurationList = 4656012825EACBBB00276691 /* Build configuration list for PBXNativeTarget "E64" */;
 			buildPhases = (
 				4656011425EACBBA00276691 /* Sources */,
 				4656011525EACBBA00276691 /* Frameworks */,
@@ -512,9 +537,9 @@
 			);
 			dependencies = (
 			);
-			name = "E64-SQ";
+			name = E64;
 			productName = "E64-SQ";
-			productReference = 4656011825EACBBA00276691 /* E64-SQ.app */;
+			productReference = 4656011825EACBBA00276691 /* E64.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -544,7 +569,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				4656011725EACBBA00276691 /* E64-SQ */,
+				4656011725EACBBA00276691 /* E64 */,
 			);
 		};
 /* End PBXProject section */
@@ -577,6 +602,7 @@
 				4689305225F7D6020087BE61 /* ldump.c in Sources */,
 				4656019925EAD0F600276691 /* sdl2.cpp in Sources */,
 				4656018925EAD0B200276691 /* blitter.cpp in Sources */,
+				467CACEA260765E800581D83 /* fake6502.c in Sources */,
 				4656014225EACE8D00276691 /* cbm_cp437_font.cpp in Sources */,
 				4689304D25F7D6020087BE61 /* lapi.c in Sources */,
 				4689303B25F7D6020087BE61 /* lmem.c in Sources */,
@@ -603,6 +629,7 @@
 				4656017125EAD01300276691 /* wave6581_PST.cc in Sources */,
 				46D4636F25F4D38400862941 /* devices.cpp in Sources */,
 				4656018D25EAD0D700276691 /* kernel.cpp in Sources */,
+				467CACE9260765E800581D83 /* cpu.cpp in Sources */,
 				4689303A25F7D6020087BE61 /* lobject.c in Sources */,
 				4689303D25F7D6020087BE61 /* ldblib.c in Sources */,
 				4656017025EAD01300276691 /* wave8580_P_T.cc in Sources */,
@@ -612,6 +639,7 @@
 				4656016925EAD01300276691 /* extfilt.cc in Sources */,
 				4656019D25EAD0F600276691 /* stats.cpp in Sources */,
 				4689305625F7D6020087BE61 /* liolib.c in Sources */,
+				46478E6D2607E63A0000F661 /* mem.cpp in Sources */,
 				4689304525F7D6020087BE61 /* ltable.c in Sources */,
 				4689305325F7D6020087BE61 /* lstring.c in Sources */,
 				4656017325EAD01300276691 /* wave6581_P_T.cc in Sources */,
@@ -821,7 +849,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		4656012825EACBBB00276691 /* Build configuration list for PBXNativeTarget "E64-SQ" */ = {
+		4656012825EACBBB00276691 /* Build configuration list for PBXNativeTarget "E64" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				4656012925EACBBB00276691 /* Debug */,

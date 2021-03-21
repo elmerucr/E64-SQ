@@ -1,5 +1,5 @@
 //  machine.hpp
-//  E64-II
+//  E64
 //
 //  Copyright © 2019-2021 elmerucr. All rights reserved.
 

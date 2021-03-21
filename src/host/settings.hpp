@@ -1,5 +1,5 @@
 //  settings.hpp
-//  E64-SQ
+//  E64
 //
 //  Copyright © 2021 elmerucr. All rights reserved.
 

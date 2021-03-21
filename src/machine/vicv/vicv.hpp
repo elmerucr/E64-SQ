@@ -1,6 +1,6 @@
 /*
  * vicv.hpp
- * E64-SQ
+ * E64
  *
  * Copyright © 2017-2021 elmerucr. All rights reserved.
  */

@@ -4,7 +4,7 @@
 //
 // 2020-10-23 elmerucr
 //
-// Part of E64-II - Character ROM 2kb
+// Part of E64 - Character ROM 2kb
 
 #include <cstdint>
 

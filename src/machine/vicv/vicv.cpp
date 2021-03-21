@@ -1,6 +1,6 @@
 /*
  * vicv.cpp
- * E64-SQ
+ * E64
  *
  * Copyright © 2017-2021 elmerucr. All rights reserved.
  */
@@ -67,7 +67,6 @@ void E64::vicv_ic::run(uint32_t cycles)
 		if (!blank) {
 			if (hborder) {
 				host.video->framebuffer[dot_clock] =
-					//host.video->palette[*((uint16_t *)(&registers[VICV_REG_HOR_BOR_COL_HIGH]))];
 					host.video->palette[registers[0x04] | (registers[0x05] << 8)];
 			} else {
 				host.video->framebuffer[dot_clock] =

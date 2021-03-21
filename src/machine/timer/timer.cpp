@@ -1,5 +1,5 @@
 //  timer.cpp
-//  E64-SQ
+//  E64
 //
 //  Copyright © 2019-2021 elmerucr. All rights reserved.
 

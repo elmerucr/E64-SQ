@@ -159,20 +159,3 @@ void E64::kernel_t::timer_7_event()
 {
 	//
 }
-
-//void E64::kernel_t::build_character_ram()
-//{
-//	cbm_font = (uint16_t *)machine.mmu->malloc(64 * 256 * sizeof(uint16_t));
-//
-//	uint16_t *dest = cbm_font;
-//
-//	for (int i=0; i<2048; i++) {
-//		uint8_t byte = cbm_cp437_font[i];
-//		uint8_t count = 8;
-//		while (count--) {
-//			*dest = (byte & 0b10000000) ? C64_GREY : 0x0000;
-//			dest++;
-//			byte = byte << 1;
-//		}
-//	}
-//}

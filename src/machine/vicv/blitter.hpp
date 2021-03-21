@@ -1,5 +1,5 @@
 //  blitter.hpp
-//  E64-SQ
+//  E64
 //
 //  Copyright © 2020-2021 elmerucr. All rights reserved.
 

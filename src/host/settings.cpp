@@ -1,5 +1,5 @@
 //  settings.cpp
-//  E64-SQ
+//  E64
 //
 //  Copyright © 2021 elmerucr. All rights reserved.
 
@@ -31,7 +31,7 @@ E64::settings_t::settings_t()
 	strcpy(current_path, home_dir);    // current path defaults to homedir
 	printf("[Settings] user home directory: %s\n", home_dir);
 
-	snprintf(iterator, 256, "/.E64-SQ");
+	snprintf(iterator, 256, "/.E64");
     
 	printf("[Settings] opening settings directory: %s\n", settings_path);
 	settings_directory = opendir(settings_path);
