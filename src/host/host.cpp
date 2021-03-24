@@ -5,7 +5,7 @@
 
 E64::host_t::host_t()
 {
-	printf("[host] E64-II (C)%i by elmerucr - version %i.%i.%i\n",
+	printf("[host] E64 (C)%i by elmerucr - version %i.%i.%i\n",
 	       E64_SQ_YEAR, E64_SQ_MAJOR_VERSION, E64_SQ_MINOR_VERSION,
 	       E64_SQ_BUILD);
 	
@@ -14,7 +14,7 @@ E64::host_t::host_t()
 
 E64::host_t::~host_t()
 {
-	printf("[host] closing E64-SQ\n");
+	printf("[host] closing E64\n");
 	
 	delete video;
 }

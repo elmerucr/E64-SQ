@@ -43,7 +43,7 @@ public:
 	machine_t();
 	~machine_t();
 
-	void run(uint16_t no_of_cycles);
+	bool run(uint16_t no_of_cycles);
 
 	void reset();
 };

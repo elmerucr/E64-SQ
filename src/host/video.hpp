@@ -34,17 +34,16 @@ private:
 	int window_width;
 	int window_height;
 	
-	void init_palette();
+	//void init_palette();
 public:
 	video_t();
 	~video_t();
 	
 	/* framebuffer pointers */
-	uint32_t *framebuffer;
-	uint32_t *monitor_framebuffer;
+	uint16_t *framebuffer;
 	
-	/* Palette, 4096 colors (3 x 4 bit) */
-	uint32_t *palette;
+//	/* Palette, 4096 colors (3 x 4 bit) */
+//	uint32_t *palette;
     
 	// must be called upon machine reset
 	void reset();

@@ -23,21 +23,11 @@ E64::tty_t::tty_t(uint8_t flags_0, uint8_t flags_1, uint8_t size_in_tiles_log2, 
 	
 	current_foreground_color = foreground_color;
 	current_background_color = background_color;
-	
-//	text_screen->pixel_data = pixeldata;
-//	text_screen->tile_data = (uint8_t *)machine.mmu->malloc(tiles * sizeof(uint8_t));
-//	text_screen->tile_color_data = (uint16_t *)machine.mmu->malloc(tiles * sizeof(uint16_t));
-//	text_screen->tile_background_color_data = (uint16_t *)machine.mmu->malloc(tiles * sizeof(uint16_t));
 }
 
 E64::tty_t::~tty_t()
 {
 	delete command_buffer;
-	
-//	machine.mmu->free(text_screen->tile_background_color_data);
-//	machine.mmu->free(text_screen->tile_color_data);
-//	machine.mmu->free(text_screen->tile_data);
-//	machine.mmu->free(text_screen);
 }
 
 void E64::tty_t::clear()

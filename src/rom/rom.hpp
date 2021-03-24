@@ -4,5 +4,6 @@
 #include <cstdint>
 
 extern uint8_t cbm_cp437_font[];
+extern uint8_t rom[];
 
 #endif

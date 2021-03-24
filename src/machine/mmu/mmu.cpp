@@ -24,7 +24,7 @@ E64::mmu_ic::~mmu_ic()
 void E64::mmu_ic::reset()
 {
 	// fill alternating blocks with 0x00 and 0x10
-	for (int i=0; i<RAM_SIZE; i++)
+	for (int i=0; i < RAM_SIZE; i++)
 		ram[i] = (i & 64) ? 0x10 : 0x00;
 }
 

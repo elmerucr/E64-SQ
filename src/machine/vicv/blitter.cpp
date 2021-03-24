@@ -78,7 +78,6 @@ E64::blitter_ic::blitter_ic()
 	
 	for (int i=0; i<512; i++) {
 		blit[i].pixel_data                 = (uint16_t *)&blit_memory[(i << 16) | 0x0000];
-		//blit[i].pixel_data = cbm_font;
 		blit[i].tile_data                  = (uint8_t  *)&blit_memory[(i << 16) | 0x8000]; // 4k block
 		blit[i].tile_color_data            = (uint16_t *)&blit_memory[(i << 16) | 0xc000]; // 8k block
 		blit[i].tile_background_color_data = (uint16_t *)&blit_memory[(i << 16) | 0xe000]; // 8k block

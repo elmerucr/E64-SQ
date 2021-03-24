@@ -132,6 +132,11 @@ public:
 	void add_blit(int blit_no, int16_t x, int16_t y);
 	bool busy();
 	
+	// run cycles until not busy anymore
+	inline void flush() {
+		while (busy()) run(1);
+	}
+	
 	enum blitter_state_t blitter_state;
 	double fraction_busy(); /*  Returns the fraction of time the blitter was NOT idle */
 private:

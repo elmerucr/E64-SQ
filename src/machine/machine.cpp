@@ -49,7 +49,7 @@ E64::machine_t::~machine_t()
  * However, run(63) significantly reduces host cpu load, once we have some music
  * running in the virtual machine, test this.
  */
-void E64::machine_t::run(uint16_t cycles)
+bool E64::machine_t::run(uint16_t cycles)
 {
 	// run cycles on vicv and check for breakpoints
 	vicv->run(cycles);
@@ -78,6 +78,8 @@ void E64::machine_t::run(uint16_t cycles)
 	
 	if (audio_queue_size > (AUDIO_BUFFER_SIZE/2))
 		E64::sdl2_start_audio();
+	
+	return false;
 }
 
 void E64::machine_t::reset()

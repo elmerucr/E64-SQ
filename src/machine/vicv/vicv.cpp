@@ -67,10 +67,12 @@ void E64::vicv_ic::run(uint32_t cycles)
 		if (!blank) {
 			if (hborder) {
 				host.video->framebuffer[dot_clock] =
-					host.video->palette[registers[0x04] | (registers[0x05] << 8)];
+					registers[0x04] | (registers[0x05] << 8);
+					//host.video->palette[registers[0x04] | (registers[0x05] << 8)];
 			} else {
 				host.video->framebuffer[dot_clock] =
-					host.video->palette[frontbuffer[dot_clock]];
+					frontbuffer[dot_clock];
+					//host.video->palette[frontbuffer[dot_clock]];
 			}
 			dot_clock++;	// progress dot clock if pixel was sent (!blank)
 		}
@@ -124,9 +126,9 @@ inline void E64::vicv_ic::render_stats(uint16_t xpos, uint16_t ypos)
 					cbm_cp437_font[((*temp_text * 8) + y)];
 			}
 
-			host.video->framebuffer[base + x] = (eight_pixels & 0x80) ?
-				host.video->palette[COBALT_06] :
-				host.video->palette[COBALT_02];
+			host.video->framebuffer[base + x] = (eight_pixels & 0x80) ? COBALT_06 : COBALT_02;
+//				host.video->palette[COBALT_06] :
+//				host.video->palette[COBALT_02];
 
 			eight_pixels = eight_pixels << 1;
 			x++;
