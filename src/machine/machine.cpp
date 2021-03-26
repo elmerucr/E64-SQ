@@ -13,7 +13,6 @@ E64::machine_t::machine_t()
 	timer = new timer_ic();
 	
 	vicv = new vicv_ic();
-	vicv->set_stats(stats.summary());
 	
 	blitter = new blitter_ic();
 	sids = new sids_ic();

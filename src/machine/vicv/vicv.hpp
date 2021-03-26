@@ -22,23 +22,6 @@
  */
 #define VICV_REG_BUFFERSWAP	0x01
 
-/*
- * Register 0x02 is a byte telling the size of the top and bottom
- * borders.
- */
-#define VICV_REG_BORDER_SIZE	0x02
-
-/* Register 0x03 currently reserved for left/right border size */
-
-/*
- * Registers 0x04-0x05 combined: 16 bit color value for the current
- * horizontal border color.
- */
-#define VICV_REG_HOR_BOR_COL_LOW	0x04
-#define VICV_REG_HOR_BOR_COL_HIGH	0x05
-
-/* Registers 0x06-0x07 currently reserved for left/right border color */
-
 namespace E64 {
 
 class vicv_ic
@@ -59,16 +42,8 @@ private:
 public:
 	bool breakpoint_reached;
 
-	// stats overlay
-private:
-	bool stats_visible;
-	
-	void render_stats(uint16_t xpos, uint16_t ypos);
-	char *stats_text;
 public:
 	void swap_buffers();
-	void toggle_stats();
-	void set_stats(char *text) { stats_text = text; }
     
 public:
 	vicv_ic();
@@ -99,11 +74,6 @@ public:
 	// Register access to vicv
 	uint8_t read_byte(uint8_t address);
 	void write_byte(uint8_t address, uint8_t byte);
-	
-	// for E64-SQ
-	void set_horizontal_border_color(uint16_t color);
-	uint8_t get_horizontal_border_size();
-	void set_horizontal_border_size(uint8_t size);
 };
 
 }

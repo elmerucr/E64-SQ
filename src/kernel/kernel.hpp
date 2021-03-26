@@ -23,7 +23,7 @@ public:
 	lua_State *L;
 	
 	tty_t *tty;
-	tty_t *message_box;
+	tty_t *statistics;
 	
 	void reset();
 	void execute();

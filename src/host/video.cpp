@@ -100,23 +100,10 @@ E64::video_t::video_t()
 
 	// make sure mouse cursor isn't visible
 	SDL_ShowCursor(SDL_DISABLE);
-
-	// prepare screen buffer
-	framebuffer = new uint16_t[VICV_PIXELS_PER_SCANLINE*VICV_SCANLINES];
-	//buffer_1 = new uint32_t[VICV_PIXELS_PER_SCANLINE*VICV_SCANLINES];
-
-	//init_palette();
 }
 
 E64::video_t::~video_t()
 {
-	//delete [] palette;
-//	delete [] monitor_framebuffer;
-	delete [] framebuffer;
-	framebuffer = nullptr;
-//	monitor_framebuffer = nullptr;
-	//palette = nullptr;
-
 	printf("[SDL] cleaning up video\n");
 	SDL_DestroyTexture(texture);
 	SDL_DestroyRenderer(renderer);
@@ -126,35 +113,14 @@ E64::video_t::~video_t()
 
 void E64::video_t::reset()
 {
-	for (int i=0; i<VICV_PIXELS_PER_SCANLINE*VICV_SCANLINES; i++)
-		framebuffer[i] = 0xf222;
+	//
 }
-
-//void E64::video_t::init_palette()
-//{
-//	/*
-//	 * Prepare the 12 bit color palette and fill it with the right colors.
-//	 * Index in the array is the actual 12 bit color, the 32 bit value is
-//	 * the color in host space.
-//	 */
-//	palette = new uint32_t[0x10000];
-//	for (int i = 0x0; i<0x10000; i++) {
-//		uint8_t red   = (i & 0x0f00) >> 8;
-//		uint8_t green = (i & 0x00f0) >> 4;
-//		uint8_t blue  = (i & 0x000f);
-//
-//		palette[i] =	0xff000000 |
-//				((red * 0x11) << 16) |
-//				((green * 0x11) << 8) |
-//				(blue * 0x11);
-//	}
-//}
 
 void E64::video_t::update_screen()
 {
 	SDL_RenderClear(renderer);
 
-	SDL_UpdateTexture(texture, NULL, framebuffer,
+	SDL_UpdateTexture(texture, NULL, machine.vicv->frontbuffer,
 		VICV_PIXELS_PER_SCANLINE * sizeof(uint16_t));
     
 	SDL_RenderCopy(renderer, texture, NULL, NULL);

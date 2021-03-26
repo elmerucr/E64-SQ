@@ -11,16 +11,12 @@
 
 E64::vicv_ic::vicv_ic()
 {
-	stats_visible = false;
-	
 	fb0 = new uint16_t[VICV_PIXELS_PER_SCANLINE * VICV_SCANLINES];
 	fb1 = new uint16_t[VICV_PIXELS_PER_SCANLINE * VICV_SCANLINES];
 
 	breakpoint_reached = false;
 	clear_scanline_breakpoints();
 	old_y_pos = 0;
-
-	stats_text = nullptr;
 }
 
 E64::vicv_ic::~vicv_ic()
@@ -31,6 +27,11 @@ E64::vicv_ic::~vicv_ic()
 
 void E64::vicv_ic::reset()
 {
+	for (int i=0; i<VICV_PIXELS_PER_SCANLINE*VICV_SCANLINES; i++) {
+		fb0[i] = 0xf222;
+		fb1[i] = 0xf222;
+	}
+	
 	frame_done = false;
 
 	cycle_clock = dot_clock = 0;
@@ -61,19 +62,8 @@ void E64::vicv_ic::run(uint32_t cycles)
 		bool hblank = (x_pos >= VICV_PIXELS_PER_SCANLINE);
 		bool vblank = cycle_clock>=((VICV_PIXELS_PER_SCANLINE+VICV_PIXELS_HBLANK)*VICV_SCANLINES);
 		bool blank = hblank || vblank;
-		bool hborder = (y_pos < registers[VICV_REG_BORDER_SIZE]) ||
-			(y_pos > ((VICV_SCANLINES-1)-registers[VICV_REG_BORDER_SIZE]));
 
 		if (!blank) {
-			if (hborder) {
-				host.video->framebuffer[dot_clock] =
-					registers[0x04] | (registers[0x05] << 8);
-					//host.video->palette[registers[0x04] | (registers[0x05] << 8)];
-			} else {
-				host.video->framebuffer[dot_clock] =
-					frontbuffer[dot_clock];
-					//host.video->palette[frontbuffer[dot_clock]];
-			}
 			dot_clock++;	// progress dot clock if pixel was sent (!blank)
 		}
 
@@ -82,13 +72,11 @@ void E64::vicv_ic::run(uint32_t cycles)
 		switch (cycle_clock) {
 			case (VICV_PIXELS_PER_SCANLINE+VICV_PIXELS_HBLANK)*VICV_SCANLINES:
 				// start of vblank, so swap buffers
+				// NEEDS WORK
 				machine.kernel->vblank_event();
 				break;
 			case (VICV_PIXELS_PER_SCANLINE+VICV_PIXELS_HBLANK)*(VICV_SCANLINES+VICV_SCANLINES_VBLANK):
 				// finished vblank, do other necessary stuff
-				if (stats_visible) {
-					render_stats(72, 276);
-				}
 				cycle_clock = dot_clock = 0;
 				frame_done = true;
 				break;
@@ -108,39 +96,6 @@ void E64::vicv_ic::run(uint32_t cycles)
 
 bool E64::vicv_ic::is_hblank() { return HBLANK; }
 bool E64::vicv_ic::is_vblank() { return VBLANK; }
-
-inline void E64::vicv_ic::render_stats(uint16_t xpos, uint16_t ypos)
-{
-	uint32_t base = ((ypos * VICV_PIXELS_PER_SCANLINE) + xpos) %
-		(VICV_PIXELS_PER_SCANLINE * VICV_SCANLINES);
-	uint8_t  eight_pixels = 0;
-
-	for (int y=0; y<8; y++) {
-		char *temp_text = stats_text;
-		uint16_t x = 0;
-		// are we still pointing at a character
-		while (*temp_text) {
-			// are we at the first pixel of a char
-			if (!(x & 7)) {
-				eight_pixels =
-					cbm_cp437_font[((*temp_text * 8) + y)];
-			}
-
-			host.video->framebuffer[base + x] = (eight_pixels & 0x80) ? COBALT_06 : COBALT_02;
-//				host.video->palette[COBALT_06] :
-//				host.video->palette[COBALT_02];
-
-			eight_pixels = eight_pixels << 1;
-			x++;
-			// increase the text pointer only when necessary
-			if (!(x & 7))
-				temp_text++;
-		}
-		// go to the next line
-		base = (base + VICV_PIXELS_PER_SCANLINE) %
-			(VICV_PIXELS_PER_SCANLINE * VICV_SCANLINES);
-	}
-}
 
 uint16_t E64::vicv_ic::get_current_scanline() { return Y_POS; }
 
@@ -195,30 +150,9 @@ void E64::vicv_ic::write_byte(uint8_t address, uint8_t byte)
 	}
 }
 
-void E64::vicv_ic::toggle_stats()
-{
-	stats_visible = !stats_visible;
-}
-
 void E64::vicv_ic::swap_buffers()
 {
 	uint16_t *tempbuffer = frontbuffer;
 	frontbuffer = backbuffer;
 	backbuffer = tempbuffer;
-}
-
-void E64::vicv_ic::set_horizontal_border_color(uint16_t color)
-{
-	write_byte(0x04, color & 0xff);
-	write_byte(0x05, (color & 0xff00) >> 8);
-}
-
-uint8_t E64::vicv_ic::get_horizontal_border_size()
-{
-	return read_byte(VICV_REG_BORDER_SIZE);
-}
-
-void E64::vicv_ic::set_horizontal_border_size(uint8_t size)
-{
-	write_byte(VICV_REG_BORDER_SIZE, size);
 }

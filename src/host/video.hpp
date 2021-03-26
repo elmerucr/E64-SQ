@@ -40,10 +40,7 @@ public:
 	~video_t();
 	
 	/* framebuffer pointers */
-	uint16_t *framebuffer;
-	
-//	/* Palette, 4096 colors (3 x 4 bit) */
-//	uint32_t *palette;
+	//uint16_t *framebuffer;
     
 	// must be called upon machine reset
 	void reset();

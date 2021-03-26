@@ -8,24 +8,22 @@ E64::kernel_t::kernel_t()
 	luaopen_math(L);
 	luaopen_string(L);
 	
-	tty = new tty_t(0b10001000, 0b00110000, 0x56, 256, COBALT_06, COBALT_02);
-	message_box = new tty_t(0b10001010, 0b00000100, 0x05, 257, GREEN_06, (GREEN_02 & 0x0fff) | 0xa000);
-	message_box->clear();
-	message_box->printf("  Here we have a piece of info");
+	tty = new tty_t(0b10001000, 0b00000000, 0x56, 256, C64_LIGHTBLUE, C64_BLUE);
+	statistics = new tty_t(0b10001010, 0b00000000, 0x06, 257, GREEN_06, (GREEN_02 & 0x0fff) | 0xa000);
 }
 
 E64::kernel_t::~kernel_t()
 {
-	delete message_box;
+	delete statistics;
 	delete tty;
 	lua_close(L);
 }
 
 void E64::kernel_t::reset()
 {
-	machine.vicv->set_horizontal_border_color(C64_BLACK);
-	machine.vicv->set_horizontal_border_size(16);
-	machine.blitter->set_clearcolor(COBALT_02);
+	machine.blitter->set_clear_color(C64_BLUE);
+	machine.blitter->set_border_color(C64_BLACK);
+	machine.blitter->set_border_size(16);
 	
 	// clear sids
 	for (int i=0; i<128; i++) machine.sids->write_byte(i, 0);
@@ -108,16 +106,21 @@ void E64::kernel_t::execute()
 		process_keypress();
 		tty->activate_cursor();
 	}
+	
+	statistics->clear();
+	statistics->puts(stats.summary());
 }
 
 void E64::kernel_t::vblank_event()
 {
 	machine.vicv->swap_buffers();
 	machine.blitter->add_clear_framebuffer();
-	//machine.blitter->add_blit(tty->text_screen, 0, 16);
+	
 	machine.blitter->add_blit(256, 0, 16);
-	//machine.blitter->add_blit(message_box->text_screen, 100, 100);
-	machine.blitter->add_blit(257, 100, 100);
+	
+	machine.blitter->add_border();
+	
+	machine.blitter->add_blit(257, 0, 276);
 }
 
 void E64::kernel_t::timer_0_event()

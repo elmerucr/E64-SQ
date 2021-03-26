@@ -19,7 +19,7 @@
 
 #define E64_SQ_MAJOR_VERSION    0
 #define E64_SQ_MINOR_VERSION    1
-#define E64_SQ_BUILD            20210324
+#define E64_SQ_BUILD            20210325
 #define E64_SQ_YEAR             2021
 
 /* Global objects */
@@ -80,6 +80,8 @@ extern E64::stats_t	stats;
 #define VICV_PIXELS_HBLANK		148
 #define VICV_SCANLINES			288
 #define VICV_SCANLINES_VBLANK		12
+
+#define VICV_TOTAL_PIXELS		(VICV_PIXELS_PER_SCANLINE*VICV_SCANLINES)
 
 /* These two macros are defined for use within the monitor */
 #define VICV_CHAR_COLUMNS		(VICV_PIXELS_PER_SCANLINE/8)

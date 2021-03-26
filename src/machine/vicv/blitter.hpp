@@ -20,6 +20,7 @@ namespace E64
 enum blitter_state_t {
 	IDLE,
 	CLEARING,
+	DRAW_BORDER,
 	BLITTING
 };
 
@@ -107,6 +108,7 @@ struct blit_t {
 
 enum operation_type {
 	CLEAR,
+	BORDER,
 	BLIT
 };
 
@@ -127,9 +129,15 @@ public:
 	
 	struct blit_t *blit;	// 2048 bytes (256 * 8) for E64, another 2048 for host
 	
-	void set_clearcolor(uint16_t color);
+	void set_clear_color(uint16_t color);
 	void add_clear_framebuffer();
+	
+	void set_border_color(uint16_t color) { border_color = color; }
+	void set_border_size(uint8_t size ) { border_size = size; }
+	void add_border();
+	
 	void add_blit(int blit_no, int16_t x, int16_t y);
+	
 	bool busy();
 	
 	// run cycles until not busy anymore
@@ -190,6 +198,10 @@ private:
     
 	// specific for clearing framebuffer
 	uint16_t clear_color;
+	
+	// specific for border
+	uint16_t border_color;
+	uint8_t  border_size;
 
 	int16_t x;
 	int16_t y;

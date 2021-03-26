@@ -103,7 +103,7 @@ int E64::sdl2_process_events()
                 }
                 else if(event.key.keysym.sym == SDLK_F10)
                     {
-			    machine.vicv->toggle_stats();
+			    //machine.vicv->toggle_stats();
                     }
                 break;
             case SDL_WINDOWEVENT:

@@ -127,6 +127,14 @@ inline void E64::blitter_ic::check_new_operation()
 				pixel_no = 0;
 				tail++;
 				break;
+			case BORDER:
+				blitter_state = DRAW_BORDER;
+				width_on_screen = VICV_PIXELS_PER_SCANLINE;
+				height_on_screen = border_size;
+				total_no_of_pix = (width_on_screen * height_on_screen);
+				pixel_no = 0;
+				tail++;
+				break;
 			case BLIT:
 				blitter_state = BLITTING;
 		    
@@ -192,6 +200,16 @@ void E64::blitter_ic::run(int no_of_cycles)
 			cycles_busy++;
 			if (!(pixel_no == total_no_of_pix)) {
 				machine.vicv->backbuffer[pixel_no] = clear_color;
+				pixel_no++;
+			} else {
+				blitter_state = IDLE;
+			}
+			break;
+		case DRAW_BORDER:
+			cycles_busy++;
+			if (!(pixel_no == total_no_of_pix)) {
+				alpha_blend(&machine.vicv->backbuffer[pixel_no], &border_color);
+				alpha_blend(&machine.vicv->backbuffer[(VICV_TOTAL_PIXELS-1) - pixel_no], &border_color);
 				pixel_no++;
 			} else {
 				blitter_state = IDLE;
@@ -289,7 +307,7 @@ double E64::blitter_ic::fraction_busy()
 	return fraction;
 }
 
-void E64::blitter_ic::set_clearcolor(uint16_t color)
+void E64::blitter_ic::set_clear_color(uint16_t color)
 {
 	clear_color = color | 0xf000;
 }
@@ -297,6 +315,12 @@ void E64::blitter_ic::set_clearcolor(uint16_t color)
 void E64::blitter_ic::add_clear_framebuffer()
 {
 	operations[head].type = CLEAR;
+	head++;
+}
+
+void E64::blitter_ic::add_border()
+{
+	operations[head].type = BORDER;
 	head++;
 }
 
