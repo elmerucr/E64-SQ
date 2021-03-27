@@ -20,6 +20,8 @@ public:
 	kernel_t();
 	~kernel_t();
 	
+	blitter_ic *blitter;
+	
 	lua_State *L;
 	
 	tty_t *tty;
@@ -30,7 +32,6 @@ public:
 	void process_keypress();
 	
 	// events
-	void vblank_event();
 	void timer_0_event();
 	void timer_1_event();
 	void timer_2_event();

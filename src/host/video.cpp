@@ -5,9 +5,12 @@
 
 #include "video.hpp"
 #include "common.hpp"
+#include <cstring>
 
 E64::video_t::video_t()
 {
+	framebuffer = new uint16_t[VICV_PIXELS_PER_SCANLINE * VICV_SCANLINES];
+	
 	SDL_version compiled;
 	SDL_version linked;
 
@@ -109,18 +112,31 @@ E64::video_t::~video_t()
 	SDL_DestroyRenderer(renderer);
 	SDL_DestroyWindow(window);
 	SDL_Quit();
+	
+	delete [] framebuffer;
 }
 
-void E64::video_t::reset()
+void E64::video_t::clear_frame_buffer()
 {
-	//
+	memset(framebuffer, 0, VICV_TOTAL_PIXELS * sizeof(*framebuffer));
+}
+
+void E64::video_t::merge_down_buffer(uint16_t *buffer)
+{
+	uint16_t *temp_framebuffer = framebuffer;
+	for (int i=0; i < VICV_TOTAL_PIXELS; i++) {
+		//alpha_blend(&framebuffer[i], &buffer[i]);
+		alpha_blend(temp_framebuffer++, buffer++);
+		//framebuffer[i] |= 0xf000;
+		//framebuffer[i] = buffer[i];
+	}
 }
 
 void E64::video_t::update_screen()
 {
 	SDL_RenderClear(renderer);
 
-	SDL_UpdateTexture(texture, NULL, machine.vicv->frontbuffer,
+	SDL_UpdateTexture(texture, NULL, framebuffer,
 		VICV_PIXELS_PER_SCANLINE * sizeof(uint16_t));
     
 	SDL_RenderCopy(renderer, texture, NULL, NULL);

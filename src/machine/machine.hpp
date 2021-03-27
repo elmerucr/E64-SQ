@@ -26,7 +26,6 @@ namespace E64
 class machine_t
 {
 private:
-    clocks *vicv_to_blitter;
     clocks *vicv_to_sid;
     char machine_help_string[2048];
 public:

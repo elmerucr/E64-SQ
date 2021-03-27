@@ -120,54 +120,25 @@ struct operation {
 };
 
 class blitter_ic {
-public:
-	blitter_ic();
-	~blitter_ic();
-	
-	void reset();
-	void run(int no_of_cycles);
-	
-	struct blit_t *blit;	// 2048 bytes (256 * 8) for E64, another 2048 for host
-	
-	void set_clear_color(uint16_t color);
-	void add_clear_framebuffer();
-	
-	void set_border_color(uint16_t color) { border_color = color; }
-	void set_border_size(uint8_t size ) { border_size = size; }
-	void add_border();
-	
-	void add_blit(int blit_no, int16_t x, int16_t y);
-	
-	bool busy();
-	
-	// run cycles until not busy anymore
-	inline void flush() {
-		while (busy()) run(1);
-	}
-	
-	enum blitter_state_t blitter_state;
-	double fraction_busy(); /*  Returns the fraction of time the blitter was NOT idle */
 private:
 	uint8_t *blit_memory;
 	uint16_t *blit_memory_as_words;
 	uint16_t *cbm_font;	// unpacked font
 	
-	/*
-	 * Keeping track of busy and idle cycles. This way, it is possible
-	 * to estimate the % of usage of the blitter chip. It is best to
-	 * calculate this only once per frame.
-	 */
-	uint64_t cycles_busy;
-	uint64_t cycles_idle;
+	enum blitter_state_t blitter_state;
+	
+	// framebuffer pointers
+	uint16_t *fb0;
+	uint16_t *fb1;
 
 	/*
-	 * Circular buffer containing operations. If more than 256 operations
+	 * Circular buffer containing operations. If more than 65536 operations
 	 * would be written (unlikely) and unfinished, something will be
 	 * overwritten.
 	 */
-	struct operation operations[256];
-	uint8_t head;
-	uint8_t tail;
+	struct operation operations[65536];
+	uint16_t head;
+	uint16_t tail;
     
 	/* Finite state machine */
 	bool        bitmap_mode;
@@ -236,6 +207,36 @@ private:
 	uint32_t user_data;
 	
 	inline void check_new_operation();
+public:
+	blitter_ic();
+	~blitter_ic();
+	
+	void swap_buffers();
+
+	// framebuffer pointers inside the virtual machine
+	uint16_t *frontbuffer;
+	uint16_t *backbuffer;
+	
+	void reset();
+	void run(int no_of_cycles);
+	inline void make_idle() { blitter_state = IDLE; }
+	
+	struct blit_t *blit;	// 2048 bytes (256 * 8) for E64, another 2048 for host
+	
+	void set_clear_color(uint16_t color);
+	void set_border_color(uint16_t color) { border_color = color; }
+	void set_border_size(uint8_t size ) { border_size = size; }
+	
+	void clear_framebuffer();
+	void draw_border();
+	void draw_blit(int blit_no, int16_t x, int16_t y);
+	
+	inline bool busy() { return blitter_state == IDLE ? false : true; }
+	
+	// run cycles until not busy anymore
+	inline void flush() {
+		do run(1000); while (busy());
+	}
 };
 
 }

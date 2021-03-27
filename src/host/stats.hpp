@@ -39,9 +39,6 @@ private:
     double idle_per_frame;
     double smoothed_idle_per_frame;
     
-    double percentage_blitter;
-    double smoothed_percentage_blitter;
-    
     char statistics_string[256];
     
 public:

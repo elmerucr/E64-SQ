@@ -14,11 +14,13 @@ E64::host_t	host;
 E64::stats_t	stats;
 E64::machine_t	machine;
 
+int swallah = 0;
+
 std::chrono::time_point<std::chrono::steady_clock> refresh_moment;
 
 static void do_frames()
 {
-	if (machine.run(63)) {
+	if (machine.run(1023)) {
 		// switch mode e.g. when have breakpoint
 		//machine.switch_mode(E64::MONITOR);
 	}
@@ -31,6 +33,26 @@ static void do_frames()
 		}
 		
 		machine.kernel->execute();
+		
+		machine.blitter->swap_buffers();
+		machine.blitter->clear_framebuffer();
+		machine.blitter->draw_blit(256, 0, 16);
+		machine.blitter->draw_border();
+		machine.blitter->draw_blit(257, 0, 276);
+		
+		machine.blitter->draw_blit(257, swallah, swallah);
+		swallah++;
+		if (swallah>288) swallah = -16;
+		
+		machine.blitter->flush();
+		
+		machine.kernel->blitter->swap_buffers();
+		machine.kernel->blitter->clear_framebuffer();
+		machine.kernel->blitter->flush();
+		
+		host.video->clear_frame_buffer();
+		host.video->merge_down_buffer(machine.blitter->frontbuffer);
+		host.video->merge_down_buffer(machine.kernel->blitter->frontbuffer);
 		
 		stats.process_parameters();
 		/*
@@ -64,11 +86,8 @@ static void do_frames()
 int main(int argc, char **argv)
 {
 	E64::sdl2_init();
-
 	machine.turned_on = true;
-	
 	machine.reset();
-
 	stats.reset();
 	
 	refresh_moment = std::chrono::steady_clock::now();
