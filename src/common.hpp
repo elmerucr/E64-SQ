@@ -13,6 +13,7 @@
 #include <cstdint>
 
 #include "host.hpp"
+#include "kernel.hpp"
 #include "machine.hpp"
 #include "stats.hpp"
 #include "rom.hpp"
@@ -24,6 +25,7 @@
 
 /* Global objects */
 extern E64::host_t	host;
+extern E64::kernel_t	*kernel;
 extern E64::machine_t	machine;
 extern E64::stats_t	stats;
 

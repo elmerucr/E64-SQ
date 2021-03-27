@@ -11,13 +11,12 @@ E64::blitter_ic::blitter_ic()
 	fb0 = new uint16_t[VICV_PIXELS_PER_SCANLINE * VICV_SCANLINES];
 	fb1 = new uint16_t[VICV_PIXELS_PER_SCANLINE * VICV_SCANLINES];
 	
-	blit_memory = new uint8_t[512 * 65536];
-	for (int i=0; i<(256*65536); i++) blit_memory[i] = i; // TEMP HACK TO SHOW SOMETHING
+	blit_memory = new uint8_t[256 * 65536];
 	blit_memory_as_words = (uint16_t *)blit_memory;
-	blit = new struct blit_t[512];
+	blit = new struct blit_t[256];
 	cbm_font = new uint16_t[256 * 64];
 	
-	for (int i=0; i<512; i++) {
+	for (int i=0; i<256; i++) {
 		blit[i].pixel_data                 = (uint16_t *)&blit_memory[(i << 16) | 0x0000];
 		blit[i].tile_data                  = (uint8_t  *)&blit_memory[(i << 16) | 0x8000]; // 4k block
 		blit[i].tile_color_data            = (uint16_t *)&blit_memory[(i << 16) | 0xc000]; // 8k block

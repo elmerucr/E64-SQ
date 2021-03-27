@@ -94,6 +94,7 @@ int E64::sdl2_process_events()
                 {
                     E64::sdl2_wait_until_r_released();
 			machine.reset();
+			kernel->reset();
                     stats.reset();
                 }
                 else if( (event.key.keysym.sym == SDLK_q) && alt_pressed )

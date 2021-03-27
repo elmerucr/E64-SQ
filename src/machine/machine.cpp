@@ -18,7 +18,7 @@ E64::machine_t::machine_t()
 	sids = new sids_ic();
 	cia = new cia_ic();
 	
-	kernel = new kernel_t();
+	//kernel = new kernel_t();
 	
 	// init clocks (frequency dividers, right no of cycles will run on different ic's)
 	vicv_to_sid   = new clocks(VICV_DOT_CLOCK_SPEED, SID_CLOCK_SPEED );
@@ -28,7 +28,7 @@ E64::machine_t::~machine_t()
 {
 	delete vicv_to_sid;
 	
-	delete kernel;
+	//delete kernel;
 	delete cia;
 	delete sids;
 	delete blitter;
@@ -69,6 +69,6 @@ void E64::machine_t::reset()
 	blitter->reset();
 	timer->reset();
 	cia->reset();
-	kernel->reset();
+	//kernel->reset();
 	printf("[machine] system reset\n");
 }

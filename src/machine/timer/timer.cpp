@@ -34,28 +34,28 @@ void E64::timer_ic::run(uint32_t number_of_cycles)
 			//machine.TTL74LS148->pull_line(interrupt_device_number);
 			switch (i) {
 				case 0:
-					machine.kernel->timer_0_event();
+					kernel->timer_0_event();
 					break;
 				case 1:
-					machine.kernel->timer_1_event();
+					kernel->timer_1_event();
 					break;
 				case 2:
-					machine.kernel->timer_2_event();
+					kernel->timer_2_event();
 					break;
 				case 3:
-					machine.kernel->timer_3_event();
+					kernel->timer_3_event();
 					break;
 				case 4:
-					machine.kernel->timer_4_event();
+					kernel->timer_4_event();
 					break;
 				case 5:
-					machine.kernel->timer_5_event();
+					kernel->timer_5_event();
 					break;
 				case 6:
-					machine.kernel->timer_6_event();
+					kernel->timer_6_event();
 					break;
 				case 7:
-					machine.kernel->timer_7_event();
+					kernel->timer_7_event();
 					break;
 			}
 			registers[0] |= (0b1 << i);

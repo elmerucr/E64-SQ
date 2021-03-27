@@ -7,10 +7,12 @@
 #include <chrono>
 #include <thread>
 #include "common.hpp"
+#include "kernel.hpp"
 #include "sdl2.hpp"
 
 // global components
 E64::host_t	host;
+E64::kernel_t	*kernel;
 E64::stats_t	stats;
 E64::machine_t	machine;
 
@@ -32,27 +34,28 @@ static void do_frames()
 			machine.turned_on = false;
 		}
 		
-		machine.kernel->execute();
+		kernel->execute();
 		
 		machine.blitter->swap_buffers();
 		machine.blitter->clear_framebuffer();
-		machine.blitter->draw_blit(256, 0, 16);
+		machine.blitter->draw_blit(0, 0, 16);
 		machine.blitter->draw_border();
-		machine.blitter->draw_blit(257, 0, 276);
+		machine.blitter->draw_blit(1, 0, 276);
 		
-		machine.blitter->draw_blit(257, swallah, swallah);
+		machine.blitter->draw_blit(1, swallah, swallah);
 		swallah++;
 		if (swallah>288) swallah = -16;
 		
 		machine.blitter->flush();
 		
-		machine.kernel->blitter->swap_buffers();
-		machine.kernel->blitter->clear_framebuffer();
-		machine.kernel->blitter->flush();
+		kernel->blitter->swap_buffers();
+		kernel->blitter->clear_framebuffer();
+		kernel->blitter->draw_blit(0, 0, 132);
+		kernel->blitter->flush();
 		
 		host.video->clear_frame_buffer();
 		host.video->merge_down_buffer(machine.blitter->frontbuffer);
-		host.video->merge_down_buffer(machine.kernel->blitter->frontbuffer);
+		host.video->merge_down_buffer(kernel->blitter->frontbuffer);
 		
 		stats.process_parameters();
 		/*
@@ -88,6 +91,10 @@ int main(int argc, char **argv)
 	E64::sdl2_init();
 	machine.turned_on = true;
 	machine.reset();
+	
+	kernel = new E64::kernel_t();
+	kernel->reset();
+	
 	stats.reset();
 	
 	refresh_moment = std::chrono::steady_clock::now();
@@ -96,6 +103,7 @@ int main(int argc, char **argv)
 		do_frames();
 	}
 
+	delete kernel;
 	E64::sdl2_cleanup();
 	return 0;
 }

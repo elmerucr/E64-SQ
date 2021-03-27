@@ -26,6 +26,7 @@ public:
 	
 	tty_t *tty;
 	tty_t *statistics;
+	tty_t *stat2;
 	
 	void reset();
 	void execute();

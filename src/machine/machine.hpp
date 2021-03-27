@@ -13,7 +13,7 @@
 #include "timer.hpp"
 #include "vicv.hpp"
 #include "blitter.hpp"
-#include "kernel.hpp"
+//#include "kernel.hpp"
 
 // output states for run function
 #define NO_BREAKPOINT       0b00000000
@@ -37,7 +37,7 @@ public:
 	blitter_ic	*blitter;
 	sids_ic		*sids;
 	cia_ic		*cia;
-	kernel_t	*kernel;
+	//kernel_t	*kernel;
 
 	machine_t();
 	~machine_t();

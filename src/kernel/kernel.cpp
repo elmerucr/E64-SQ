@@ -8,14 +8,16 @@ E64::kernel_t::kernel_t()
 	luaopen_math(L);
 	luaopen_string(L);
 	
-	tty = new tty_t(0b10001000, 0b00000000, 0x56, 256, C64_LIGHTBLUE, C64_BLUE);
-	statistics = new tty_t(0b10001010, 0b00000000, 0x06, 257, GREEN_06, (GREEN_02 & 0x0fff) | 0xa000);
-	
 	blitter = new blitter_ic();
+	
+	tty = new tty_t(0b10001000, 0b00000000, 0x56, 0, machine.blitter, C64_LIGHTBLUE, C64_BLUE);
+	statistics = new tty_t(0b10001010, 0b00000000, 0x06, 1, machine.blitter, GREEN_06, (GREEN_02 & 0x0fff) | 0xa000);
+	stat2 = new tty_t(0b10001010, 0b00000000, 0x06, 0, blitter, GREEN_06, (GREEN_04 & 0x0fff) | 0x8000);
 }
 
 E64::kernel_t::~kernel_t()
 {
+	delete stat2;
 	delete blitter;
 	delete statistics;
 	delete tty;
@@ -25,13 +27,15 @@ E64::kernel_t::~kernel_t()
 
 void E64::kernel_t::reset()
 {
-	blitter->reset();
 	
 	machine.blitter->set_clear_color(C64_BLUE);
 	machine.blitter->set_border_color(C64_BLACK);
 	machine.blitter->set_border_size(16);
 	
-	blitter->set_clear_color(0xcff0);
+	blitter->reset();
+	blitter->set_clear_color(0x0000);
+	blitter->set_border_color(0x0000);
+	blitter->set_border_size(0);
 	
 	// clear sids
 	for (int i=0; i<128; i++) machine.sids->write_byte(i, 0);
@@ -70,6 +74,9 @@ void E64::kernel_t::reset()
 	tty->putchar('\n');
 	tty->prompt();
 	tty->activate_cursor();
+	
+	stat2->clear();
+	stat2->printf("BOE!!!!!!!!!");
 }
 
 void E64::kernel_t::process_keypress()

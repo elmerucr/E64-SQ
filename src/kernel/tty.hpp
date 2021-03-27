@@ -24,7 +24,7 @@ private:
 	uint16_t current_foreground_color;
 	uint16_t current_background_color;
 public:
-	tty_t(uint8_t flags_0, uint8_t flags_1, uint8_t size_in_tiles_log2, int _blit_no, uint16_t foreground_color, uint16_t background_color);
+	tty_t(uint8_t flags_0, uint8_t flags_1, uint8_t size_in_tiles_log2, int _blit_no, blitter_ic *_blitter, uint16_t foreground_color, uint16_t background_color);
 	~tty_t();
 	
 	blit_t *text_screen;
