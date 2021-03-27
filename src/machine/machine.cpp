@@ -10,6 +10,7 @@
 E64::machine_t::machine_t()
 {
 	mmu = new mmu_ic();
+	cpu = new cpu_ic();
 	timer = new timer_ic();
 	
 	vicv = new vicv_ic();
@@ -34,6 +35,7 @@ E64::machine_t::~machine_t()
 	delete blitter;
 	delete vicv;
 	delete timer;
+	delete cpu;
 	delete mmu;
 }
 
@@ -69,6 +71,6 @@ void E64::machine_t::reset()
 	blitter->reset();
 	timer->reset();
 	cia->reset();
-	//kernel->reset();
+	cpu->reset();
 	printf("[machine] system reset\n");
 }

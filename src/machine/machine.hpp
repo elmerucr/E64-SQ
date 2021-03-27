@@ -13,7 +13,7 @@
 #include "timer.hpp"
 #include "vicv.hpp"
 #include "blitter.hpp"
-//#include "kernel.hpp"
+#include "cpu.hpp"
 
 // output states for run function
 #define NO_BREAKPOINT       0b00000000
@@ -32,6 +32,7 @@ public:
 	bool turned_on;
 
 	mmu_ic		*mmu;
+	cpu_ic		*cpu;
 	timer_ic	*timer;
 	vicv_ic		*vicv;
 	blitter_ic	*blitter;

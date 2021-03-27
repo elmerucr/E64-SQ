@@ -11,16 +11,25 @@ E64::kernel_t::kernel_t()
 	blitter = new blitter_ic();
 	
 	tty = new tty_t(0b10001000, 0b00000000, 0x56, 0, machine.blitter, C64_LIGHTBLUE, C64_BLUE);
-	statistics = new tty_t(0b10001010, 0b00000000, 0x06, 1, machine.blitter, GREEN_06, (GREEN_02 & 0x0fff) | 0xa000);
-	stat2 = new tty_t(0b10001010, 0b00000000, 0x06, 0, blitter, GREEN_06, (GREEN_04 & 0x0fff) | 0x8000);
+	stats_view = new tty_t(0b10001010, 0b00000000, 0x25, 0, blitter, GREEN_05, (GREEN_03 & 0x0fff) | 0x8000);
+	cpu_view = new tty_t(0b10001010, 0b00000000, 0x25, 1, blitter, GREEN_05, (GREEN_03 & 0x0fff) | 0x8000);
+	disassembly_view = new tty_t(0b10001010, 0b00000000, 0x45, 2, blitter, GREEN_05, (GREEN_03 & 0x0fff) | 0x8000);
+	stats_visible = false;
+	overhead_visible = false;
+	
+	machine.mmu->write_memory_8(0x1010, 0x0f);
+	machine.mmu->write_memory_8(0x1011, 0x53);
+	machine.mmu->write_memory_8(0x1012, 0x01);
+	machine.mmu->write_memory_8(0x1013, 0xc0);
 }
 
 E64::kernel_t::~kernel_t()
 {
-	delete stat2;
-	delete blitter;
-	delete statistics;
+	delete disassembly_view;
+	delete cpu_view;
+	delete stats_view;
 	delete tty;
+	delete blitter;
 	
 	lua_close(L);
 }
@@ -74,9 +83,6 @@ void E64::kernel_t::reset()
 	tty->putchar('\n');
 	tty->prompt();
 	tty->activate_cursor();
-	
-	stat2->clear();
-	stat2->printf("BOE!!!!!!!!!");
 }
 
 void E64::kernel_t::process_keypress()
@@ -121,8 +127,52 @@ void E64::kernel_t::execute()
 		process_keypress();
 		tty->activate_cursor();
 	}
-	statistics->clear();
-	statistics->puts(stats.summary());
+	
+	stats_view->clear();
+	stats_view->puts(stats.summary());
+	
+	cpu_view->clear();
+	cpu_view->printf("  pc  ac xr yr sp nv-bdizc\n");
+	cpu_view->printf(" %04x %02x %02x %02x %02x %c%c%c%c%c%c%c%c\n", machine.cpu->get_pc(), machine.cpu->get_a(), machine.cpu->get_x(), machine.cpu->get_y(), machine.cpu->get_sp(),
+			 machine.cpu->get_status() & 0x80 ? '*' : '.',
+			 machine.cpu->get_status() & 0x40 ? '*' : '.',
+			 machine.cpu->get_status() & 0x20 ? '*' : '.',
+			 machine.cpu->get_status() & 0x10 ? '*' : '.',
+			 machine.cpu->get_status() & 0x08 ? '*' : '.',
+			 machine.cpu->get_status() & 0x04 ? '*' : '.',
+			 machine.cpu->get_status() & 0x02 ? '*' : '.',
+			 machine.cpu->get_status() & 0x01 ? '*' : '.');
+	
+	disassembly_view->clear();
+	char tekst[256];
+	uint16_t pc = machine.cpu->get_pc();
+	for (int i=0; i<15; i++) {
+		int ops = machine.cpu->disassemble(pc, tekst);
+		switch (ops) {
+		case 1:
+			disassembly_view->printf("%04x %02x       %s\n",
+						 pc,
+						 machine.mmu->read_memory_8(pc),
+						 tekst);
+			break;
+		case 2:
+			disassembly_view->printf("%04x %02x %02x    %s\n",
+						 pc,
+						 machine.mmu->read_memory_8(pc),
+						 machine.mmu->read_memory_8(pc+1),
+						 tekst);
+			break;
+		case 3:
+			disassembly_view->printf("%04x %02x %02x %02x %s\n",
+						 pc,
+						 machine.mmu->read_memory_8(pc),
+						 machine.mmu->read_memory_8(pc+1),
+						 machine.mmu->read_memory_8(pc+2),
+						 tekst);
+			break;
+		}
+		pc += ops;
+	}
 }
 
 void E64::kernel_t::timer_0_event()

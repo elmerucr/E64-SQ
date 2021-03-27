@@ -25,8 +25,12 @@ public:
 	lua_State *L;
 	
 	tty_t *tty;
-	tty_t *statistics;
-	tty_t *stat2;
+	tty_t *stats_view;
+	tty_t *cpu_view;
+	tty_t *disassembly_view;
+	
+	bool stats_visible;
+	bool overhead_visible;
 	
 	void reset();
 	void execute();

@@ -8,7 +8,7 @@ extern "C" {
 
 #include "mnemonics.h"
 
-cpu::cpu()
+cpu_ic::cpu_ic()
 {
 	irq_line = true;
 	nmi_line = true;
@@ -21,17 +21,17 @@ cpu::cpu()
 	}
 }
 
-cpu::~cpu()
+cpu_ic::~cpu_ic()
 {
 	delete [] breakpoints;
 }
 
-void cpu::reset()
+void cpu_ic::reset()
 {
 	reset6502();
 }
 
-uint32_t cpu::run(uint32_t cycles)
+uint32_t cpu_ic::run(uint32_t cycles)
 {
 	bool done = false;
 
@@ -60,36 +60,22 @@ uint32_t cpu::run(uint32_t cycles)
 	return cycles_done;
 }
 
-void cpu::print_status()
-{
-	printf(" PC  SP AC XR YR nv-bdizc\n");
-	printf("%04x %02x %02x %02x %02x %u%u%u%u%u%u%u%u\n", pc, sp, a, x, y,
-		status & 0x80 ? 1 : 0,
-		status & 0x40 ? 1 : 0,
-		status & 0x20 ? 1 : 0,
-		status & 0x10 ? 1 : 0,
-		status & 0x08 ? 1 : 0,
-		status & 0x04 ? 1 : 0,
-		status & 0x02 ? 1 : 0,
-		status & 0x01 ? 1 : 0);
-}
-
-uint32_t cpu::clock_ticks()
+uint32_t cpu_ic::clock_ticks()
 {
 	return clockticks6502;
 }
 
-void cpu::pull_irq()
+void cpu_ic::pull_irq()
 {
 	irq_line = false;
 }
 
-void cpu::release_irq()
+void cpu_ic::release_irq()
 {
 	irq_line = true;
 }
 
-void cpu::dump_stack()
+void cpu_ic::dump_stack()
 {
 	printf("Stack dump\n");
 	for (int i=0; i < 10; i++) {
@@ -97,23 +83,23 @@ void cpu::dump_stack()
 	}
 }
 
-uint16_t cpu::get_pc()     { return     pc; }
-uint8_t  cpu::get_sp()     { return     sp; }
-uint8_t  cpu::get_a()      { return      a; }
-uint8_t  cpu::get_x()      { return      x; }
-uint8_t  cpu::get_y()      { return      y; }
-uint8_t  cpu::get_status() { return status; }
+uint16_t cpu_ic::get_pc()     { return     pc; }
+uint8_t  cpu_ic::get_sp()     { return     sp; }
+uint8_t  cpu_ic::get_a()      { return      a; }
+uint8_t  cpu_ic::get_x()      { return      x; }
+uint8_t  cpu_ic::get_y()      { return      y; }
+uint8_t  cpu_ic::get_status() { return status; }
 
-void cpu::set_pc(uint16_t _pc)        { pc = _pc; }
-void cpu::set_sp(uint8_t _sp)         { sp = _sp; }
-void cpu::set_a(uint8_t _a)           { a = _a; }
-void cpu::set_x(uint8_t _x)           { x = _x; }
-void cpu::set_y(uint8_t _y)           { y = _y; }
-void cpu::set_status(uint8_t _status) { status = _status; }
+void cpu_ic::set_pc(uint16_t _pc)        { pc = _pc; }
+void cpu_ic::set_sp(uint8_t _sp)         { sp = _sp; }
+void cpu_ic::set_a(uint8_t _a)           { a = _a; }
+void cpu_ic::set_x(uint8_t _x)           { x = _x; }
+void cpu_ic::set_y(uint8_t _y)           { y = _y; }
+void cpu_ic::set_status(uint8_t _status) { status = _status; }
 
-int cpu::disassemble(uint16_t _pc)
+int cpu_ic::disassemble(uint16_t _pc, char *text)
 {
-	char buffer[256];
+	//char buffer[256];
 	uint8_t opcode = read6502(_pc);
 	char const *mnemonic = mnemonics[opcode];
 
@@ -125,26 +111,26 @@ int cpu::disassemble(uint16_t _pc)
 
 	int length = 1;
 
-	strncpy(buffer, mnemonic, 256);
+	strncpy(text, mnemonic, 256);
 
 	if (is_zp_rel) {
-		snprintf(buffer, 256, mnemonic, read6502(_pc + 1), _pc + 3 + (int8_t)read6502(_pc + 2));
+		snprintf(text, 256, mnemonic, read6502(_pc + 1), _pc + 3 + (int8_t)read6502(_pc + 2));
 		length = 3;
 	} else {
-		if (strstr(buffer, "%02x")) {
+		if (strstr(text, "%02x")) {
 			length = 2;
 			if (is_branch) {
-				snprintf(buffer, 256, mnemonic, _pc + 2 + (int8_t)read6502(_pc + 1));
+				snprintf(text, 256, mnemonic, _pc + 2 + (int8_t)read6502(_pc + 1));
 			} else {
-				snprintf(buffer, 256, mnemonic, read6502(_pc + 1));
+				snprintf(text, 256, mnemonic, read6502(_pc + 1));
 			}
 		}
-		if (strstr(buffer, "%04x")) {
+		if (strstr(text, "%04x")) {
 			length = 3;
-			snprintf(buffer, 256, mnemonic, read6502(_pc + 1) | read6502(_pc + 2) << 8);
+			snprintf(text, 256, mnemonic, read6502(_pc + 1) | read6502(_pc + 2) << 8);
 		}
 	}
-	printf("%04x %s\n", _pc, buffer);
+	//printf("%04x %s\n", _pc, buffer);
 	return length;
 }
 
@@ -187,7 +173,7 @@ int cpu::disassemble(uint16_t _pc)
 // 	return length;
 
 
-int cpu::disassemble()
+int cpu_ic::disassemble(char *text)
 {
-	return disassemble(pc);
+	return disassemble(pc, text);
 }

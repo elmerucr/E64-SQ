@@ -16,8 +16,6 @@ E64::kernel_t	*kernel;
 E64::stats_t	stats;
 E64::machine_t	machine;
 
-int swallah = 0;
-
 std::chrono::time_point<std::chrono::steady_clock> refresh_moment;
 
 static void do_frames()
@@ -40,17 +38,17 @@ static void do_frames()
 		machine.blitter->clear_framebuffer();
 		machine.blitter->draw_blit(0, 0, 16);
 		machine.blitter->draw_border();
-		machine.blitter->draw_blit(1, 0, 276);
-		
-		machine.blitter->draw_blit(1, swallah, swallah);
-		swallah++;
-		if (swallah>288) swallah = -16;
-		
 		machine.blitter->flush();
 		
 		kernel->blitter->swap_buffers();
 		kernel->blitter->clear_framebuffer();
-		kernel->blitter->draw_blit(0, 0, 132);
+		if (kernel->stats_visible)
+			kernel->blitter->draw_blit(0, 128, 252);
+		if (kernel->overhead_visible) {
+			kernel->blitter->draw_blit(1, 6, 6);
+//			kernel->blitter->draw_blit(2, 36, 24);
+			kernel->blitter->draw_blit(2, 6, 44);
+		}
 		kernel->blitter->flush();
 		
 		host.video->clear_frame_buffer();

@@ -64,13 +64,12 @@ inline void alpha_blend(uint16_t *destination, uint16_t *source)
     
 	a_src_inv = 17 - a_src;
 	
-	a_dest = (a_dest >= (a_src-1)) ? a_dest : (a_src-1);
+	//a_dest = (a_dest >= (a_src-1)) ? a_dest : (a_src-1);
+	a_dest = (256-((16-(a_src-1))*(16-a_dest))) >> 4;
 	r_dest = ((a_src * r_src) + (a_src_inv * r_dest)) >> 4;
 	g_dest = ((a_src * g_src) + (a_src_inv * g_dest)) >> 4;
 	b_dest = ((a_src * b_src) + (a_src_inv * b_dest)) >> 4;
 
-//	// Anything returned, has an alpha value of 0xf
-//	*destination = 0xf000 | (r_dest << 8) | (g_dest << 4) | b_dest;
 	*destination = (a_dest << 12) | (r_dest << 8) | (g_dest << 4) | b_dest;
 }
 

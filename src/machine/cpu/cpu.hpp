@@ -12,7 +12,7 @@
 #define FLAG_OVERFLOW  0x40
 #define FLAG_SIGN      0x80
 
-class cpu {
+class cpu_ic {
 private:
 	bool irq_line;
 	bool old_irq_line;
@@ -21,8 +21,8 @@ private:
 
 	bool *breakpoints;
 public:
-	cpu();
-	~cpu();
+	cpu_ic();
+	~cpu_ic();
 
 	void reset();
 
@@ -51,10 +51,9 @@ public:
 	void set_y(uint8_t _y);
 	void set_status(uint8_t _status);
 
-	int disassemble();
-	int disassemble(uint16_t _pc);
+	int disassemble(char *text);
+	int disassemble(uint16_t _pc, char *text);
 
-	void print_status();
 	void dump_stack();
 	uint32_t clock_ticks();
 };

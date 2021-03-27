@@ -65,7 +65,7 @@ void E64::stats_t::process_parameters()
     status_bar_framecounter++;
     if( status_bar_framecounter == status_bar_framecounter_interval )
     {
-        snprintf(statistics_string, 256, "%5.2fMHz  %5.2ffps  %5.2fms %4.1fkb", smoothed_mhz, smoothed_framerate, smoothed_idle_per_frame/1000, smoothed_audio_queue_size/1024);
+        snprintf(statistics_string, 256, "      clock speed:  %5.2f MHz\n   screen refresh:  %5.2f fps\n   idle per frame:  %5.2f ms\n      soundbuffer:  %5.2f kb", smoothed_mhz, smoothed_framerate, smoothed_idle_per_frame/1000, smoothed_audio_queue_size/1024);
         status_bar_framecounter = 0;
     }
 }

@@ -90,21 +90,23 @@ int E64::sdl2_process_events()
                     E64::sdl2_wait_until_f_released();
                     host.video->toggle_fullscreen();
                 }
-                else if( (event.key.keysym.sym == SDLK_r) && alt_pressed )
-                {
-                    E64::sdl2_wait_until_r_released();
+                else if( (event.key.keysym.sym == SDLK_r) && alt_pressed ) {
+			E64::sdl2_wait_until_r_released();
 			machine.reset();
 			kernel->reset();
-                    stats.reset();
+			stats.reset();
                 }
                 else if( (event.key.keysym.sym == SDLK_q) && alt_pressed )
                 {
                     E64::sdl2_wait_until_q_released();
                     return_value = QUIT_EVENT;
                 }
+		else if(event.key.keysym.sym == SDLK_F9) {
+			      kernel->overhead_visible = !kernel->overhead_visible;
+		      }
                 else if(event.key.keysym.sym == SDLK_F10)
                     {
-			    //machine.vicv->toggle_stats();
+			    kernel->stats_visible = !kernel->stats_visible;
                     }
                 break;
             case SDL_WINDOWEVENT:
