@@ -14,6 +14,7 @@ include_directories(
     src/kernel/lua-5.4.2/src/
     src/machine/
     src/machine/cia/
+    src/machine/cpu/
     src/machine/mmu/
     src/machine/sids/
     src/machine/sids/resid-0.16/
