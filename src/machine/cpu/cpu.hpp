@@ -2,6 +2,7 @@
 #define CPU_HPP
 
 #include <cstdlib>
+#include <cstdint>
 
 #define FLAG_CARRY     0x01
 #define FLAG_ZERO      0x02
