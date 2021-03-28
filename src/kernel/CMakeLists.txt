@@ -33,3 +33,5 @@ add_library(lua STATIC
 	lua-5.4.2/src/lvm.c
 	lua-5.4.2/src/lzio.c
 )
+
+target_link_libraries(kernel cpu)
