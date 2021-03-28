@@ -11,9 +11,13 @@ E64::kernel_t::kernel_t()
 	blitter = new blitter_ic();
 	
 	tty = new tty_t(0b10001000, 0b00000000, 0x56, 0, machine.blitter, C64_LIGHTBLUE, C64_BLUE);
-	stats_view = new tty_t(0b10001010, 0b00000000, 0x25, 0, blitter, GREEN_05, (GREEN_03 & 0x0fff) | 0x8000);
-	cpu_view = new tty_t(0b10001010, 0b00000000, 0x25, 1, blitter, GREEN_05, (GREEN_03 & 0x0fff) | 0x8000);
-	disassembly_view = new tty_t(0b10001010, 0b00000000, 0x45, 2, blitter, GREEN_05, (GREEN_03 & 0x0fff) | 0x8000);
+	
+	stats_view = new tty_t(0b10001010, 0b00000000, 0x25, 0, blitter, GREEN_05, (GREEN_02 & 0x0fff) | 0xa000);
+	terminal = new tty_t(0b10001010, 0b00000000, 0x46, 1, blitter, GREEN_05, (GREEN_02 & 0x0fff) | 0xa000);
+	cpu_view = new tty_t(0b10001010, 0b00000000, 0x15, 2, blitter, GREEN_05, (GREEN_02 & 0x0fff) | 0xa000);
+	disassembly_view = new tty_t(0b10001010, 0b00000000, 0x45, 3, blitter, GREEN_05, (GREEN_02 & 0x0fff) | 0xa000);
+	stack_view = new tty_t(0b10001010, 0b00000000, 0x35, 4, blitter, GREEN_05, (GREEN_02 & 0x0fff) | 0xa000);
+	
 	stats_visible = false;
 	overhead_visible = false;
 	
@@ -25,8 +29,10 @@ E64::kernel_t::kernel_t()
 
 E64::kernel_t::~kernel_t()
 {
+	delete stack_view;
 	delete disassembly_view;
 	delete cpu_view;
+	delete terminal;
 	delete stats_view;
 	delete tty;
 	delete blitter;
@@ -83,6 +89,9 @@ void E64::kernel_t::reset()
 	tty->putchar('\n');
 	tty->prompt();
 	tty->activate_cursor();
+	
+	terminal->clear();
+	stack_view->clear();
 }
 
 void E64::kernel_t::process_keypress()
@@ -132,8 +141,13 @@ void E64::kernel_t::execute()
 	stats_view->puts(stats.summary());
 	
 	cpu_view->clear();
-	cpu_view->printf("  pc  ac xr yr sp nv-bdizc\n");
-	cpu_view->printf(" %04x %02x %02x %02x %02x %c%c%c%c%c%c%c%c\n", machine.cpu->get_pc(), machine.cpu->get_a(), machine.cpu->get_x(), machine.cpu->get_y(), machine.cpu->get_sp(),
+	cpu_view->printf("  pc  ac xr yr sp nv-bdizc I Nn\n");
+	cpu_view->printf(" %04x %02x %02x %02x %02x %c%c%c%c%c%c%c%c %c %c%c",
+			 machine.cpu->get_pc(),
+			 machine.cpu->get_a(),
+			 machine.cpu->get_x(),
+			 machine.cpu->get_y(),
+			 machine.cpu->get_sp(),
 			 machine.cpu->get_status() & 0x80 ? '*' : '.',
 			 machine.cpu->get_status() & 0x40 ? '*' : '.',
 			 machine.cpu->get_status() & 0x20 ? '*' : '.',
@@ -141,29 +155,36 @@ void E64::kernel_t::execute()
 			 machine.cpu->get_status() & 0x08 ? '*' : '.',
 			 machine.cpu->get_status() & 0x04 ? '*' : '.',
 			 machine.cpu->get_status() & 0x02 ? '*' : '.',
-			 machine.cpu->get_status() & 0x01 ? '*' : '.');
+			 machine.cpu->get_status() & 0x01 ? '*' : '.',
+//	cpu_view->printf("\n  irq pin: %c   nmi pin: %c(%c)",
+			 machine.cpu->get_irq_line() ? '1' : '0',
+			 machine.cpu->get_nmi_line() ? '1' : '0',
+			 machine.cpu->get_old_nmi_line() ? '1' : '0'
+			 );
 	
 	disassembly_view->clear();
 	char tekst[256];
 	uint16_t pc = machine.cpu->get_pc();
-	for (int i=0; i<15; i++) {
+	for (int i=0; i<16; i++) {
+		if (disassembly_view->get_column() != 0)
+			disassembly_view->putchar('\n');
 		int ops = machine.cpu->disassemble(pc, tekst);
 		switch (ops) {
 		case 1:
-			disassembly_view->printf("%04x %02x       %s\n",
+			disassembly_view->printf("%04x %02x       %s",
 						 pc,
 						 machine.mmu->read_memory_8(pc),
 						 tekst);
 			break;
 		case 2:
-			disassembly_view->printf("%04x %02x %02x    %s\n",
+			disassembly_view->printf("%04x %02x %02x    %s",
 						 pc,
 						 machine.mmu->read_memory_8(pc),
 						 machine.mmu->read_memory_8(pc+1),
 						 tekst);
 			break;
 		case 3:
-			disassembly_view->printf("%04x %02x %02x %02x %s\n",
+			disassembly_view->printf("%04x %02x %02x %02x %s",
 						 pc,
 						 machine.mmu->read_memory_8(pc),
 						 machine.mmu->read_memory_8(pc+1),

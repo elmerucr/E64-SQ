@@ -10,7 +10,7 @@ E64::tty_t::tty_t(uint8_t flags_0, uint8_t flags_1, uint8_t size_in_tiles_log2, 
 	//text_screen = &machine.blitter->blit[_blit_no];
 	text_screen = &_blitter->blit[_blit_no];
 	
-	//blit_no = _blit_no;
+	blit_no = _blit_no;
 	
 	text_screen->flags_0 = flags_0;
 	text_screen->flags_1 = flags_1;

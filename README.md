@@ -1,15 +1,16 @@
-# E64-SQ
-![E64](./docs/E64-SQ_icon.png)
+# E64
+![E64](./docs/E64_icon.png)
 ## Description
-E64-SQ is a virtual computer system that runs on macOS and linux. It's mainly inspired by the Commodore 64 and implements some parts of Amiga 500 and Atari ST technology as well. Unlike the [E64-II](https://github.com/elmerucr/E64-II) system, there's no virtual CPU in inside this system. It uses a kernel written in C/C++.
+E64 is a virtual computer system that runs on macOS and linux. It's mainly inspired by the Commodore 64 and implements some Amiga 500 and Atari ST technology as well.
 ## Technical specifications:
-* Total of 16MB ram.
+* Main system with 64k ram.
 * Custom Video Interface Chip (VICV) with a resolution of 512x288 pixels and a palette of 4096 colors (12bit).
-* Custom Blitter Chip with alpha blending capabilities.
+* Custom Blitter Chip with alpha blending capabilities and 16mb video ram.
 * Two SID chips (MOS 6581) with stereo mixing possibilities. Each individual SID chip runs at 985248Hz for the same pitch as the chips in the original C64 pal version. Emulation is achieved with the excellent [reSID](http://www.zimmers.net/anonftp/pub/cbm/crossplatform/emulators/resid/index.html) library by Dag Lem.
 * Eight independent and programmable timers.
 ## Screenshots
-to be done
+![E64](./docs/E64_2021-03-28.png)
+![E64](./docs/E64_monitor_2021-03-28.png)
 ## Compiling
 ### Core application
 #### macOS
@@ -20,26 +21,24 @@ to be done
 Run the following commands in a terminal:
 ````console
 $ sudo apt install build-essential cmake git libsdl2-dev
-$ git clone https://github.com/elmerucr/E64-SQ
-$ cd E64-II && mkdir build && cd build
+$ git clone https://github.com/elmerucr/E64
+$ cd E64 && mkdir build && cd build
 $ cmake ..
 $ make
 ````
 Finally, to run the application from the build directory:
 ````console
-$ ./E64-SQ
+$ ./E64
 ````
 ## Websites and projects of interest
-### Scripting Languages
-* [Squirrel](http://www.squirrel-lang.org) - Squirrel is a high level imperative, object-oriented programming language, designed to be a light-weight scripting language that fits in the size, memory bandwidth, and real-time requirements of applications like video games.
+### Scripting Language
 * [Lua](http://www.lua.org) - Lua is a powerful, efficient, lightweight, embeddable scripting language. It supports procedural programming, object-oriented programming, functional programming, data-driven programming, and data description.
-* [Gravity](https://marcobambini.github.io/gravity/#/) - Gravity is a powerful, dynamically typed, lightweight, embeddable programming language written in C without any external dependencies (except for stdlib). It is a class-based concurrent scripting language with a modern Swift like syntax.
 ### Emulators
 * [CCS64](http://www.ccs64.com) - A Commodore 64 Emulator by Per Håkan Sundell.
 * [Commander X16 emulator](https://github.com/commanderx16/x16-emulator) - Software version of Commander X16.
 * [Hatari](https://hatari.tuxfamily.org) - Hatari is an Atari ST/STE/TT/Falcon emulator.
 * [lib65ce02](https://github.com/elmerucr/lib65ce02) - CSG65CE02 emulator written in C.
-* [Moira](https://github.com/dirkwhoffmann/Moira) - New Motorola 68000 emulator written in C++ by Dirk W. Hoffmann.
+* [Moira](https://github.com/dirkwhoffmann/Moira) - Motorola 68000 emulator written in C++ by Dirk W. Hoffmann.
 * [Musashi](https://github.com/kstenerud/Musashi) - Motorola 680x0 emulator written in C by Karl Stenerud.
 * [reSID](http://www.zimmers.net/anonftp/pub/cbm/crossplatform/emulators/resid/index.html) - ReSID is a Commodore 6581 or 8580 Sound Interface Device emulator by Dag Lem.
 * [vAmiga](http://www.dirkwhoffmann.de/software/vamiga.html) - An Amiga 500, 1000, or 2000 on your Apple Macintosh by Dirk W. Hoffmann.

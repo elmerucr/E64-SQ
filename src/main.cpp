@@ -42,12 +42,14 @@ static void do_frames()
 		
 		kernel->blitter->swap_buffers();
 		kernel->blitter->clear_framebuffer();
-		if (kernel->stats_visible)
-			kernel->blitter->draw_blit(0, 128, 252);
+		if (kernel->stats_visible && !kernel->overhead_visible)
+			kernel->blitter->draw_blit(kernel->stats_view->blit_no, 128, 244);
 		if (kernel->overhead_visible) {
-			kernel->blitter->draw_blit(1, 6, 6);
-//			kernel->blitter->draw_blit(2, 36, 24);
-			kernel->blitter->draw_blit(2, 6, 44);
+			kernel->blitter->draw_blit(kernel->stats_view->blit_no, -4, 244);
+			kernel->blitter->draw_blit(kernel->terminal->blit_no, 0, 12);
+			kernel->blitter->draw_blit(kernel->cpu_view->blit_no, -4, 148);
+			kernel->blitter->draw_blit(kernel->stack_view->blit_no, -4, 172);
+			kernel->blitter->draw_blit(kernel->disassembly_view->blit_no, 260, 148);
 		}
 		kernel->blitter->flush();
 		

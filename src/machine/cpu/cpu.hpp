@@ -44,6 +44,10 @@ public:
 	uint8_t  get_x();
 	uint8_t  get_y();
 	uint8_t  get_status();
+	
+	inline bool get_irq_line() { return irq_line; }
+	inline bool get_nmi_line() { return nmi_line; }
+	inline bool get_old_nmi_line() { return old_nmi_line; }
 
 	void set_pc(uint16_t _pc);
 	void set_sp(uint8_t _sp);
