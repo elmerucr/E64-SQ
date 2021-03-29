@@ -23,7 +23,7 @@ public:
 
 	char home_dir[256];
 	char settings_path[256];
-	char path_to_kernel[256];
+	char path_to_rom[256];
 	char current_path[256];
 };
 

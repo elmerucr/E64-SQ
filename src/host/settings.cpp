@@ -41,7 +41,7 @@ E64::settings_t::settings_t()
 		settings_directory = opendir(settings_path);
 	}
 
-	snprintf(path_to_kernel, 256, "%s/kernel.bin", settings_path);
+	snprintf(path_to_rom, 256, "%s/rom.bin", settings_path);
 
 	// switch to settings path and try to update current_path from settings
 	chdir(settings_path);

@@ -26,17 +26,24 @@ namespace E64 {
 
 class vicv_ic
 {
-public:
-	// this chip contains 256 registers (and are mapped to a specific page)
-	uint8_t registers[256];
 private:
 	uint32_t cycle_clock;	// measures all cycles
 	uint32_t dot_clock;	// measures only cycles that wrote a pixel
-public:
+	
 	// this will be flagged if a frame is completely done
-	bool frame_done;
-
+	bool frame_is_done;
+public:
+	// this chip contains 256 registers (and are mapped to a specific page)
+	uint8_t registers[256];
+	
 	void reset();
+	
+	inline bool frame_done() {
+		bool result = frame_is_done;
+		if (frame_is_done)
+			frame_is_done = false;
+		return result;
+	}
 
 	// run cycles on this chip
 	void run(uint32_t cycles);

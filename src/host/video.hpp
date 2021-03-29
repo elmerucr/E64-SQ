@@ -105,7 +105,7 @@ public:
 	~video_t();
 
 	void clear_frame_buffer();
-	void merge_down_buffer(uint16_t *buffer);
+	void merge_down_layer(uint16_t *buffer);
 	void update_screen();
 	void update_title();
 	void reset_window_size();

@@ -15,6 +15,7 @@
 #define IO_VICV_PAGE		0xd0
 #define IO_SND_PAGE		0xd4
 #define IO_TIMER_PAGE		0x06
+#define IO_ROM_PAGE		0xE0
 
 namespace E64
 {
@@ -25,12 +26,14 @@ public:
 	~mmu_ic();
 	
 	uint8_t  *ram;          // make this private and work with friend class?
-	//uint16_t *ram_as_words; // make this private and work with friend class?
+	uint8_t  current_rom_image[8192];
 	
 	void reset();
 	
 	uint8_t read_memory_8(uint16_t address);
 	void write_memory_8(uint16_t address, uint8_t value);
+	
+	void find_and_update_rom_image();
 };
 
 }

@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		46103A152610DF8800F7AB6F /* rom.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 46103A142610DF8800F7AB6F /* rom.cpp */; };
 		46478E6D2607E63A0000F661 /* mem.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 46478E6C2607E44C0000F661 /* mem.cpp */; };
 		4656012025EACBBB00276691 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 4656011F25EACBBB00276691 /* Assets.xcassets */; };
 		4656012325EACBBB00276691 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 4656012225EACBBB00276691 /* Preview Assets.xcassets */; };
@@ -97,6 +98,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		46103A142610DF8800F7AB6F /* rom.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = rom.cpp; path = ../../src/rom/rom.cpp; sourceTree = "<group>"; };
 		46478E6C2607E44C0000F661 /* mem.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = mem.cpp; path = ../../src/machine/cpu/mem.cpp; sourceTree = "<group>"; };
 		4656011825EACBBA00276691 /* E64.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = E64.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		4656011F25EACBBB00276691 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -361,6 +363,7 @@
 			isa = PBXGroup;
 			children = (
 				4656014125EACE8D00276691 /* rom.hpp */,
+				46103A142610DF8800F7AB6F /* rom.cpp */,
 				4656014025EACE8D00276691 /* cbm_cp437_font.cpp */,
 			);
 			name = rom;
@@ -601,6 +604,7 @@
 				4656017525EAD01300276691 /* wave8580_PST.cc in Sources */,
 				4689305225F7D6020087BE61 /* ldump.c in Sources */,
 				4656019925EAD0F600276691 /* sdl2.cpp in Sources */,
+				46103A152610DF8800F7AB6F /* rom.cpp in Sources */,
 				4656018925EAD0B200276691 /* blitter.cpp in Sources */,
 				467CACEA260765E800581D83 /* fake6502.c in Sources */,
 				4656014225EACE8D00276691 /* cbm_cp437_font.cpp in Sources */,

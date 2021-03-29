@@ -13,6 +13,13 @@
 
 namespace E64 {
 
+enum overhead_state_t {
+	OVERHEAD_NOT_VISIBLE,
+	OVERHEAD_MOVING_IN,
+	OVERHEAD_MOVING_OUT,
+	OVERHEAD_VISIBLE
+};
+
 class kernel_t {
 private:
 	devices_t devices;
@@ -30,8 +37,11 @@ public:
 	tty_t *cpu_view;
 	tty_t *disassembly_view;
 	tty_t *stack_view;
+	tty_t *bar_1_height;
+	tty_t *bar_2_height;
 	
 	bool stats_visible;
+	enum overhead_state_t overhead_state;
 	bool overhead_visible;
 	
 	void reset();

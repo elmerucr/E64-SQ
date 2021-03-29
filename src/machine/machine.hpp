@@ -38,7 +38,6 @@ public:
 	blitter_ic	*blitter;
 	sids_ic		*sids;
 	cia_ic		*cia;
-	//kernel_t	*kernel;
 
 	machine_t();
 	~machine_t();

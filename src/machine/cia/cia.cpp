@@ -287,16 +287,13 @@ void E64::cia_ic::run(int no_of_cycles)
         // registers 128 to 255 reflect the current keyboard state
         // shift each register one bit to the left, bit 0 is only set if key is pressed
         // if one of the keys changed its state, push an event
-        for(int i=0x00; i<0x80; i++)
-        {
-            registers[0x80|i] = (registers[0x80|i] << 1) | keys_last_known_state[i];
+        for (int i=0x00; i<0x80; i++) {
+            registers[0x80 | i] = (registers[0x80 | i] << 1) | keys_last_known_state[i];
 
-            switch(registers[0x80|i] & 0b00000011)
-            {
+            switch (registers[0x80 | i] & 0b00000011) {
                 case 0b01:
                     // Event: key pressed
-                    if(generate_key_events && scancode_not_modifier[i] )
-                    {
+                    if (generate_key_events && scancode_not_modifier[i]) {
                         key_down = true;
                         last_key = i;
                         keyboard_repeat_current_max = keyboard_repeat_delay;
@@ -305,9 +302,9 @@ void E64::cia_ic::run(int no_of_cycles)
                     break;
                 case 0b10:
                     // Event: key released
-                    if(generate_key_events)
-                    {
-                        if( i == last_key ) key_down = false;
+                    if (generate_key_events) {
+                        if (i == last_key)
+				key_down = false;
                     }
                     break;
                 default:
@@ -316,12 +313,11 @@ void E64::cia_ic::run(int no_of_cycles)
             }
         }
         
-        if(key_down)
-        {
-            if( keyboard_repeat_counter == 0 ) push_event( event_to_ascii(last_key, modifier_keys_status) );
+        if (key_down) {
+            if (keyboard_repeat_counter == 0)
+		    push_event(event_to_ascii(last_key, modifier_keys_status));
             keyboard_repeat_counter++;
-            if(keyboard_repeat_counter == keyboard_repeat_current_max)
-            {
+            if (keyboard_repeat_counter == keyboard_repeat_current_max) {
                 keyboard_repeat_counter = 0;
                 keyboard_repeat_current_max = keyboard_repeat_speed;
             }
@@ -333,8 +329,7 @@ uint8_t E64::cia_ic::read_byte(uint8_t address)
 {
     uint8_t return_value = 0x00;
     
-    switch( address )
-    {
+    switch (address) {
         case 0x00:
             return_value = events_waiting() ? 0x01 : 0x00;
             break;

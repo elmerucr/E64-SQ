@@ -121,7 +121,7 @@ void E64::video_t::clear_frame_buffer()
 	memset(framebuffer, 0, VICV_TOTAL_PIXELS * sizeof(*framebuffer));
 }
 
-void E64::video_t::merge_down_buffer(uint16_t *buffer)
+void E64::video_t::merge_down_layer(uint16_t *buffer)
 {
 	uint16_t *temp_framebuffer = framebuffer;
 	for (int i=0; i < VICV_TOTAL_PIXELS; i++) {

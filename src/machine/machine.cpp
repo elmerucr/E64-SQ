@@ -19,8 +19,6 @@ E64::machine_t::machine_t()
 	sids = new sids_ic();
 	cia = new cia_ic();
 	
-	//kernel = new kernel_t();
-	
 	// init clocks (frequency dividers, right no of cycles will run on different ic's)
 	vicv_to_sid   = new clocks(VICV_DOT_CLOCK_SPEED, SID_CLOCK_SPEED );
 }
@@ -29,7 +27,6 @@ E64::machine_t::~machine_t()
 {
 	delete vicv_to_sid;
 	
-	//delete kernel;
 	delete cia;
 	delete sids;
 	delete blitter;
@@ -41,9 +38,10 @@ E64::machine_t::~machine_t()
 
 bool E64::machine_t::run(uint16_t cycles)
 {
+	//cpu->run(cycles);
 	vicv->run(cycles);
-	timer->run(cycles);
 	cia->run(cycles);
+	timer->run(cycles);
 	
 	// run cycles on sound device & start audio if buffer is large enough
 	// some cheating by adjustment of cycles to run depending on current
@@ -66,6 +64,7 @@ bool E64::machine_t::run(uint16_t cycles)
 
 void E64::machine_t::reset()
 {
+	mmu->reset();
 	sids->reset();
 	vicv->reset();
 	blitter->reset();

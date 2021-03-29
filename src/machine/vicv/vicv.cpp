@@ -11,7 +11,7 @@
 
 void E64::vicv_ic::reset()
 {
-	frame_done = false;
+	frame_is_done = false;
 
 	cycle_clock = dot_clock = 0;
 
@@ -51,7 +51,7 @@ void E64::vicv_ic::run(uint32_t cycles)
 			case (VICV_PIXELS_PER_SCANLINE+VICV_PIXELS_HBLANK)*(VICV_SCANLINES+VICV_SCANLINES_VBLANK):
 				// end of vblank
 				cycle_clock = dot_clock = 0;
-				frame_done = true;
+				frame_is_done = true;
 				break;
 		}
 	cycles--;

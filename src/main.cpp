@@ -22,12 +22,9 @@ static void do_frames()
 {
 	if (machine.run(1023)) {
 		// switch mode e.g. when have breakpoint
-		//machine.switch_mode(E64::MONITOR);
 	}
 	
-	if (machine.vicv->frame_done) {
-		machine.vicv->frame_done = false;
-	
+	if (machine.vicv->frame_done()) {
 		if (E64::sdl2_process_events() == E64::QUIT_EVENT) {
 			machine.turned_on = false;
 		}
@@ -42,20 +39,23 @@ static void do_frames()
 		
 		kernel->blitter->swap_buffers();
 		kernel->blitter->clear_framebuffer();
-		if (kernel->stats_visible && !kernel->overhead_visible)
-			kernel->blitter->draw_blit(kernel->stats_view->blit_no, 128, 244);
+		if (kernel->stats_visible || kernel->overhead_visible)
+			kernel->blitter->draw_blit(kernel->stats_view->blit_no, 0, 244);
 		if (kernel->overhead_visible) {
-			kernel->blitter->draw_blit(kernel->stats_view->blit_no, -4, 244);
 			kernel->blitter->draw_blit(kernel->terminal->blit_no, 0, 12);
-			kernel->blitter->draw_blit(kernel->cpu_view->blit_no, -4, 148);
-			kernel->blitter->draw_blit(kernel->stack_view->blit_no, -4, 172);
-			kernel->blitter->draw_blit(kernel->disassembly_view->blit_no, 260, 148);
+			kernel->blitter->draw_blit(kernel->cpu_view->blit_no, 0, 148);
+			kernel->blitter->draw_blit(kernel->stack_view->blit_no, 0, 180);
+			kernel->blitter->draw_blit(kernel->disassembly_view->blit_no, 256, 148);
+			kernel->blitter->draw_blit(kernel->bar_1_height->blit_no, 0, 140);
+			kernel->blitter->draw_blit(kernel->bar_2_height->blit_no, 0, -4);
+			kernel->blitter->draw_blit(kernel->bar_2_height->blit_no, 0, 276);
 		}
 		kernel->blitter->flush();
 		
 		host.video->clear_frame_buffer();
-		host.video->merge_down_buffer(machine.blitter->frontbuffer);
-		host.video->merge_down_buffer(kernel->blitter->frontbuffer);
+		
+		host.video->merge_down_layer(machine.blitter->frontbuffer);
+		host.video->merge_down_layer(kernel->blitter->frontbuffer);
 		
 		stats.process_parameters();
 		/*
