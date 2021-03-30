@@ -13,6 +13,7 @@ include_directories(
     src/kernel/
     src/kernel/lua-5.4.2/src/
     src/components/
+    src/components/blitter/
     src/components/cia/
     src/components/cpu/
     src/components/mmu/
