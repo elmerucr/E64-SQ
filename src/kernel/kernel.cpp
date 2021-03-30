@@ -14,15 +14,16 @@ E64::kernel_t::kernel_t()
 	luaopen_string(L);
 	
 	blitter = new blitter_ic();
+	cia = new cia_ic();
 	
-	tty = new tty_t(0b10001000, 0b00000000, 0x56, 0, machine.blitter, C64_LIGHTBLUE, C64_BLUE);
+	//tty = new tty_t(0b10001000, 0b00000000, 0x56, 0, machine.blitter, C64_LIGHTBLUE, C64_BLUE);
 	
 	stats_view = new tty_t(0b10001010, 0b00000000, 0x25, 0, blitter, GREEN_05, (GREEN_02 & 0x0fff) | 0xa000);
 	terminal = new tty_t(0b10001010, 0b00000000, 0x46, 1, blitter, GREEN_05, (GREEN_02 & 0x0fff) | 0xa000);
 	cpu_view = new tty_t(0b10001010, 0b00000000, 0x25, 2, blitter, GREEN_05, (GREEN_02 & 0x0fff) | 0xa000);
 	disassembly_view = new tty_t(0b10001010, 0b00000000, 0x45, 3, blitter, GREEN_05, (GREEN_02 & 0x0fff) | 0xa000);
 	stack_view = new tty_t(0b10001010, 0b00000000, 0x35, 4, blitter, GREEN_05, (GREEN_02 & 0x0fff) | 0xa000);
-	bar_1_height = new tty_t(0b10001010, 0b00000000, 0x06, 5, blitter, GREEN_05, (GREEN_02 & 0x0fff) | 0xa000);
+	bar_1_height = new tty_t(0b00001111, 0b00000000, 0x06, 5, blitter, GREEN_05, (GREEN_02 & 0x0fff) | 0xa000);
 	bar_2_height = new tty_t(0b10001010, 0b00000000, 0x16, 6, blitter, GREEN_05, (GREEN_02 & 0x0fff) | 0xa000);
 	
 	stats_visible = false;
@@ -44,7 +45,9 @@ E64::kernel_t::~kernel_t()
 	delete cpu_view;
 	delete terminal;
 	delete stats_view;
-	delete tty;
+	//delete tty;
+	
+	delete cia;
 	delete blitter;
 	
 	lua_close(L);
@@ -93,16 +96,18 @@ void E64::kernel_t::reset()
 	
 	devices.timer_set(0, 3600);
 	
-	tty->clear();
-	tty->printf("E64 Virtual Computer System (C)%u elmerucr\n\n", E64_SQ_YEAR);
-	tty->puts(LUA_COPYRIGHT);
-	tty->putchar('\n');
-	tty->prompt();
-	tty->activate_cursor();
-	
 	terminal->clear();
+	terminal->printf("E64 Virtual Computer System (C)%u elmerucr\n\n", E64_SQ_YEAR);
+	terminal->puts(LUA_COPYRIGHT);
+	terminal->putchar('\n');
+	terminal->prompt();
+	terminal->activate_cursor();
+	
 	stack_view->clear();
 	bar_1_height->clear();
+	for (int i = 1536; i<2048; i++)
+		blitter->blit[bar_1_height->blit_no].pixel_data[i] = GREEN_05;
+	
 	bar_2_height->clear();
 }
 
@@ -111,33 +116,33 @@ void E64::kernel_t::process_keypress()
 	uint8_t key_value = machine.cia->read_byte(0x04);
 	switch (key_value) {
 		case ASCII_CURSOR_LEFT:
-			tty->cursor_left();
+			terminal->cursor_left();
 			break;
 		case ASCII_CURSOR_RIGHT:
-			tty->cursor_right();
+			terminal->cursor_right();
 			break;
 		case ASCII_CURSOR_UP:
-			tty->cursor_up();
+			terminal->cursor_up();
 			break;
 		case ASCII_CURSOR_DOWN:
-			tty->cursor_down();
+			terminal->cursor_down();
 			break;
 		case ASCII_BACKSPACE:
-			tty->backspace();
+			terminal->backspace();
 			break;
 		case ASCII_LF:
-		{
-			char *buffer = tty->enter_command();
-			tty->putchar('\n');
-			machine.cpu->run(0);
-			if (*buffer) {
-				tty->puts(buffer);
-				tty->prompt();
+			{
+				char *buffer = terminal->enter_command();
+				terminal->putchar('\n');
+				machine.cpu->run(0);
+				if (*buffer) {
+					terminal->puts(buffer);
+					terminal->prompt();
+				}
 			}
-		}
 			break;
 		default:
-			tty->putchar(key_value);
+			terminal->putchar(key_value);
 			break;
 	}
 }
@@ -145,16 +150,16 @@ void E64::kernel_t::process_keypress()
 void E64::kernel_t::execute()
 {
 	while (machine.cia->read_byte(0x00)) {
-		tty->deactivate_cursor();
+		terminal->deactivate_cursor();
 		process_keypress();
-		tty->activate_cursor();
+		terminal->activate_cursor();
 	}
 	
 	stats_view->clear();
 	stats_view->puts(stats.summary());
 	
 	cpu_view->clear();
-	cpu_view->printf("\n  pc  ac xr yr sp nv-bdizc I Nn\n");
+	cpu_view->printf("  pc  ac xr yr sp nv-bdizc I Nn\n");
 	cpu_view->printf(" %04x %02x %02x %02x %02x %c%c%c%c%c%c%c%c %c %c%c",
 			 machine.cpu->get_pc(),
 			 machine.cpu->get_a(),
@@ -209,7 +214,7 @@ void E64::kernel_t::execute()
 
 void E64::kernel_t::timer_0_event()
 {
-	tty->timer_callback();
+	terminal->timer_callback();
 }
 
 void E64::kernel_t::timer_1_event()

@@ -3,11 +3,12 @@
 ## Description
 E64 is a virtual computer system that runs on macOS and linux. It's mainly inspired by the Commodore 64 and implements some Amiga 500 and Atari ST technology as well.
 ## Technical specifications:
-* Main system with 64k ram.
+* 65c02 cpu
+* 64k ram
 * Custom Video Interface Chip (VICV) with a resolution of 512x288 pixels and a palette of 4096 colors (12bit).
-* Custom Blitter Chip with alpha blending capabilities and 16mb video ram.
-* Two SID chips (MOS 6581) with stereo mixing possibilities. Each individual SID chip runs at 985248Hz for the same pitch as the chips in the original C64 pal version. Emulation is achieved with the excellent [reSID](http://www.zimmers.net/anonftp/pub/cbm/crossplatform/emulators/resid/index.html) library by Dag Lem.
-* Eight independent and programmable timers.
+* Custom Blitter Chip with alpha blending capabilities and 16mb video ram
+* Two SID chips (MOS 6581) with stereo mixing possibilities. Each individual SID chip runs at 985248Hz for the same pitch as the chips in the original C64 pal version. Emulation is achieved with the excellent [reSID](http://www.zimmers.net/anonftp/pub/cbm/crossplatform/emulators/resid/index.html) library by Dag Lem
+* Eight independent and programmable timers
 ## Screenshots
 ![E64](./docs/E64_2021-03-28.png)
 ![E64](./docs/E64_monitor_2021-03-28.png)
@@ -31,8 +32,6 @@ Finally, to run the application from the build directory:
 $ ./E64
 ````
 ## Websites and projects of interest
-### Scripting Language
-* [Lua](http://www.lua.org) - Lua is a powerful, efficient, lightweight, embeddable scripting language. It supports procedural programming, object-oriented programming, functional programming, data-driven programming, and data description.
 ### Emulators
 * [CCS64](http://www.ccs64.com) - A Commodore 64 Emulator by Per Håkan Sundell.
 * [Commander X16 emulator](https://github.com/commanderx16/x16-emulator) - Software version of Commander X16.
@@ -48,6 +47,7 @@ $ ./E64
 * [C256 Foenix](https://c256foenix.com) - A computer that could have possibly followed the Commodore 128 if things would have been different at Commodore at the time.
 * [Commander X16](https://www.commanderx16.com) - The Commander X16 is a modern 8-bit computer currently in active development. It is the brainchild of David "the 8 Bit Guy" Murray.
 * [EmuTOS](https://emutos.sourceforge.io) - EmuTOS is a Free operating system for computers based on Motorola 680x0 or ColdFire microprocessors.
+* [Lua](http://www.lua.org) - Lua is a powerful, efficient, lightweight, embeddable scripting language. It supports procedural programming, object-oriented programming, functional programming, data-driven programming, and data description.
 * [Mega65](http://mega65.org) - The 21st century realization of the C65 heritage.
 * [SDL Simple DirectMedia Layer](https://www.libsdl.org) - A cross-platform development library by Sam Lantinga designed to provide low level access to audio, keyboard, mouse, joystick, and graphics hardware.
 * [ultimate64](https://ultimate64.com/Ultimate-64) - A hardware implementation (FPGA) of the C64.

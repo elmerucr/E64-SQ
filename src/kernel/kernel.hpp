@@ -3,6 +3,7 @@
 
 #include "lua.hpp"
 #include "blitter.hpp"
+#include "cia.hpp"
 #include "tty.hpp"
 #include "devices.hpp"
 
@@ -28,10 +29,10 @@ public:
 	~kernel_t();
 	
 	blitter_ic *blitter;
+	cia_ic *cia;
 	
 	lua_State *L;
 	
-	tty_t *tty;
 	tty_t *terminal;
 	tty_t *stats_view;
 	tty_t *cpu_view;

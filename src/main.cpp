@@ -29,13 +29,13 @@ static void do_frames()
 			machine.turned_on = false;
 		}
 		
-		kernel->execute();
-		
 		machine.blitter->swap_buffers();
 		machine.blitter->clear_framebuffer();
 		machine.blitter->draw_blit(0, 0, 16);
 		machine.blitter->draw_border();
 		machine.blitter->flush();
+		
+		kernel->execute();
 		
 		kernel->blitter->swap_buffers();
 		kernel->blitter->clear_framebuffer();

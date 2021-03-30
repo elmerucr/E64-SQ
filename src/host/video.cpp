@@ -25,7 +25,7 @@ E64::video_t::video_t()
 	printf("[SDL] base path is: %s\n", base_path);
 	SDL_free(base_path);
 
-	char *pref_path = SDL_GetPrefPath("elmerucr", "E64-II");
+	char *pref_path = SDL_GetPrefPath("elmerucr", "E64");
 	printf("[SDL] pref path is: %s\n", pref_path);
 	SDL_free(pref_path);
 

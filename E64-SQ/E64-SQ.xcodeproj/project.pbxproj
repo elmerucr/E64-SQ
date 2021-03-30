@@ -333,8 +333,8 @@
 		464F63BA26139820005A3E51 /* blitter */ = {
 			isa = PBXGroup;
 			children = (
-				464F63F526139AF9005A3E51 /* blitter.cpp */,
 				464F63F626139AF9005A3E51 /* blitter.hpp */,
+				464F63F526139AF9005A3E51 /* blitter.cpp */,
 			);
 			name = blitter;
 			sourceTree = "<group>";

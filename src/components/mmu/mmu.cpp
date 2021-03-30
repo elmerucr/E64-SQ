@@ -43,7 +43,7 @@ uint8_t E64::mmu_ic::read_memory_8(uint16_t address)
 	} else if (page == IO_CIA_PAGE) {
 		return machine.cia->read_byte(address & 0xff);
 	} else if ((page & IO_ROM_PAGE) == IO_ROM_PAGE) {
-		return rom[address & 0x1fff];
+		return current_rom_image[address & 0x1fff];
 	} else {
 		return ram[address & 0xffff];
 	}
