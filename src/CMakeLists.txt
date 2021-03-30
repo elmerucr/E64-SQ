@@ -1,3 +1,4 @@
+add_subdirectory(components/)
 add_subdirectory(host/)
 add_subdirectory(kernel/)
 add_subdirectory(machine/)

@@ -12,14 +12,15 @@ include_directories(
     src/host/
     src/kernel/
     src/kernel/lua-5.4.2/src/
+    src/components/
+    src/components/cia/
+    src/components/cpu/
+    src/components/mmu/
+    src/components/sids/
+    src/components/sids/resid-0.16/
+    src/components/timer/
+    src/components/vicv/
     src/machine/
-    src/machine/cia/
-    src/machine/cpu/
-    src/machine/mmu/
-    src/machine/sids/
-    src/machine/sids/resid-0.16/
-    src/machine/timer/
-    src/machine/vicv/
     src/rom/
 )
 
