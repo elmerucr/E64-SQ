@@ -374,7 +374,7 @@
 		4656010F25EACBBA00276691 = {
 			isa = PBXGroup;
 			children = (
-				4656011A25EACBBA00276691 /* E64-SQ */,
+				4656011A25EACBBA00276691 /* E64 */,
 				4656011925EACBBA00276691 /* Products */,
 				46B74D2E25EAD19200766C1D /* Frameworks */,
 			);
@@ -388,7 +388,7 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
-		4656011A25EACBBA00276691 /* E64-SQ */ = {
+		4656011A25EACBBA00276691 /* E64 */ = {
 			isa = PBXGroup;
 			children = (
 				464F63B3261397D3005A3E51 /* components */,
@@ -404,7 +404,7 @@
 				4656012525EACBBB00276691 /* E64_SQ.entitlements */,
 				4656012125EACBBB00276691 /* Preview Content */,
 			);
-			path = "E64-SQ";
+			path = "E64";
 			sourceTree = "<group>";
 		};
 		4656012125EACBBB00276691 /* Preview Content */ = {
@@ -557,7 +557,7 @@
 			dependencies = (
 			);
 			name = E64;
-			productName = "E64-SQ";
+			productName = "E64";
 			productReference = 4656011825EACBBA00276691 /* E64.app */;
 			productType = "com.apple.product-type.application";
 		};
@@ -575,7 +575,7 @@
 					};
 				};
 			};
-			buildConfigurationList = 4656011325EACBBA00276691 /* Build configuration list for PBXProject "E64-SQ" */;
+			buildConfigurationList = 4656011325EACBBA00276691 /* Build configuration list for PBXProject "E64" */;
 			compatibilityVersion = "Xcode 9.3";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
@@ -807,23 +807,23 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = NO;
-				CODE_SIGN_ENTITLEMENTS = "E64-SQ/E64_SQ.entitlements";
+				CODE_SIGN_ENTITLEMENTS = "E64/E64_SQ.entitlements";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				DEVELOPMENT_ASSET_PATHS = "\"E64-SQ/Preview Content\"";
+				DEVELOPMENT_ASSET_PATHS = "\"E64/Preview Content\"";
 				ENABLE_PREVIEWS = YES;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(LOCAL_LIBRARY_DIR)/Frameworks",
 				);
 				GCC_OPTIMIZATION_LEVEL = 2;
-				INFOPLIST_FILE = "E64-SQ/Info.plist";
+				INFOPLIST_FILE = "E64/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 11.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "elmerucr.E64-SQ";
+				PRODUCT_BUNDLE_IDENTIFIER = "elmerucr.E64";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
 			};
@@ -835,23 +835,23 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = NO;
-				CODE_SIGN_ENTITLEMENTS = "E64-SQ/E64_SQ.entitlements";
+				CODE_SIGN_ENTITLEMENTS = "E64/E64_SQ.entitlements";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				DEVELOPMENT_ASSET_PATHS = "\"E64-SQ/Preview Content\"";
+				DEVELOPMENT_ASSET_PATHS = "\"E64/Preview Content\"";
 				ENABLE_PREVIEWS = YES;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(LOCAL_LIBRARY_DIR)/Frameworks",
 				);
 				GCC_OPTIMIZATION_LEVEL = 2;
-				INFOPLIST_FILE = "E64-SQ/Info.plist";
+				INFOPLIST_FILE = "E64/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 11.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "elmerucr.E64-SQ";
+				PRODUCT_BUNDLE_IDENTIFIER = "elmerucr.E64";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
 			};
@@ -860,7 +860,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		4656011325EACBBA00276691 /* Build configuration list for PBXProject "E64-SQ" */ = {
+		4656011325EACBBA00276691 /* Build configuration list for PBXProject "E64" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				4656012625EACBBB00276691 /* Debug */,

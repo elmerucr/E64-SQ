@@ -22,7 +22,7 @@ E64::vicv_ic	*vicv;
 
 std::chrono::time_point<std::chrono::steady_clock> refresh_moment;
 
-static void do_frame()
+static void finish_frame()
 {
 	if (E64::sdl2_process_events() == E64::QUIT_EVENT) machine.turned_on = false;
 	
@@ -105,7 +105,7 @@ int main(int argc, char **argv)
 			// switch mode e.g. when have breakpoint
 		}
 		
-		if (vicv->frame_done()) do_frame();
+		if (vicv->frame_done()) finish_frame();
 	}
 
 	delete kernel;
