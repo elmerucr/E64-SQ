@@ -4,6 +4,7 @@
 //  Copyright © 2020-2021 elmerucr. All rights reserved.
 
 #include "blitter.hpp"
+#include "rom.hpp"
 #include "common.hpp"
 
 E64::blitter_ic::blitter_ic()

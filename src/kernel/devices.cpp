@@ -20,8 +20,8 @@ void E64::devices_t::timer_set(uint8_t timer_no, uint16_t bpm)
 {
 	timer_no &= 0b111; // confine to 0 - 7
 	
-	machine.timer->write_byte(0x02, (bpm & 0xff00) >> 8);
-	machine.timer->write_byte(0x03, bpm & 0xff);
+	machine.timer->write_byte(0x02, bpm & 0xff);
+	machine.timer->write_byte(0x03, (bpm & 0xff00) >> 8);
 	
 	machine.timer->write_byte(0x01, 0b1 << timer_no);
 }

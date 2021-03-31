@@ -29,10 +29,13 @@ cpu_ic::~cpu_ic()
 void cpu_ic::reset()
 {
 	reset6502();
+	cycle_saldo = 0;
 }
 
 uint32_t cpu_ic::run(uint32_t cycles)
 {
+	cycle_saldo += cycles;
+	
 	bool done = false;
 
 	uint32_t cycles_done = 0;
@@ -40,11 +43,11 @@ uint32_t cpu_ic::run(uint32_t cycles)
 	if ((nmi_line == false) && (old_nmi_line = true)) {
 		nmi6502();
 		cycles_done += 7;
-		if (cycles_done >= cycles) done = true;
+		if (cycles_done >= cycle_saldo) done = true;
 	} else if (!irq_line && !(status & FLAG_INTERRUPT)) {
 		irq6502();
 		cycles_done += 7;
-		if (cycles_done >= cycles) done = true;
+		if (cycles_done >= cycle_saldo) done = true;
 	}
 
 	if (!done) {
@@ -52,10 +55,12 @@ uint32_t cpu_ic::run(uint32_t cycles)
 			uint32_t old_clockticks6502 = clockticks6502;
 			step6502();
 			cycles_done += (clockticks6502 - old_clockticks6502);
-		} while (cycles_done < cycles);
+		} while (cycles_done < cycle_saldo);
 	}
 
 	old_nmi_line = nmi_line;
+	
+	cycle_saldo -= cycles_done;
 
 	return cycles_done;
 }
@@ -97,7 +102,7 @@ void cpu_ic::set_x(uint8_t _x)           { x = _x; }
 void cpu_ic::set_y(uint8_t _y)           { y = _y; }
 void cpu_ic::set_status(uint8_t _status) { status = _status; }
 
-int cpu_ic::disassemble(uint16_t _pc, char *text)
+int cpu_ic::disassemble(uint16_t _pc, char *buffer)
 {
 	//char buffer[256];
 	uint8_t opcode = read6502(_pc);
@@ -107,73 +112,35 @@ int cpu_ic::disassemble(uint16_t _pc, char *text)
 	// $10,$30,$50,$70,$90,$B0,$D0,$F0.
 	bool is_branch = (opcode == 0x80) || ((opcode & 0x1f) == 0x10);
 
+	// Ditto bbr and bbs, the "zero-page, relative" ops.
+	// $0F,$1F,$2F,$3F,$4F,$5F,$6F,$7F,$8F,$9F,$AF,$BF,$CF,$DF,$EF,$FF
 	bool is_zp_rel = (opcode & 0x0f) == 0x0f;
 
 	int length = 1;
 
-	strncpy(text, mnemonic, 256);
+	strncpy(buffer, mnemonic, 256);
 
 	if (is_zp_rel) {
-		snprintf(text, 256, mnemonic, read6502(_pc + 1), _pc + 3 + (int8_t)read6502(_pc + 2));
+		snprintf(buffer, 256, mnemonic, read6502(_pc + 1), _pc + 3 + (int8_t)read6502(_pc + 2));
 		length = 3;
 	} else {
-		if (strstr(text, "%02x")) {
+		if (strstr(buffer, "%02x")) {
 			length = 2;
 			if (is_branch) {
-				snprintf(text, 256, mnemonic, _pc + 2 + (int8_t)read6502(_pc + 1));
+				snprintf(buffer, 256, mnemonic, _pc + 2 + (int8_t)read6502(_pc + 1));
 			} else {
-				snprintf(text, 256, mnemonic, read6502(_pc + 1));
+				snprintf(buffer, 256, mnemonic, read6502(_pc + 1));
 			}
 		}
-		if (strstr(text, "%04x")) {
+		if (strstr(buffer, "%04x")) {
 			length = 3;
-			snprintf(text, 256, mnemonic, read6502(_pc + 1) | read6502(_pc + 2) << 8);
+			snprintf(buffer, 256, mnemonic, read6502(_pc + 1) | read6502(_pc + 2) << 8);
 		}
 	}
-	//printf("%04x %s\n", _pc, buffer);
 	return length;
 }
 
-// int disasm(uint16_t pc, uint8_t *RAM, char *line, unsigned int max_line, bool debugOn, uint8_t bank) {
-// 	uint8_t opcode = real_read6502(pc, debugOn, bank);
-// 	char const *mnemonic = mnemonics[opcode];
-
-// 	//
-// 	//		Test for branches, relative address. These are BRA ($80) and
-// 	//		$10,$30,$50,$70,$90,$B0,$D0,$F0.
-// 	//
-// 	//
-// 	int isBranch = (opcode == 0x80) || ((opcode & 0x1F) == 0x10);
-// 	//
-// 	//		Ditto bbr and bbs, the "zero-page, relative" ops.
-// 	//		$0F,$1F,$2F,$3F,$4F,$5F,$6F,$7F,$8F,$9F,$AF,$BF,$CF,$DF,$EF,$FF
-// 	//
-// 	int isZprel  = (opcode & 0x0F) == 0x0F;
-
-// 	int length   = 1;
-// 	strncpy(line,mnemonic,max_line);
-
-// 	if (isZprel) {
-// 		snprintf(line, max_line, mnemonic, real_read6502(pc + 1, debugOn, bank), pc + 3 + (int8_t)real_read6502(pc + 2, debugOn, bank));
-// 		length = 3;
-// 	} else {
-// 		if (strstr(line, "%02x")) {
-// 			length = 2;
-// 			if (isBranch) {
-// 				snprintf(line, max_line, mnemonic, pc + 2 + (int8_t)real_read6502(pc + 1, debugOn, bank));
-// 			} else {
-// 				snprintf(line, max_line, mnemonic, real_read6502(pc + 1, debugOn, bank));
-// 			}
-// 		}
-// 		if (strstr(line, "%04x")) {
-// 			length = 3;
-// 			snprintf(line, max_line, mnemonic, real_read6502(pc + 1, debugOn, bank) | real_read6502(pc + 2, debugOn, bank) << 8);
-// 		}
-// 	}
-// 	return length;
-
-
-int cpu_ic::disassemble(char *text)
+int cpu_ic::disassemble(char *buffer)
 {
-	return disassemble(pc, text);
+	return disassemble(pc, buffer);
 }

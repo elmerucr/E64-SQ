@@ -12,11 +12,11 @@ void E64::timer_ic::reset()
 	registers[1] = 0x00;	// all timers turned off
     
 	// load data register with value 1 bpm (may never be zero)
-	registers[2] = 0x00;	// high byte
-	registers[3] = 0x01;	// low byte
+	registers[2] = 0x01;	// low byte
+	registers[3] = 0x00;	// high byte
 	
 	for (int i=0; i<8; i++) {
-		timers[i].bpm = (registers[2] << 8) | registers[3];
+		timers[i].bpm = registers[2] | (registers[3] << 8);
 		timers[i].clock_interval = bpm_to_clock_interval(timers[i].bpm);
 		timers[i].counter = 0;
 	}
@@ -104,8 +104,7 @@ void E64::timer_ic::write_byte(uint8_t address, uint8_t byte)
 		
 		for (int i=0; i<8; i++) {
 			if (turned_on & (0b1 << i)) {
-				timers[i].bpm = (uint16_t)(registers[2] << 8) |
-					registers[3];
+				timers[i].bpm = (uint16_t)registers[2] | (registers[3] << 8);
 				if (timers[i].bpm == 0)
 					timers[i].bpm = 1;
 				timers[i].clock_interval =

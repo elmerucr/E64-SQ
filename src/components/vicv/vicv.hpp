@@ -16,12 +16,6 @@
  */
 #define VICV_REG_ISR		0x00
 
-/*
- * Register 0x01, write to bit 0 = swap front and back buffer
- * (machine internally).
- */
-#define VICV_REG_BUFFERSWAP	0x01
-
 namespace E64 {
 
 class vicv_ic
@@ -33,8 +27,7 @@ private:
 	// this will be flagged if a frame is completely done
 	bool frame_is_done;
 public:
-	// this chip contains 256 registers (and are mapped to a specific page)
-	uint8_t registers[256];
+	uint8_t registers[2];
 	
 	void reset();
 	

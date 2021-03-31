@@ -16,8 +16,6 @@ namespace E64 {
 
 enum overhead_state_t {
 	OVERHEAD_NOT_VISIBLE,
-	OVERHEAD_MOVING_IN,
-	OVERHEAD_MOVING_OUT,
 	OVERHEAD_VISIBLE
 };
 

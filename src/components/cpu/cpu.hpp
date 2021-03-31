@@ -21,6 +21,8 @@ private:
 	bool old_nmi_line;
 
 	bool *breakpoints;
+	
+	int cycle_saldo;
 public:
 	cpu_ic();
 	~cpu_ic();
@@ -56,8 +58,8 @@ public:
 	void set_y(uint8_t _y);
 	void set_status(uint8_t _status);
 
-	int disassemble(char *text);
-	int disassemble(uint16_t _pc, char *text);
+	int disassemble(char *buffer);
+	int disassemble(uint16_t _pc, char *buffer);
 
 	void dump_stack();
 	uint32_t clock_ticks();

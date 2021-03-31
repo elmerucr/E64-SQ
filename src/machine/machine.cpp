@@ -19,8 +19,8 @@ E64::machine_t::machine_t()
 	sids = new sids_ic();
 	cia = new cia_ic();
 	
-	// init clocks (frequency dividers, right no of cycles will run on different ic's)
-	vicv_to_sid   = new clocks(VICV_DOT_CLOCK_SPEED, SID_CLOCK_SPEED );
+	// init clocks (frequency dividers, right no. of cycles will run on different ic's)
+	vicv_to_sid   = new clocks(VICV_DOT_CLOCK_SPEED, SID_CLOCK_SPEED);
 }
 
 E64::machine_t::~machine_t()
@@ -30,7 +30,6 @@ E64::machine_t::~machine_t()
 	delete cia;
 	delete sids;
 	delete blitter;
-	delete vicv;
 	delete timer;
 	delete cpu;
 	delete mmu;
@@ -38,10 +37,9 @@ E64::machine_t::~machine_t()
 
 bool E64::machine_t::run(uint16_t cycles)
 {
-	//cpu->run(cycles);
-	vicv->run(cycles);
-	cia->run(cycles);
-	timer->run(cycles);
+	uint16_t processed_cycles = cpu->run(cycles);
+	cia->run(processed_cycles);
+	timer->run(processed_cycles);
 	
 	// run cycles on sound device & start audio if buffer is large enough
 	// some cheating by adjustment of cycles to run depending on current
@@ -49,11 +47,11 @@ bool E64::machine_t::run(uint16_t cycles)
 	unsigned int audio_queue_size = stats.current_audio_queue_size();
 	
 	if (audio_queue_size < 0.9 * AUDIO_BUFFER_SIZE) {
-		sids->run(vicv_to_sid->clock(1.2 * cycles));
+		sids->run(vicv_to_sid->clock(1.2 * processed_cycles));
 	} else if (audio_queue_size > 1.1 * AUDIO_BUFFER_SIZE) {
-		sids->run(vicv_to_sid->clock(0.8 * cycles));
+		sids->run(vicv_to_sid->clock(0.8 * processed_cycles));
 	} else {
-		sids->run(vicv_to_sid->clock(cycles));
+		sids->run(vicv_to_sid->clock(processed_cycles));
 	}
 	
 	if (audio_queue_size > (AUDIO_BUFFER_SIZE/2))
@@ -66,7 +64,6 @@ void E64::machine_t::reset()
 {
 	mmu->reset();
 	sids->reset();
-	vicv->reset();
 	blitter->reset();
 	timer->reset();
 	cia->reset();

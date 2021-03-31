@@ -1,11 +1,6 @@
 #include "kernel.hpp"
 #include "common.hpp"
 
-uint16_t overhead_positions[30] = {
-	0 ,1 ,2, 5, 8, 11, 15, 20, 25, 32, 38, 46, 54, 62, 72, 81, 92,
-	103, 115, 128, 141, 154, 169, 184, 200, 216, 233, 250, 269, 288
-};
-
 E64::kernel_t::kernel_t()
 {
 	L = luaL_newstate();
@@ -130,11 +125,14 @@ void E64::kernel_t::process_keypress()
 		case ASCII_BACKSPACE:
 			terminal->backspace();
 			break;
+		case ASCII_F1:
+			// NEEDS WORK
+			machine.cpu->run(0);
+			break;
 		case ASCII_LF:
 			{
 				char *buffer = terminal->enter_command();
 				terminal->putchar('\n');
-				machine.cpu->run(0);
 				if (*buffer) {
 					terminal->puts(buffer);
 					terminal->prompt();

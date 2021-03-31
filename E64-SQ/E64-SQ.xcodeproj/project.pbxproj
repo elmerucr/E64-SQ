@@ -269,9 +269,9 @@
 		464F63B4261397E3005A3E51 /* cpu */ = {
 			isa = PBXGroup;
 			children = (
-				464F63FC26139B22005A3E51 /* 65c02.h */,
-				464F63FE26139B22005A3E51 /* cpu.cpp */,
 				464F640126139B22005A3E51 /* cpu.hpp */,
+				464F63FE26139B22005A3E51 /* cpu.cpp */,
+				464F63FC26139B22005A3E51 /* 65c02.h */,
 				464F63FA26139B22005A3E51 /* fake6502.c */,
 				464F640226139B22005A3E51 /* fake6502.h */,
 				464F63FF26139B22005A3E51 /* instructions.h */,
@@ -315,8 +315,8 @@
 		464F63B826139809005A3E51 /* timer */ = {
 			isa = PBXGroup;
 			children = (
-				464F63C026139A00005A3E51 /* timer.cpp */,
 				464F63BF26139A00005A3E51 /* timer.hpp */,
+				464F63C026139A00005A3E51 /* timer.cpp */,
 			);
 			name = timer;
 			sourceTree = "<group>";
@@ -324,8 +324,8 @@
 		464F63B926139813005A3E51 /* vicv */ = {
 			isa = PBXGroup;
 			children = (
-				464F63BC261399E7005A3E51 /* vicv.cpp */,
 				464F63BD261399E7005A3E51 /* vicv.hpp */,
+				464F63BC261399E7005A3E51 /* vicv.cpp */,
 			);
 			name = vicv;
 			sourceTree = "<group>";

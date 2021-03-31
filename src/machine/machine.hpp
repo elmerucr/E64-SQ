@@ -11,7 +11,6 @@
 #include "mmu.hpp"
 #include "sids.hpp"
 #include "timer.hpp"
-#include "vicv.hpp"
 #include "blitter.hpp"
 #include "cpu.hpp"
 
@@ -34,7 +33,6 @@ public:
 	mmu_ic		*mmu;
 	cpu_ic		*cpu;
 	timer_ic	*timer;
-	vicv_ic		*vicv;
 	blitter_ic	*blitter;
 	sids_ic		*sids;
 	cia_ic		*cia;

@@ -12,11 +12,9 @@
 void E64::vicv_ic::reset()
 {
 	frame_is_done = false;
-
 	cycle_clock = dot_clock = 0;
-
-	for (int i=0; i<256; i++)
-		registers[i] = 0;
+	registers[0] = 0;
+	registers[1] = 0;
 }
 
 void E64::vicv_ic::run(uint32_t cycles)
@@ -65,15 +63,9 @@ void E64::vicv_ic::run(uint32_t cycles)
 
 bool E64::vicv_ic::is_hblank() { return HBLANK; }
 bool E64::vicv_ic::is_vblank() { return VBLANK; }
-
 uint16_t E64::vicv_ic::get_current_scanline() { return Y_POS; }
-
 uint16_t E64::vicv_ic::get_current_pixel() { return X_POS; }
-
-uint8_t E64::vicv_ic::read_byte(uint8_t address)
-{
-	return registers[address & 0x07];
-}
+uint8_t E64::vicv_ic::read_byte(uint8_t address) { return registers[address & 0x07]; }
 
 void E64::vicv_ic::write_byte(uint8_t address, uint8_t byte)
 {
@@ -82,15 +74,6 @@ void E64::vicv_ic::write_byte(uint8_t address, uint8_t byte)
 		if (byte & 0b00000001)
 			// NEEDS WORK
 			//machine.TTL74LS148->release_line(vblank_interrupt_device_number);  // acknowledge pending irq
-		break;
-	case VICV_REG_BUFFERSWAP:
-		if (byte & 0b00000001) {
-			if (machine.blitter->busy()) {
-				machine.blitter->make_idle();
-				printf("[blitter] warning: blitter was not finished when swapping buffers\n");
-			}
-			//swap_buffers();
-		}
 		break;
 	default:
 		registers[address & 0x07] = byte;

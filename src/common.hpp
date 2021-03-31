@@ -16,11 +16,11 @@
 #include "kernel.hpp"
 #include "machine.hpp"
 #include "stats.hpp"
-#include "rom.hpp"
+#include "vicv.hpp"
 
 #define E64_SQ_MAJOR_VERSION    0
 #define E64_SQ_MINOR_VERSION    1
-#define E64_SQ_BUILD            20210330
+#define E64_SQ_BUILD            20210331
 #define E64_SQ_YEAR             2021
 
 /* Global objects */
@@ -28,6 +28,7 @@ extern E64::host_t	host;
 extern E64::kernel_t	*kernel;
 extern E64::machine_t	machine;
 extern E64::stats_t	stats;
+extern E64::vicv_ic	*vicv;
 
 #define	RAM_SIZE	0x010000
 
@@ -92,7 +93,6 @@ extern E64::stats_t	stats;
 #define FPS				60
 
 #define VICV_DOT_CLOCK_SPEED        (VICV_PIXELS_PER_SCANLINE+VICV_PIXELS_HBLANK)*(VICV_SCANLINES+VICV_SCANLINES_VBLANK)*FPS
-//#define BLITTER_DOT_CLOCK_SPEED     (4*VICV_DOT_CLOCK_SPEED)
 
 #define SID_CLOCK_SPEED             985248
 #define SAMPLE_RATE                 44100
