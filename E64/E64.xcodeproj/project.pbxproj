@@ -293,8 +293,8 @@
 		464F63B6261397F5005A3E51 /* mmu */ = {
 			isa = PBXGroup;
 			children = (
-				464F63F026139AC0005A3E51 /* mmu.cpp */,
 				464F63EF26139AC0005A3E51 /* mmu.hpp */,
+				464F63F026139AC0005A3E51 /* mmu.cpp */,
 			);
 			name = mmu;
 			sourceTree = "<group>";

@@ -21,10 +21,12 @@ enum overhead_state_t {
 
 class hud_t {
 private:
-	// devices_t devices;
+	bool refresh;
 public:
 	hud_t();
 	~hud_t();
+	
+	bool refreshed();
 	
 	blitter_ic *blitter;
 	cia_ic *cia;

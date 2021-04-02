@@ -112,5 +112,6 @@ void E64::timer_ic::set(uint8_t timer_no, uint16_t bpm)
 	
 	write_byte(0x02, bpm & 0xff);
 	write_byte(0x03, (bpm & 0xff00) >> 8);
-	write_byte(0x01, 0b1 << timer_no);
+	uint8_t byte = read_byte(0x01);
+	write_byte(0x01, (0b1 << timer_no) | byte);
 }

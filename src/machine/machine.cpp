@@ -17,8 +17,10 @@ E64::machine_t::machine_t()
 	sids = new sids_ic();
 	cia = new cia_ic();
 	
-	// init clocks (frequency dividers, right no. of cycles will run on different ic's)
+	// init clocks (frequency dividers)
 	system_to_sid   = new clocks(SYSTEM_CLOCK_SPEED, SID_CLOCK_SPEED);
+	
+	paused = false;
 }
 
 E64::machine_t::~machine_t()
@@ -61,8 +63,6 @@ bool E64::machine_t::run(uint16_t cycles)
 void E64::machine_t::reset()
 {
 	printf("[machine] system reset\n");
-	
-	paused = false;
 	
 	mmu->reset();
 	sids->reset();

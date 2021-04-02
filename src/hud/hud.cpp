@@ -23,6 +23,7 @@ E64::hud_t::hud_t()
 	stats_visible = false;
 	overhead_visible = false;
 	overhead_state = OVERHEAD_NOT_VISIBLE;
+	refresh = false;
 }
 
 E64::hud_t::~hud_t()
@@ -42,6 +43,13 @@ E64::hud_t::~hud_t()
 	lua_close(L);
 }
 
+bool E64::hud_t::refreshed()
+{
+	bool return_value = refresh;
+	if (refresh) refresh = false;
+	return return_value;
+}
+
 void E64::hud_t::reset()
 {
 	blitter->reset();
@@ -55,12 +63,11 @@ void E64::hud_t::reset()
 	cia->generate_key_events();
 	
 	timer->set(0, 3600);	// check keyboard state etc...
-	//timer->set(1, 3600);	// execute hud
+	timer->set(1, 3600);	// connected to execute
 	
 	terminal->clear();
 	terminal->printf("E64 Virtual Computer System (C)%u elmerucr\n", E64_SQ_YEAR);
 	terminal->puts(LUA_COPYRIGHT);
-	//terminal->putchar('\n');
 	terminal->prompt();
 	terminal->activate_cursor();
 	
@@ -176,12 +183,12 @@ void E64::hud_t::execute()
 		}
 		pc += ops;
 	}
+	refresh = true;
 }
 
 void E64::hud_t::run(uint16_t cycles)
 {
 	timer->run(cycles);
-	
 	if (timer->irq_line == false) {
 		for (int i=0; i<8; i++) {
 			if (timer->read_byte(0x00) & (0b1 << i)) {
@@ -210,7 +217,7 @@ void E64::hud_t::timer_0_event()
 
 void E64::hud_t::timer_1_event()
 {
-	//
+	execute();
 }
 
 void E64::hud_t::timer_2_event()

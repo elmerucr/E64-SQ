@@ -34,12 +34,12 @@ static void finish_frame()
 	machine.blitter->draw_border();
 	machine.blitter->flush();
 	
-	hud.execute();
-	
-	hud.blitter->swap_buffers();
-	hud.blitter->clear_framebuffer();
-	hud.draw();
-	hud.blitter->flush();
+	if (hud.refreshed()) {
+		hud.blitter->swap_buffers();
+		hud.blitter->clear_framebuffer();
+		hud.draw();
+		hud.blitter->flush();
+	}
 	
 	host.video->clear_frame_buffer();
 	host.video->merge_down_layer(machine.blitter->frontbuffer);
@@ -83,6 +83,8 @@ int main(int argc, char **argv)
 	hud.reset();
 	machine.reset();
 	stats.reset();
+	
+	machine.paused = true;
 	
 	refresh_moment = std::chrono::steady_clock::now();
 
