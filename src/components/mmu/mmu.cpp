@@ -36,7 +36,7 @@ uint8_t E64::mmu_ic::read_memory_8(uint16_t address)
 	uint16_t page = address >> 8;
 	
 	if (page == IO_VICV_PAGE) {
-		return vicv->read_byte(address & 0x01);
+		return vicv.read_byte(address & 0x01);
 	} else if (page == IO_SND_PAGE) {
 		return machine.sids->read_byte(address & 0xff);
 	} else if (page == IO_TIMER_PAGE) {
@@ -55,7 +55,7 @@ void E64::mmu_ic::write_memory_8(uint16_t address, uint8_t value)
 	uint16_t page = address >> 8;
 	
 	if (page == IO_VICV_PAGE) {
-		vicv->write_byte(address & 0x01, value & 0xff);
+		vicv.write_byte(address & 0x01, value & 0xff);
 	} else if (page == IO_SND_PAGE) {
 		machine.sids->write_byte(address & 0xff, value & 0xff);
 	} else if (page == IO_TIMER_PAGE) {

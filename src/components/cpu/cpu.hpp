@@ -22,7 +22,7 @@ private:
 
 	bool *breakpoints;
 	
-	int cycle_saldo;
+	int32_t cycle_saldo;
 public:
 	cpu_ic();
 	~cpu_ic();

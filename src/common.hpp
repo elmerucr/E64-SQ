@@ -13,22 +13,22 @@
 #include <cstdint>
 
 #include "host.hpp"
-#include "kernel.hpp"
+#include "hud.hpp"
 #include "machine.hpp"
 #include "stats.hpp"
 #include "vicv.hpp"
 
 #define E64_SQ_MAJOR_VERSION    0
 #define E64_SQ_MINOR_VERSION    1
-#define E64_SQ_BUILD            20210331
+#define E64_SQ_BUILD            20210402
 #define E64_SQ_YEAR             2021
 
 /* Global objects */
 extern E64::host_t	host;
-extern E64::kernel_t	*kernel;
+extern E64::hud_t	hud;
 extern E64::machine_t	machine;
 extern E64::stats_t	stats;
-extern E64::vicv_ic	*vicv;
+extern E64::vicv_ic	vicv;
 
 #define	RAM_SIZE	0x010000
 
@@ -92,7 +92,8 @@ extern E64::vicv_ic	*vicv;
 
 #define FPS				60
 
-#define VICV_DOT_CLOCK_SPEED        (VICV_PIXELS_PER_SCANLINE+VICV_PIXELS_HBLANK)*(VICV_SCANLINES+VICV_SCANLINES_VBLANK)*FPS
+#define VICV_DOT_CLOCK_SPEED		(VICV_PIXELS_PER_SCANLINE+VICV_PIXELS_HBLANK)*(VICV_SCANLINES+VICV_SCANLINES_VBLANK)*FPS
+#define SYSTEM_CLOCK_SPEED		VICV_DOT_CLOCK_SPEED
 
 #define SID_CLOCK_SPEED             985248
 #define SAMPLE_RATE                 44100

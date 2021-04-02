@@ -1,5 +1,5 @@
 add_subdirectory(components/)
 add_subdirectory(host/)
-add_subdirectory(kernel/)
+add_subdirectory(hud/)
 add_subdirectory(machine/)
 add_subdirectory(rom/)

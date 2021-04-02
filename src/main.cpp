@@ -7,7 +7,7 @@
 #include <chrono>
 #include <thread>
 #include "common.hpp"
-#include "kernel.hpp"
+#include "hud.hpp"
 #include "sdl2.hpp"
 #include "vicv.hpp"
 
@@ -15,16 +15,18 @@
 
 // global components
 E64::host_t	host;
-E64::kernel_t	*kernel;
+E64::hud_t	hud;
 E64::stats_t	stats;
 E64::machine_t	machine;
-E64::vicv_ic	*vicv;
+E64::vicv_ic	vicv;
+
+bool app_running;
 
 std::chrono::time_point<std::chrono::steady_clock> refresh_moment;
 
 static void finish_frame()
 {
-	if (E64::sdl2_process_events() == E64::QUIT_EVENT) machine.turned_on = false;
+	if (E64::sdl2_process_events() == E64::QUIT_EVENT) app_running = false;
 	
 	machine.blitter->swap_buffers();
 	machine.blitter->clear_framebuffer();
@@ -32,27 +34,16 @@ static void finish_frame()
 	machine.blitter->draw_border();
 	machine.blitter->flush();
 	
-	kernel->execute();
+	hud.execute();
 	
-	kernel->blitter->swap_buffers();
-	kernel->blitter->clear_framebuffer();
-	if (kernel->stats_visible || kernel->overhead_visible)
-		kernel->blitter->draw_blit(kernel->stats_view->blit_no, 0, 244);
-	if (kernel->overhead_visible) {
-		kernel->blitter->draw_blit(kernel->terminal->blit_no, 0, 12);
-		kernel->blitter->draw_blit(kernel->cpu_view->blit_no, 0, 148);
-		kernel->blitter->draw_blit(kernel->stack_view->blit_no, 0, 180);
-		kernel->blitter->draw_blit(kernel->disassembly_view->blit_no, 256, 148);
-		kernel->blitter->draw_blit(kernel->bar_1_height->blit_no, 0, 140);
-		kernel->blitter->draw_blit(kernel->bar_2_height->blit_no, 0, -4);
-		kernel->blitter->draw_blit(kernel->bar_2_height->blit_no, 0, 276);
-	}
-	kernel->blitter->flush();
+	hud.blitter->swap_buffers();
+	hud.blitter->clear_framebuffer();
+	hud.draw();
+	hud.blitter->flush();
 	
 	host.video->clear_frame_buffer();
-	
 	host.video->merge_down_layer(machine.blitter->frontbuffer);
-	host.video->merge_down_layer(kernel->blitter->frontbuffer);
+	host.video->merge_down_layer(hud.blitter->frontbuffer);
 	
 	stats.process_parameters();
 	/*
@@ -84,32 +75,31 @@ static void finish_frame()
 
 int main(int argc, char **argv)
 {
-	vicv = new E64::vicv_ic();
-	vicv->reset();
-	
 	E64::sdl2_init();
-	machine.turned_on = true;
+	
+	app_running = true;
+	
+	vicv.reset();
+	hud.reset();
 	machine.reset();
-	
-	kernel = new E64::kernel_t();
-	kernel->reset();
-	
 	stats.reset();
 	
 	refresh_moment = std::chrono::steady_clock::now();
 
-	while (machine.turned_on) {
-		vicv->run(CYCLES_PER_STEP);
+	while (app_running) {
+		vicv.run(CYCLES_PER_STEP);
+		hud.run(CYCLES_PER_STEP);
 		
-		if (machine.run(CYCLES_PER_STEP)) {
-			// switch mode e.g. when have breakpoint
+		if (!machine.paused) {
+			if (machine.run(CYCLES_PER_STEP)) {
+				// switch mode e.g. when have breakpoint
+			}
 		}
 		
-		if (vicv->frame_done()) finish_frame();
+		if (vicv.frame_done())
+			finish_frame();
 	}
 
-	delete kernel;
 	E64::sdl2_cleanup();
-	delete vicv;
 	return 0;
 }

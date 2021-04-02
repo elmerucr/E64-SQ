@@ -29,4 +29,4 @@ add_subdirectory(src/)
 
 add_executable(E64 src/main.cpp)
 
-target_link_libraries(E64 host kernel lua machine rom ${SDL2_LIBRARIES})
+target_link_libraries(E64 host hud lua machine rom ${SDL2_LIBRARIES})

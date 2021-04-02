@@ -1,7 +1,7 @@
-#include "kernel.hpp"
+#include "hud.hpp"
 #include "common.hpp"
 
-E64::kernel_t::kernel_t()
+E64::hud_t::hud_t()
 {
 	L = luaL_newstate();
 	luaL_openlibs(L);
@@ -10,105 +10,71 @@ E64::kernel_t::kernel_t()
 	
 	blitter = new blitter_ic();
 	cia = new cia_ic();
-	
-	//tty = new tty_t(0b10001000, 0b00000000, 0x56, 0, machine.blitter, C64_LIGHTBLUE, C64_BLUE);
+	timer = new timer_ic();
 	
 	stats_view = new tty_t(0b10001010, 0b00000000, 0x25, 0, blitter, GREEN_05, (GREEN_02 & 0x0fff) | 0xa000);
 	terminal = new tty_t(0b10001010, 0b00000000, 0x46, 1, blitter, GREEN_05, (GREEN_02 & 0x0fff) | 0xa000);
 	cpu_view = new tty_t(0b10001010, 0b00000000, 0x25, 2, blitter, GREEN_05, (GREEN_02 & 0x0fff) | 0xa000);
 	disassembly_view = new tty_t(0b10001010, 0b00000000, 0x45, 3, blitter, GREEN_05, (GREEN_02 & 0x0fff) | 0xa000);
 	stack_view = new tty_t(0b10001010, 0b00000000, 0x35, 4, blitter, GREEN_05, (GREEN_02 & 0x0fff) | 0xa000);
-	bar_1_height = new tty_t(0b00001111, 0b00000000, 0x06, 5, blitter, GREEN_05, (GREEN_02 & 0x0fff) | 0xa000);
-	bar_2_height = new tty_t(0b10001010, 0b00000000, 0x16, 6, blitter, GREEN_05, (GREEN_02 & 0x0fff) | 0xa000);
+	bar_single_height = new tty_t(0b00001111, 0b00000000, 0x06, 5, blitter, GREEN_05, (GREEN_02 & 0x0fff) | 0xa000);
+	bar_double_height = new tty_t(0b10001010, 0b00000000, 0x16, 6, blitter, GREEN_05, (GREEN_02 & 0x0fff) | 0xa000);
 	
 	stats_visible = false;
 	overhead_visible = false;
 	overhead_state = OVERHEAD_NOT_VISIBLE;
-	
-	machine.mmu->write_memory_8(0x1010, 0x0f);
-	machine.mmu->write_memory_8(0x1011, 0x53);
-	machine.mmu->write_memory_8(0x1012, 0x01);
-	machine.mmu->write_memory_8(0x1013, 0xc0);
 }
 
-E64::kernel_t::~kernel_t()
+E64::hud_t::~hud_t()
 {
-	delete bar_2_height;
-	delete bar_1_height;
+	delete bar_double_height;
+	delete bar_single_height;
 	delete stack_view;
 	delete disassembly_view;
 	delete cpu_view;
 	delete terminal;
 	delete stats_view;
-	//delete tty;
 	
+	delete timer;
 	delete cia;
 	delete blitter;
 	
 	lua_close(L);
 }
 
-void E64::kernel_t::reset()
+void E64::hud_t::reset()
 {
-	
-	machine.blitter->set_clear_color(C64_BLUE);
-	machine.blitter->set_border_color(C64_BLACK);
-	machine.blitter->set_border_size(16);
-	
 	blitter->reset();
 	blitter->set_clear_color(0x0000);
 	blitter->set_border_color(0x0000);
 	blitter->set_border_size(0);
 	
-	// clear sids
-	for (int i=0; i<128; i++) machine.sids->write_byte(i, 0);
-	for (int i=0; i<8; i++) machine.sids->write_byte(128+i, 255);
-	machine.sids->write_byte(0x18, 0x0f);		// volume sid0
-	machine.sids->write_byte(0x38, 0x0f);		// volume sid1
-
-	// sounds
-	machine.sids->write_byte(0x00, 0xc4);		// note d3
-	machine.sids->write_byte(0x01, 0x09);
-	machine.sids->write_byte(0x05, 0b00001001);	// attack/decay
-	machine.sids->write_byte(0x02, 0x0f);		// pulsewidth
-	machine.sids->write_byte(0x03, 0x0f);
-	machine.sids->write_byte(0x80, 0xff);		// sid0 left
-	machine.sids->write_byte(0x81, 0x10);		// sid0 right
-	machine.sids->write_byte(0x04, 0b01000001);	// voice control
+	cia->reset();
+	cia->set_keyboard_repeat_delay(50);
+	cia->set_keyboard_repeat_speed(5);
+	cia->generate_key_events();
 	
-	machine.sids->write_byte(0x20, 0xa2);		// note a3
-	machine.sids->write_byte(0x21, 0x0e);
-	machine.sids->write_byte(0x25, 0b00001001);	// attack/decay
-	machine.sids->write_byte(0x22, 0x0f);		// pulsewidth
-	machine.sids->write_byte(0x23, 0x0f);
-	machine.sids->write_byte(0x82, 0x10);		// sid1 left
-	machine.sids->write_byte(0x83, 0xff);		// sid1 right
-	machine.sids->write_byte(0x24, 0b01000001);	// voice control
-	
-	devices.cia_set_keyboard_repeat_delay(50);
-	devices.cia_set_keyboard_repeat_speed(5);
-	devices.cia_generate_key_events();
-	
-	devices.timer_set(0, 3600);
+	timer->set(0, 3600);	// check keyboard state etc...
+	//timer->set(1, 3600);	// execute hud
 	
 	terminal->clear();
-	terminal->printf("E64 Virtual Computer System (C)%u elmerucr\n\n", E64_SQ_YEAR);
+	terminal->printf("E64 Virtual Computer System (C)%u elmerucr\n", E64_SQ_YEAR);
 	terminal->puts(LUA_COPYRIGHT);
-	terminal->putchar('\n');
+	//terminal->putchar('\n');
 	terminal->prompt();
 	terminal->activate_cursor();
 	
 	stack_view->clear();
-	bar_1_height->clear();
+	bar_single_height->clear();
 	for (int i = 1536; i<2048; i++)
-		blitter->blit[bar_1_height->blit_no].pixel_data[i] = GREEN_05;
+		blitter->blit[bar_single_height->blit_no].pixel_data[i] = GREEN_05;
 	
-	bar_2_height->clear();
+	bar_double_height->clear();
 }
 
-void E64::kernel_t::process_keypress()
+void E64::hud_t::process_keypress()
 {
-	uint8_t key_value = machine.cia->read_byte(0x04);
+	uint8_t key_value = cia->read_byte(0x04);
 	switch (key_value) {
 		case ASCII_CURSOR_LEFT:
 			terminal->cursor_left();
@@ -127,7 +93,9 @@ void E64::kernel_t::process_keypress()
 			break;
 		case ASCII_F1:
 			// NEEDS WORK
-			machine.cpu->run(0);
+			if (machine.paused) {
+				machine.cpu->run(0);
+			}
 			break;
 		case ASCII_LF:
 			{
@@ -145,9 +113,9 @@ void E64::kernel_t::process_keypress()
 	}
 }
 
-void E64::kernel_t::execute()
+void E64::hud_t::execute()
 {
-	while (machine.cia->read_byte(0x00)) {
+	while (cia->read_byte(0x00)) {
 		terminal->deactivate_cursor();
 		process_keypress();
 		terminal->activate_cursor();
@@ -210,42 +178,83 @@ void E64::kernel_t::execute()
 	}
 }
 
-void E64::kernel_t::timer_0_event()
+void E64::hud_t::run(uint16_t cycles)
+{
+	timer->run(cycles);
+	
+	if (timer->irq_line == false) {
+		for (int i=0; i<8; i++) {
+			if (timer->read_byte(0x00) & (0b1 << i)) {
+				switch (i) {
+					case 0:
+						timer_0_event();
+						timer->write_byte(0x00, 0b00000001);
+						break;
+					case 1:
+						timer_1_event();
+						timer->write_byte(0x00, 0b00000010);
+					default:
+						break;
+				}
+			}
+		}
+	}
+	
+	cia->run(cycles);
+}
+
+void E64::hud_t::timer_0_event()
 {
 	terminal->timer_callback();
 }
 
-void E64::kernel_t::timer_1_event()
+void E64::hud_t::timer_1_event()
 {
 	//
 }
 
-void E64::kernel_t::timer_2_event()
+void E64::hud_t::timer_2_event()
 {
 	//
 }
 
-void E64::kernel_t::timer_3_event()
+void E64::hud_t::timer_3_event()
 {
 	//
 }
 
-void E64::kernel_t::timer_4_event()
+void E64::hud_t::timer_4_event()
 {
 	//
 }
 
-void E64::kernel_t::timer_5_event()
+void E64::hud_t::timer_5_event()
 {
 	//
 }
 
-void E64::kernel_t::timer_6_event()
+void E64::hud_t::timer_6_event()
 {
 	//
 }
 
-void E64::kernel_t::timer_7_event()
+void E64::hud_t::timer_7_event()
 {
 	//
+}
+
+void E64::hud_t::draw()
+{
+	if (stats_visible && (!overhead_visible))
+		blitter->draw_blit(hud.stats_view->blit_no, 128, 244);
+	if (hud.overhead_visible) {
+		blitter->draw_blit(hud.stats_view->blit_no, 0, 244);
+		blitter->draw_blit(hud.terminal->blit_no, 0, 12);
+		blitter->draw_blit(hud.cpu_view->blit_no, 0, 148);
+		blitter->draw_blit(hud.stack_view->blit_no, 0, 180);
+		blitter->draw_blit(hud.disassembly_view->blit_no, 256, 148);
+		blitter->draw_blit(hud.bar_single_height->blit_no, 0, 140);
+		blitter->draw_blit(hud.bar_double_height->blit_no, 0, -4);
+		blitter->draw_blit(hud.bar_double_height->blit_no, 0, 276);
+	}
 }

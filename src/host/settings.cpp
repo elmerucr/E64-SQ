@@ -11,7 +11,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
-extern uint8_t kernel[];
+extern uint8_t hud[];
 
 E64::settings_t::settings_t()
 {

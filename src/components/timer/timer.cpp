@@ -20,6 +20,8 @@ void E64::timer_ic::reset()
 		timers[i].clock_interval = bpm_to_clock_interval(timers[i].bpm);
 		timers[i].counter = 0;
 	}
+	
+	irq_line = true;
 }
 
 void E64::timer_ic::run(uint32_t number_of_cycles)
@@ -29,35 +31,7 @@ void E64::timer_ic::run(uint32_t number_of_cycles)
 		if ((timers[i].counter >= timers[i].clock_interval) &&
 		    (registers[1] & (0b1 << i))) {
 			timers[i].counter -= timers[i].clock_interval;
-			// NEEDS WORK: what if counter flips below 0?
-			// NEEDS WORK!
-			//machine.TTL74LS148->pull_line(interrupt_device_number);
-			switch (i) {
-				case 0:
-					kernel->timer_0_event();
-					break;
-				case 1:
-					kernel->timer_1_event();
-					break;
-				case 2:
-					kernel->timer_2_event();
-					break;
-				case 3:
-					kernel->timer_3_event();
-					break;
-				case 4:
-					kernel->timer_4_event();
-					break;
-				case 5:
-					kernel->timer_5_event();
-					break;
-				case 6:
-					kernel->timer_6_event();
-					break;
-				case 7:
-					kernel->timer_7_event();
-					break;
-			}
+			irq_line = false;
 			registers[0] |= (0b1 << i);
 		}
 	}
@@ -96,6 +70,7 @@ void E64::timer_ic::write_byte(uint8_t address, uint8_t byte)
                 // no timers left causing interrupts
 		    // NEEDS WORK
                 //machine.TTL74LS148->release_line(interrupt_device_number);
+		    irq_line = true;
             }
             break;
         case 0x01:
@@ -129,4 +104,13 @@ uint64_t E64::timer_ic::get_timer_counter(uint8_t timer_number)
 uint64_t E64::timer_ic::get_timer_clock_interval(uint8_t timer_number)
 {
 	return timers[timer_number & 0x07].clock_interval;
+}
+
+void E64::timer_ic::set(uint8_t timer_no, uint16_t bpm)
+{
+	timer_no &= 0b111; // confine to 0 - 7
+	
+	write_byte(0x02, bpm & 0xff);
+	write_byte(0x03, (bpm & 0xff00) >> 8);
+	write_byte(0x01, 0b1 << timer_no);
 }

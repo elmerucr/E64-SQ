@@ -14,21 +14,15 @@
 #include "blitter.hpp"
 #include "cpu.hpp"
 
-// output states for run function
-#define NO_BREAKPOINT       0b00000000
-#define CPU_BREAKPOINT      0b00000001
-#define SCANLINE_BREAKPOINT 0b00000010
-
 namespace E64
 {
-    
-class machine_t
-{
+
+class machine_t {
 private:
-    clocks *vicv_to_sid;
-    char machine_help_string[2048];
+	clocks *system_to_sid;
+	char machine_help_string[2048];
 public:
-	bool turned_on;
+	bool paused;
 
 	mmu_ic		*mmu;
 	cpu_ic		*cpu;

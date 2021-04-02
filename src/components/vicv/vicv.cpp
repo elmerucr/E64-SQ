@@ -15,6 +15,8 @@ void E64::vicv_ic::reset()
 	cycle_clock = dot_clock = 0;
 	registers[0] = 0;
 	registers[1] = 0;
+	
+	irq_line = true;
 }
 
 void E64::vicv_ic::run(uint32_t cycles)
@@ -44,7 +46,7 @@ void E64::vicv_ic::run(uint32_t cycles)
 		switch (cycle_clock) {
 			case (VICV_PIXELS_PER_SCANLINE+VICV_PIXELS_HBLANK)*VICV_SCANLINES:
 				// start of vblank
-				// NEEDS WORK
+				irq_line = false;
 				break;
 			case (VICV_PIXELS_PER_SCANLINE+VICV_PIXELS_HBLANK)*(VICV_SCANLINES+VICV_SCANLINES_VBLANK):
 				// end of vblank

@@ -126,7 +126,7 @@ private:
     void    push_event(uint8_t event);
     uint8_t pop_event();
     
-    bool    generate_key_events;
+    bool    generating_key_events;
     
     // implement a fifo event list, important for key presses, you don't want them in the wrong order
     uint8_t event_list[256];
@@ -155,7 +155,7 @@ public:
     void reset();
     
     // THESE NEXT ONES SHOULD BE PRIVATE IN THE FUTURE!
-    uint8_t keys_last_known_state[128];
+    //uint8_t keys_last_known_state[128];
     uint8_t registers[256];
     //
     
@@ -165,6 +165,11 @@ public:
     // register access functions
     uint8_t read_byte(uint8_t address);
     void write_byte(uint8_t address, uint8_t byte);
+	
+	// "human approach" convenience functions
+	void set_keyboard_repeat_delay(uint8_t delay);
+	void set_keyboard_repeat_speed(uint8_t speed);
+	void generate_key_events();
 };
 
 }

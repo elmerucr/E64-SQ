@@ -1,4 +1,4 @@
-add_library(kernel STATIC devices.cpp kernel.cpp tty.cpp)
+add_library(hud STATIC hud.cpp tty.cpp)
 add_library(lua STATIC
 	lua-5.4.2/src/lapi.c
 	lua-5.4.2/src/lauxlib.c
@@ -34,4 +34,4 @@ add_library(lua STATIC
 	lua-5.4.2/src/lzio.c
 )
 
-target_link_libraries(kernel cpu)
+target_link_libraries(hud cpu)

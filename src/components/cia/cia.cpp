@@ -5,6 +5,7 @@
 
 #include "cia.hpp"
 #include "common.hpp"
+#include "sdl2.hpp"
 #include <cstdio>
 
 bool scancode_not_modifier[] =
@@ -233,11 +234,11 @@ void E64::cia_ic::reset()
     cycle_counter = 0;
     
     for(int i=0; i<256; i++) registers[i] = 0x00;
-    for(int i=0; i<128; i++) keys_last_known_state[i] = 0x00;
+    //for(int i=0; i<128; i++) sdl2_keys_last_known_state[i] = 0x00;
     for(int i=0; i<256; i++) event_list[i] = 0x00;
     head = tail = 0;
     
-    generate_key_events = false;
+    generating_key_events = false;
     
     key_down = false;
     keyboard_repeat_delay = 50;
@@ -279,21 +280,21 @@ void E64::cia_ic::run(int no_of_cycles)
         cycle_counter -= cycles_per_interval;
         
         // check modifier keys
-        uint8_t modifier_keys_status =  (keys_last_known_state[SCANCODE_LSHIFT] ? SHIFT_PRESSED : 0) |
-                                        (keys_last_known_state[SCANCODE_RSHIFT] ? SHIFT_PRESSED : 0) |
-                                        (keys_last_known_state[SCANCODE_LCTRL ] ? CTRL_PRESSED  : 0) |
-                                        (keys_last_known_state[SCANCODE_RCTRL ] ? CTRL_PRESSED  : 0);
+        uint8_t modifier_keys_status =  (sdl2_keys_last_known_state[SCANCODE_LSHIFT] ? SHIFT_PRESSED : 0) |
+                                        (sdl2_keys_last_known_state[SCANCODE_RSHIFT] ? SHIFT_PRESSED : 0) |
+                                        (sdl2_keys_last_known_state[SCANCODE_LCTRL ] ? CTRL_PRESSED  : 0) |
+                                        (sdl2_keys_last_known_state[SCANCODE_RCTRL ] ? CTRL_PRESSED  : 0);
         
         // registers 128 to 255 reflect the current keyboard state
         // shift each register one bit to the left, bit 0 is only set if key is pressed
         // if one of the keys changed its state, push an event
         for (int i=0x00; i<0x80; i++) {
-            registers[0x80 | i] = (registers[0x80 | i] << 1) | keys_last_known_state[i];
+            registers[0x80 | i] = (registers[0x80 | i] << 1) | sdl2_keys_last_known_state[i];
 
             switch (registers[0x80 | i] & 0b00000011) {
                 case 0b01:
                     // Event: key pressed
-                    if (generate_key_events && scancode_not_modifier[i]) {
+                    if (generating_key_events && scancode_not_modifier[i]) {
                         key_down = true;
                         last_key = i;
                         keyboard_repeat_current_max = keyboard_repeat_delay;
@@ -302,7 +303,7 @@ void E64::cia_ic::run(int no_of_cycles)
                     break;
                 case 0b10:
                     // Event: key released
-                    if (generate_key_events) {
+                    if (generating_key_events) {
                         if (i == last_key)
 				key_down = false;
                     }
@@ -334,7 +335,7 @@ uint8_t E64::cia_ic::read_byte(uint8_t address)
             return_value = events_waiting() ? 0x01 : 0x00;
             break;
         case 0x01:
-            return_value = (generate_key_events ? 0x01 : 0x00);
+            return_value = (generating_key_events ? 0x01 : 0x00);
             break;
         case 0x02:
             return_value = keyboard_repeat_delay;
@@ -359,9 +360,9 @@ void E64::cia_ic::write_byte(uint8_t address, uint8_t byte)
 	switch (address) {
 	case 0x01:
 		if (byte & 0b00000001) {
-			generate_key_events = true;
+			generating_key_events = true;
 		} else {
-			generate_key_events = false;
+			generating_key_events = false;
 			key_down = false;
 		}
 		if (byte & 0b10000000) {
@@ -380,4 +381,19 @@ void E64::cia_ic::write_byte(uint8_t address, uint8_t byte)
 		// no other addresses are written to
 		break;
 	}
+}
+
+void E64::cia_ic::set_keyboard_repeat_delay(uint8_t delay)
+{
+	write_byte(0x02, delay);
+}
+
+void E64::cia_ic::set_keyboard_repeat_speed(uint8_t speed)
+{
+	write_byte(0x03, speed);
+}
+
+void E64::cia_ic::generate_key_events()
+{
+	write_byte(0x01, 0b00000001);
 }

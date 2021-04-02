@@ -125,10 +125,7 @@ void E64::video_t::merge_down_layer(uint16_t *buffer)
 {
 	uint16_t *temp_framebuffer = framebuffer;
 	for (int i=0; i < VICV_TOTAL_PIXELS; i++) {
-		//alpha_blend(&framebuffer[i], &buffer[i]);
 		alpha_blend(temp_framebuffer++, buffer++);
-		//framebuffer[i] |= 0xf000;
-		//framebuffer[i] = buffer[i];
 	}
 }
 

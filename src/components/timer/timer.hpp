@@ -63,6 +63,8 @@ private:
 	uint32_t bpm_to_clock_interval(uint16_t bpm);
 public:
 	void reset();
+	
+	bool irq_line;
 
 	// register access functions
 	uint8_t read_byte(uint8_t address);
@@ -74,6 +76,9 @@ public:
 
 	// run cycles on this ic
 	void run(uint32_t number_of_cycles);
+	
+	// convenience function (turning on specific timer + bpm)
+	void set(uint8_t timer_no, uint16_t bpm);
 };
 
 }

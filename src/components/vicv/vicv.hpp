@@ -29,6 +29,8 @@ private:
 public:
 	uint8_t registers[2];
 	
+	bool irq_line;
+	
 	void reset();
 	
 	inline bool frame_done() {

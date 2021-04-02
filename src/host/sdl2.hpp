@@ -19,6 +19,9 @@ namespace E64
     void sdl2_init();
     void sdl2_cleanup();
 
+	// key states
+	extern uint8_t *sdl2_keys_last_known_state;
+
     // event related
     int sdl2_process_events();
     void sdl2_wait_until_enter_released();

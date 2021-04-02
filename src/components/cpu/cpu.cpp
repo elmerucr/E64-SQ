@@ -38,7 +38,7 @@ uint32_t cpu_ic::run(uint32_t cycles)
 	
 	bool done = false;
 
-	uint32_t cycles_done = 0;
+	int32_t cycles_done = 0;
 
 	if ((nmi_line == false) && (old_nmi_line = true)) {
 		nmi6502();
