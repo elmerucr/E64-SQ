@@ -22,7 +22,6 @@ E64::hud_t::hud_t()
 	
 	stats_visible = false;
 	overhead_visible = false;
-	overhead_state = OVERHEAD_NOT_VISIBLE;
 	refresh = false;
 }
 
@@ -155,6 +154,8 @@ void E64::hud_t::execute()
 	char text_buffer[256];
 	uint16_t pc = machine.cpu->get_pc();
 	for (int i=0; i<16; i++) {
+		uint16_t old_color = terminal->current_foreground_color;
+		if (machine.cpu->breakpoints[pc] == true) disassembly_view->current_foreground_color = AMBER_07;
 		if (disassembly_view->get_column() != 0)
 			disassembly_view->putchar('\n');
 		int ops = machine.cpu->disassemble(pc, text_buffer);
@@ -182,6 +183,7 @@ void E64::hud_t::execute()
 			break;
 		}
 		pc += ops;
+		disassembly_view->current_foreground_color = old_color;
 	}
 	refresh = true;
 }
@@ -250,7 +252,7 @@ void E64::hud_t::timer_7_event()
 	//
 }
 
-void E64::hud_t::draw()
+void E64::hud_t::redraw()
 {
 	if (stats_visible && (!overhead_visible))
 		blitter->draw_blit(hud.stats_view->blit_no, 128, 244);

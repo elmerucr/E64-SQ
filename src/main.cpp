@@ -37,7 +37,7 @@ static void finish_frame()
 	if (hud.refreshed()) {
 		hud.blitter->swap_buffers();
 		hud.blitter->clear_framebuffer();
-		hud.draw();
+		hud.redraw();
 		hud.blitter->flush();
 	}
 	
@@ -84,7 +84,7 @@ int main(int argc, char **argv)
 	machine.reset();
 	stats.reset();
 	
-	machine.paused = true;
+	machine.paused = false;
 	
 	refresh_moment = std::chrono::steady_clock::now();
 

@@ -6,8 +6,6 @@
 
 E64::tty_t::tty_t(uint8_t flags_0, uint8_t flags_1, uint8_t size_in_tiles_log2, int _blit_no, blitter_ic *_blitter, uint16_t foreground_color, uint16_t background_color)
 {
-	//text_screen = (surface_t *)machine.mmu->malloc(sizeof(surface_t));
-	//text_screen = &machine.blitter->blit[_blit_no];
 	text_screen = &_blitter->blit[_blit_no];
 	
 	blit_no = _blit_no;
@@ -133,7 +131,7 @@ void E64::tty_t::add_bottom_line()
 
 void E64::tty_t::prompt()
 {
-	printf("\nready.\n");
+	putchar('\n');
 }
 
 void E64::tty_t::activate_cursor()

@@ -19,13 +19,14 @@ private:
 	bool old_irq_line;
 	bool nmi_line;
 	bool old_nmi_line;
-
-	bool *breakpoints;
 	
 	int32_t cycle_saldo;
 public:
 	cpu_ic();
 	~cpu_ic();
+	
+	bool *breakpoints;
+	bool breakpoint_reached;
 
 	void reset();
 

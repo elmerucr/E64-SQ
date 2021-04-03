@@ -74,29 +74,4 @@ void E64::machine_t::reset()
 	blitter->set_clear_color(C64_BLUE);
 	blitter->set_border_color(C64_BLACK);
 	blitter->set_border_size(16);
-	
-	// clear sids
-	for (int i=0; i<128; i++) sids->write_byte(i, 0);
-	for (int i=0; i<8; i++) sids->write_byte(128+i, 255);
-	sids->write_byte(0x18, 0x0f);		// volume sid0
-	sids->write_byte(0x38, 0x0f);		// volume sid1
-
-	// sounds
-	sids->write_byte(0x00, 0xc4);		// note d3
-	sids->write_byte(0x01, 0x09);
-	sids->write_byte(0x05, 0b00001001);	// attack/decay
-	sids->write_byte(0x02, 0x0f);		// pulsewidth
-	sids->write_byte(0x03, 0x0f);
-	sids->write_byte(0x80, 0xff);		// sid0 left
-	sids->write_byte(0x81, 0x10);		// sid0 right
-	sids->write_byte(0x04, 0b01000001);	// voice control
-	
-	sids->write_byte(0x20, 0xa2);		// note a3
-	sids->write_byte(0x21, 0x0e);
-	sids->write_byte(0x25, 0b00001001);	// attack/decay
-	sids->write_byte(0x22, 0x0f);		// pulsewidth
-	sids->write_byte(0x23, 0x0f);
-	sids->write_byte(0x82, 0x10);		// sid1 left
-	sids->write_byte(0x83, 0xff);		// sid1 right
-	sids->write_byte(0x24, 0b01000001);	// voice control
 }

@@ -14,11 +14,6 @@
 
 namespace E64 {
 
-enum overhead_state_t {
-	OVERHEAD_NOT_VISIBLE,
-	OVERHEAD_VISIBLE
-};
-
 class hud_t {
 private:
 	bool refresh;
@@ -26,6 +21,9 @@ public:
 	hud_t();
 	~hud_t();
 	
+	/*
+	 * If next function returns <true> it's good to do a redraw()
+	 */
 	bool refreshed();
 	
 	blitter_ic *blitter;
@@ -43,14 +41,13 @@ public:
 	tty_t *bar_double_height;
 	
 	bool stats_visible;
-	enum overhead_state_t overhead_state;
 	bool overhead_visible;
 	
 	void reset();
 	void run(uint16_t cycles);
 	void execute();
 	void process_keypress();
-	void draw();
+	void redraw();
 	
 	// events
 	void timer_0_event();

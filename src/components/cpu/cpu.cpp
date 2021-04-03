@@ -19,6 +19,8 @@ cpu_ic::cpu_ic()
 	if (breakpoints) {
 		for (int i=0; i<65536; i++) breakpoints[i] = false;
 	}
+	//breakpoints[0xe000] = true;
+	breakpoint_reached = false;
 }
 
 cpu_ic::~cpu_ic()
@@ -49,13 +51,26 @@ uint32_t cpu_ic::run(uint32_t cycles)
 		cycles_done += 7;
 		if (cycles_done >= cycle_saldo) done = true;
 	}
+	
+	/*
+	 * Breakpoint detection before instruction loop. Is needed because
+	 * a breakpoint at the beginning of an interrupt routine will otherwise
+	 * not be detected.
+	 */
+	if (breakpoints[pc]) {
+		breakpoint_reached = true;
+		done = true;
+	}
 
 	if (!done) {
 		do {
 			uint32_t old_clockticks6502 = clockticks6502;
 			step6502();
 			cycles_done += (clockticks6502 - old_clockticks6502);
-		} while (cycles_done < cycle_saldo);
+			if (breakpoints[pc]) {
+				breakpoint_reached = true;
+			}
+		} while ((cycles_done < cycle_saldo) && !breakpoint_reached);
 	}
 
 	old_nmi_line = nmi_line;

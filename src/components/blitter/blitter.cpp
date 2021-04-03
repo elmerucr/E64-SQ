@@ -187,20 +187,20 @@ void E64::blitter_ic::run(int no_of_cycles)
                             
                             tile_number = tile_x + (tile_y << width_in_tiles_log2);
                             
-				tile_index = tile_data[tile_number];
+				tile_index = tile_data[tile_number & 0x7fff];
                             
                             /* Replace foreground and background colors if necessary */
                             if (color_per_tile) {
-				    foreground_color = tile_color_data[tile_number & 0xfff];
-				    background_color = tile_background_color_data[tile_number & 0xfff];
+				    foreground_color = tile_color_data[tile_number & 0x7ff];
+				    background_color = tile_background_color_data[tile_number & 0x7ff];
                             }
                             
                             pixel_in_tile = (x_in_blit & 0b111) | ((y_in_blit & 0b111) << 3);
                             
-                            /*
-			     * Pick the right pixel depending on bitmap mode or tile mode,
-			     * and based on cbm_font or not
-			     */
+				/*
+				 * Pick the right pixel depending on bitmap mode or tile mode,
+				 * and based on cbm_font or not
+				 */
 				if (use_cbm_font) {
 					source_color = bitmap_mode ?
 					cbm_font[normalized_pixel_no & 0x3fff] : cbm_font[((tile_index << 6) | pixel_in_tile) & 0x3fff];
