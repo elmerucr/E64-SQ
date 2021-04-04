@@ -23,12 +23,12 @@ E64::mmu_ic::~mmu_ic()
 
 void E64::mmu_ic::reset()
 {
-	// fill alternating blocks with 0x00 and 0x10
+	// fill alternating blocks with 0x00 and 0xff (hard reset)
 	for (int i=0; i < RAM_SIZE; i++)
-		ram[i] = (i & 64) ? 0x10 : 0x00;
+		ram[i] = (i & 64) ? 0xff : 0x00;
 
-	// try to find and update rom image
-	find_and_update_rom_image();
+	// if available, update rom image
+	update_rom_image();
 }
 
 uint8_t E64::mmu_ic::read_memory_8(uint16_t address)
@@ -37,7 +37,7 @@ uint8_t E64::mmu_ic::read_memory_8(uint16_t address)
 	
 	if (page == IO_VICV_PAGE) {
 		return vicv.read_byte(address & 0x01);
-	} else if (page == IO_SND_PAGE) {
+	} else if (page == IO_SID_PAGE) {
 		return machine.sids->read_byte(address & 0xff);
 	} else if (page == IO_TIMER_PAGE) {
 		return machine.timer->read_byte(address & 0xff);
@@ -56,7 +56,7 @@ void E64::mmu_ic::write_memory_8(uint16_t address, uint8_t value)
 	
 	if (page == IO_VICV_PAGE) {
 		vicv.write_byte(address & 0x01, value & 0xff);
-	} else if (page == IO_SND_PAGE) {
+	} else if (page == IO_SID_PAGE) {
 		machine.sids->write_byte(address & 0xff, value & 0xff);
 	} else if (page == IO_TIMER_PAGE) {
 		machine.timer->write_byte(address & 0xff, value & 0xff);
@@ -67,7 +67,7 @@ void E64::mmu_ic::write_memory_8(uint16_t address, uint8_t value)
 	}
 }
 
-void E64::mmu_ic::find_and_update_rom_image()
+void E64::mmu_ic::update_rom_image()
 {
 	FILE *f = fopen(host.settings.path_to_rom, "r");
 	

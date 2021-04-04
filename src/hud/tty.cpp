@@ -38,8 +38,6 @@ void E64::tty_t::clear()
 	}
 	
 	cursor_position = 0;
-//	cursor_start_of_command = 0;
-//	cursor_end_of_command = 0;
 	
 	cursor_interval = 20; 	// 0.33s (if timer @ 60Hz)
 	cursor_countdown = 0;
@@ -53,7 +51,7 @@ void E64::tty_t::putsymbol(char symbol)
 	text_screen->tile_background_color_data[cursor_position] = current_background_color;
 	cursor_position++;
 	if (cursor_position >= tiles) {
-		add_bottom_line();
+		add_bottom_row();
 		cursor_position -= columns;
 	}
 }
@@ -68,7 +66,7 @@ int E64::tty_t::putchar(int character)
 		case '\n':
 			cursor_position -= cursor_position % columns;
 			if ((cursor_position / columns) == (rows - 1)) {
-				    add_bottom_line();
+				    add_bottom_row();
 			} else {
 				cursor_position += columns;
 			}
@@ -110,7 +108,7 @@ int E64::tty_t::printf(const char *format, ...)
 	return number;
 }
 
-void E64::tty_t::add_bottom_line()
+void E64::tty_t::add_bottom_row()
 {
 	uint16_t no_of_tiles_to_move = tiles - columns;
 
@@ -124,9 +122,23 @@ void E64::tty_t::add_bottom_line()
 		text_screen->tile_color_data[i] = current_foreground_color;
 		text_screen->tile_background_color_data[i] = current_background_color;
 	}
-	
-//	cursor_start_of_command -= columns;
-//	cursor_end_of_command -= columns;
+}
+
+void E64::tty_t::add_top_row()
+{
+	cursor_position += columns;
+	for (int i=tiles-1; i >= (cursor_position - get_column()) + columns; i--) {
+		text_screen->tile_data[i] = text_screen->tile_data[i-columns];
+		text_screen->tile_color_data[i] = text_screen->tile_color_data[i-columns];
+		text_screen->tile_background_color_data[i] = text_screen->tile_background_color_data[i-columns];
+	}
+	uint16_t start_pos = cursor_position - get_column();
+	for (int i=0; i<columns; i++) {
+		text_screen->tile_data[start_pos] = ASCII_SPACE;
+		text_screen->tile_color_data[start_pos] = current_foreground_color;
+		text_screen->tile_background_color_data[start_pos] = current_background_color;
+		start_pos++;
+	}
 }
 
 void E64::tty_t::prompt()
@@ -174,7 +186,7 @@ void E64::tty_t::cursor_right()
 {
 	cursor_position++;
 	if (cursor_position > tiles - 1) {
-		add_bottom_line();
+		add_bottom_row();
 		cursor_position -= columns;
 	}
 }
@@ -182,16 +194,42 @@ void E64::tty_t::cursor_right()
 void E64::tty_t::cursor_up()
 {
 	cursor_position -= columns;
-	if (cursor_position >= tiles)
-		cursor_position += columns;
+
+	if (cursor_position >= tiles) {
+		uint16_t address;
+	
+		switch (check_output(true, &address)) {
+			case E64::NOTHING:
+				add_top_row();
+				break;
+			case E64::ASCII:
+				add_top_row();
+				//cursor_position += columns;
+				hud.memory_dump((address-8) & (RAM_SIZE - 1), 1);
+				break;
+		}
+	}
 }
 
 void E64::tty_t::cursor_down()
 {
 	cursor_position += columns;
+	
+	// cursor out of current screen?
 	if (cursor_position >= tiles) {
-		add_bottom_line();
-		cursor_position -= columns;
+		uint16_t address;
+	
+		switch (check_output(false, &address)) {
+			case E64::NOTHING:
+				add_bottom_row();
+				cursor_position -= columns;
+				break;
+			case E64::ASCII:
+				add_bottom_row();
+				cursor_position -= columns;
+				hud.memory_dump((address+8) & (RAM_SIZE - 1), 1);
+				break;
+		}
 	}
 }
 
@@ -225,4 +263,24 @@ char *E64::tty_t::enter_command()
 	command_buffer[i + 1] = 0;
 	
 	return command_buffer;
+}
+
+enum E64::output_type E64::tty_t::check_output(bool top_down, uint16_t *address)
+{
+	enum output_type output = NOTHING;
+	
+	for (int i = 0; i < tiles; i += columns) {
+		if (text_screen->tile_data[i] == ':') {
+			output = ASCII;
+			char potential_address[5];
+			for (int j=0; j<4; j++) {
+				potential_address[j] =
+				text_screen->tile_data[i+1+j];
+			}
+			potential_address[4] = 0;
+			hud.hex_string_to_int(potential_address, address);
+			if (top_down) break;
+		}
+	}
+	return output;
 }

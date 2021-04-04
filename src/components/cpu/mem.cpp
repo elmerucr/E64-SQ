@@ -1,3 +1,7 @@
+/*
+ * Glue code to get c library working with c++ class members
+ */
+
 #include <cstdint>
 #include "common.hpp"
 

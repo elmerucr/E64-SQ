@@ -17,9 +17,20 @@ namespace E64 {
 class hud_t {
 private:
 	bool refresh;
+	bool irq_line;
+	
+	void process_command(char *buffer);
 public:
 	hud_t();
 	~hud_t();
+	
+	bool paused;
+	
+	void flip_modes();
+
+	void memory_dump(uint16_t address, int rows);
+	void enter_monitor_line(char *buffer);
+	bool hex_string_to_int(const char *temp_string, uint16_t *return_value);
 	
 	/*
 	 * If next function returns <true> it's good to do a redraw()
@@ -37,8 +48,11 @@ public:
 	tty_t *cpu_view;
 	tty_t *disassembly_view;
 	tty_t *stack_view;
+	tty_t *bar_single_height_small_1;
+	tty_t *bar_single_height_small_2;
 	tty_t *bar_single_height;
 	tty_t *bar_double_height;
+	tty_t *other_info;
 	
 	bool stats_visible;
 	bool overhead_visible;

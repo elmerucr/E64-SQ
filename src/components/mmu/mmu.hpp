@@ -11,11 +11,12 @@
 #include <cstdint>
 #include <cstdlib>
 
+#define IO_SID_PAGE		0xd4
+#define IO_ROM_PAGE		0xE0
+
 #define IO_CIA_PAGE		0x03
 #define IO_VICV_PAGE		0xd0
-#define IO_SND_PAGE		0xd4
 #define IO_TIMER_PAGE		0x06
-#define IO_ROM_PAGE		0xE0
 
 namespace E64
 {
@@ -33,7 +34,7 @@ public:
 	uint8_t read_memory_8(uint16_t address);
 	void write_memory_8(uint16_t address, uint8_t value);
 	
-	void find_and_update_rom_image();
+	void update_rom_image();
 };
 
 }

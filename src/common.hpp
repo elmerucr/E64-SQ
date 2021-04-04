@@ -18,10 +18,10 @@
 #include "stats.hpp"
 #include "vicv.hpp"
 
-#define E64_SQ_MAJOR_VERSION    0
-#define E64_SQ_MINOR_VERSION    1
-#define E64_SQ_BUILD            20210403
-#define E64_SQ_YEAR             2021
+#define E64_MAJOR_VERSION    0
+#define E64_MINOR_VERSION    1
+#define E64_BUILD            20210404
+#define E64_YEAR             2021
 
 /* Global objects */
 extern E64::host_t	host;
@@ -29,6 +29,8 @@ extern E64::hud_t	hud;
 extern E64::machine_t	machine;
 extern E64::stats_t	stats;
 extern E64::vicv_ic	vicv;
+
+extern bool		app_running;
 
 #define	RAM_SIZE	0x010000
 

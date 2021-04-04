@@ -6,8 +6,8 @@
 E64::host_t::host_t()
 {
 	printf("[host] E64 (C)%i by elmerucr - version %i.%i.%i\n",
-	       E64_SQ_YEAR, E64_SQ_MAJOR_VERSION, E64_SQ_MINOR_VERSION,
-	       E64_SQ_BUILD);
+	       E64_YEAR, E64_MAJOR_VERSION, E64_MINOR_VERSION,
+	       E64_BUILD);
 	
 	video = new video_t();
 }

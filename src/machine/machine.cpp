@@ -18,9 +18,7 @@ E64::machine_t::machine_t()
 	cia = new cia_ic();
 	
 	// init clocks (frequency dividers)
-	system_to_sid   = new clocks(SYSTEM_CLOCK_SPEED, SID_CLOCK_SPEED);
-	
-	paused = false;
+	system_to_sid = new clocks(SYSTEM_CLOCK_SPEED, SID_CLOCK_SPEED);
 }
 
 E64::machine_t::~machine_t()

@@ -5,6 +5,11 @@
 
 namespace E64 {
 
+enum output_type {
+	NOTHING,
+	ASCII
+};
+
 class tty_t {
 private:
 	uint8_t  columns;
@@ -20,6 +25,9 @@ private:
 	uint16_t cursor_original_background_color;
 	bool cursor_blink;	// current state
 	char *command_buffer;
+	
+	enum E64::output_type check_output(bool top_down, uint16_t *address);
+	
 public:
 	tty_t(uint8_t flags_0, uint8_t flags_1, uint8_t size_in_tiles_log2, int _blit_no, blitter_ic *_blitter, uint16_t foreground_color, uint16_t background_color);
 	~tty_t();
@@ -46,11 +54,18 @@ public:
 		return cursor_position % columns;
 	}
 	
+	inline int get_row() { return cursor_position / columns; }
+	
+	inline int get_rows() { return rows; }
+	inline int get_columns() { return columns; }
+	inline int lines_remaining() { return get_rows() - (cursor_position / get_columns()) - 1; }
+
 	char *enter_command();
 	
 	void timer_callback();
 	
-	void add_bottom_line();
+	void add_bottom_row();
+	void add_top_row();
 	
 	uint16_t current_foreground_color;
 	uint16_t current_background_color;

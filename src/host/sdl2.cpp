@@ -108,7 +108,8 @@ int E64::sdl2_process_events()
                     return_value = QUIT_EVENT;
                 }
 		else if(event.key.keysym.sym == SDLK_F9) {
-			      hud.overhead_visible = !hud.overhead_visible;
+			hud.flip_modes();
+			      //hud.overhead_visible = !hud.overhead_visible;
 			sdl2_wait_until_f9_released();
 		      }
                 else if(event.key.keysym.sym == SDLK_F10)

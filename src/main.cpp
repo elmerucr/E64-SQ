@@ -84,13 +84,18 @@ int main(int argc, char **argv)
 	machine.reset();
 	stats.reset();
 	
+	// if one is paused, the other shouldn't be
 	machine.paused = false;
+	hud.paused = true;
 	
 	refresh_moment = std::chrono::steady_clock::now();
 
 	while (app_running) {
 		vicv.run(CYCLES_PER_STEP);
-		hud.run(CYCLES_PER_STEP);
+		
+		if (!hud.paused) {
+			hud.run(CYCLES_PER_STEP);
+		}
 		
 		if (!machine.paused) {
 			if (machine.run(CYCLES_PER_STEP)) {

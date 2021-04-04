@@ -61,6 +61,9 @@ public:
 
 	int disassemble(char *buffer);
 	int disassemble(uint16_t _pc, char *buffer);
+	
+	void toggle_breakpoint(uint16_t address);
+	void clear_breakpoints();
 
 	void dump_stack();
 	uint32_t clock_ticks();

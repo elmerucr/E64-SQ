@@ -16,10 +16,7 @@ cpu_ic::cpu_ic()
 
 	breakpoints = nullptr;
 	breakpoints = new bool[65536];
-	if (breakpoints) {
-		for (int i=0; i<65536; i++) breakpoints[i] = false;
-	}
-	//breakpoints[0xe000] = true;
+	clear_breakpoints();
 	breakpoint_reached = false;
 }
 
@@ -32,6 +29,18 @@ void cpu_ic::reset()
 {
 	reset6502();
 	cycle_saldo = 0;
+}
+
+void cpu_ic::clear_breakpoints()
+{
+	if (breakpoints) {
+		for (int i=0; i<65536; i++) breakpoints[i] = false;
+	}
+}
+
+void cpu_ic::toggle_breakpoint(uint16_t address)
+{
+	breakpoints[address] = !breakpoints[address];
 }
 
 uint32_t cpu_ic::run(uint32_t cycles)
