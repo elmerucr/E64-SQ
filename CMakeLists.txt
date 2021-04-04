@@ -10,8 +10,8 @@ include_directories(
     ${SDL2_INCLUDE_DIRS}
     src/
     src/host/
-    src/kernel/
-    src/kernel/lua-5.4.2/src/
+    src/hud/
+    src/hud/lua-5.4.2/src/
     src/components/
     src/components/blitter/
     src/components/cia/
