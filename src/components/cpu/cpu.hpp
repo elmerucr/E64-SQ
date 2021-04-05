@@ -26,7 +26,7 @@ public:
 	~cpu_ic();
 	
 	bool *breakpoints;
-	bool breakpoint_reached;
+	//bool breakpoint_reached;
 
 	void reset();
 

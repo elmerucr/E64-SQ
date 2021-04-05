@@ -62,6 +62,8 @@ void E64::machine_t::reset()
 {
 	printf("[machine] system reset\n");
 	
+	vicv.reset();
+	
 	mmu->reset();
 	sids->reset();
 	blitter->reset();

@@ -28,18 +28,22 @@ static void finish_frame()
 {
 	if (E64::sdl2_process_events() == E64::QUIT_EVENT) app_running = false;
 	
+	/*
+	 * This partly needs replacement when machine is doing this
+	 */
+	
 	machine.blitter->swap_buffers();
 	machine.blitter->clear_framebuffer();
 	machine.blitter->draw_blit(0, 0, 16);
 	machine.blitter->draw_border();
 	machine.blitter->flush();
 	
-	if (hud.refreshed()) {
-		hud.blitter->swap_buffers();
-		hud.blitter->clear_framebuffer();
-		hud.redraw();
-		hud.blitter->flush();
-	}
+	hud.update_stats_view();
+	
+	hud.blitter->swap_buffers();
+	hud.blitter->clear_framebuffer();
+	hud.redraw();
+	hud.blitter->flush();
 	
 	host.video->clear_frame_buffer();
 	host.video->merge_down_layer(machine.blitter->frontbuffer);
@@ -47,13 +51,13 @@ static void finish_frame()
 	
 	stats.process_parameters();
 	/*
-		* If vsync is enabled, the update screen function takes more
-		* time, i.e. it will return after a few milliseconds, exactly
-		* when vertical refresh is done. This will avoid tearing.
-		* Moreover, there's no need then to let the system sleep with a
-		* calculated value. But we will still have to do a time
-		* measurement for estimation of idle time.
-		*/
+	 * If vsync is enabled, the update screen function takes more
+	 * time, i.e. it will return after a few milliseconds, exactly
+	 * when vertical refresh is done. This will avoid tearing.
+	 * Moreover, there's no need then to let the system sleep with a
+	 * calculated value. But we will still have to do a time
+	 * measurement for estimation of idle time.
+	 */
 	stats.start_idle_time();
 	if (host.video->vsync_disabled()) {
 		refresh_moment +=
@@ -98,9 +102,7 @@ int main(int argc, char **argv)
 		}
 		
 		if (!machine.paused) {
-			if (machine.run(CYCLES_PER_STEP)) {
-				// switch mode e.g. when have breakpoint
-			}
+			machine.run(CYCLES_PER_STEP);
 		}
 		
 		if (vicv.frame_done())

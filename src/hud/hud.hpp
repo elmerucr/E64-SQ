@@ -16,7 +16,6 @@ namespace E64 {
 
 class hud_t {
 private:
-	bool refresh;
 	bool irq_line;
 	
 	void process_command(char *buffer);
@@ -31,11 +30,6 @@ public:
 	void memory_dump(uint16_t address, int rows);
 	void enter_monitor_line(char *buffer);
 	bool hex_string_to_int(const char *temp_string, uint16_t *return_value);
-	
-	/*
-	 * If next function returns <true> it's good to do a redraw()
-	 */
-	bool refreshed();
 	
 	blitter_ic *blitter;
 	cia_ic *cia;
@@ -55,11 +49,11 @@ public:
 	tty_t *other_info;
 	
 	bool stats_visible;
-	bool overhead_visible;
 	
 	void reset();
 	void run(uint16_t cycles);
-	void execute();
+	void update();
+	void update_stats_view();
 	void process_keypress();
 	void redraw();
 	

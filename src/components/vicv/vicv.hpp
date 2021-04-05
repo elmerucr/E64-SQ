@@ -27,6 +27,8 @@ private:
 	// this will be flagged if a frame is completely done
 	bool frame_is_done;
 public:
+	vicv_ic();
+	
 	uint8_t registers[2];
 	
 	bool irq_line;

@@ -9,13 +9,16 @@
 #include "vicv.hpp"
 #include "common.hpp"
 
-void E64::vicv_ic::reset()
+E64::vicv_ic::vicv_ic()
 {
 	frame_is_done = false;
 	cycle_clock = dot_clock = 0;
+}
+
+void E64::vicv_ic::reset()
+{
 	registers[0] = 0;
 	registers[1] = 0;
-	
 	irq_line = true;
 }
 
@@ -46,7 +49,7 @@ void E64::vicv_ic::run(uint32_t cycles)
 		switch (cycle_clock) {
 			case (VICV_PIXELS_PER_SCANLINE+VICV_PIXELS_HBLANK)*VICV_SCANLINES:
 				// start of vblank
-				irq_line = false;
+				if (!machine.paused) irq_line = false;
 				break;
 			case (VICV_PIXELS_PER_SCANLINE+VICV_PIXELS_HBLANK)*(VICV_SCANLINES+VICV_SCANLINES_VBLANK):
 				// end of vblank
@@ -67,7 +70,7 @@ bool E64::vicv_ic::is_hblank() { return HBLANK; }
 bool E64::vicv_ic::is_vblank() { return VBLANK; }
 uint16_t E64::vicv_ic::get_current_scanline() { return Y_POS; }
 uint16_t E64::vicv_ic::get_current_pixel() { return X_POS; }
-uint8_t E64::vicv_ic::read_byte(uint8_t address) { return registers[address & 0x07]; }
+uint8_t E64::vicv_ic::read_byte(uint8_t address) { return registers[address & 0x01]; }
 
 void E64::vicv_ic::write_byte(uint8_t address, uint8_t byte)
 {
@@ -78,7 +81,7 @@ void E64::vicv_ic::write_byte(uint8_t address, uint8_t byte)
 			//machine.TTL74LS148->release_line(vblank_interrupt_device_number);  // acknowledge pending irq
 		break;
 	default:
-		registers[address & 0x07] = byte;
+		registers[address & 0x01] = byte;
 		break;
 	}
 }

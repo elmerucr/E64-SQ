@@ -134,8 +134,6 @@ E64::hud_t::hud_t()
 			       (GREEN_02 & 0x0fff) | 0xa000);
 	
 	stats_visible = false;
-	overhead_visible = false;
-	refresh = false;
 	irq_line = true;
 }
 
@@ -157,13 +155,6 @@ E64::hud_t::~hud_t()
 	delete blitter;
 	
 	lua_close(L);
-}
-
-bool E64::hud_t::refreshed()
-{
-	bool return_value = refresh;
-	if (refresh) refresh = false;
-	return return_value;
 }
 
 void E64::hud_t::reset()
@@ -201,71 +192,73 @@ void E64::hud_t::reset()
 
 void E64::hud_t::process_keypress()
 {
-	uint8_t key_value = cia->read_byte(0x04);
-	switch (key_value) {
-		case ASCII_CURSOR_LEFT:
-			terminal->cursor_left();
-			break;
-		case ASCII_CURSOR_RIGHT:
-			terminal->cursor_right();
-			break;
-		case ASCII_CURSOR_UP:
-			terminal->cursor_up();
-			break;
-		case ASCII_CURSOR_DOWN:
-			terminal->cursor_down();
-			break;
-		case ASCII_BACKSPACE:
-			terminal->backspace();
-			break;
-		case ASCII_F1:
-			terminal->deactivate_cursor();
-			if (machine.paused) {
-				machine.run(0);
-			}
-			terminal->activate_cursor();
-			break;
-		case ASCII_F2:
-			terminal->deactivate_cursor();
-			if (machine.paused) {
-				machine.run(0);
-				machine.run(0);
-			}
-			terminal->activate_cursor();
-			break;
-		case ASCII_F3:
-			terminal->deactivate_cursor();
-			if (machine.paused) {
-				machine.run(0);
-				machine.run(0);
-				machine.run(0);
-				machine.run(0);
-			}
-			terminal->activate_cursor();
-			break;
-		case ASCII_LF:
+	while (cia->read_byte(0x00)) {
+		terminal->deactivate_cursor();
+	
+		uint8_t key_value = cia->read_byte(0x04);
+		switch (key_value) {
+			case ASCII_CURSOR_LEFT:
+				terminal->cursor_left();
+				break;
+			case ASCII_CURSOR_RIGHT:
+				terminal->cursor_right();
+				break;
+			case ASCII_CURSOR_UP:
+				terminal->cursor_up();
+				break;
+			case ASCII_CURSOR_DOWN:
+				terminal->cursor_down();
+				break;
+			case ASCII_BACKSPACE:
+				terminal->backspace();
+				break;
+			case ASCII_F1:
+				terminal->deactivate_cursor();
+				if (machine.paused) {
+					machine.run(0);
+				}
+				terminal->activate_cursor();
+				break;
+			case ASCII_F2:
+				terminal->deactivate_cursor();
+				if (machine.paused) {
+					machine.run(0);
+					machine.run(0);
+				}
+				terminal->activate_cursor();
+				break;
+			case ASCII_F3:
+				terminal->deactivate_cursor();
+				if (machine.paused) {
+					machine.run(0);
+					machine.run(0);
+					machine.run(0);
+					machine.run(0);
+				}
+				terminal->activate_cursor();
+				break;
+			case ASCII_LF:
 			{
 				char *buffer = terminal->enter_command();
 				process_command(buffer);
 			}
-			break;
-		default:
-			terminal->putchar(key_value);
-			break;
+				break;
+			default:
+				terminal->putchar(key_value);
+				break;
+		}
+		terminal->activate_cursor();
 	}
 }
 
-void E64::hud_t::execute()
+void E64::hud_t::update_stats_view()
 {
-	while (cia->read_byte(0x00)) {
-		terminal->deactivate_cursor();
-		process_keypress();
-		terminal->activate_cursor();
-	}
-	
 	stats_view->clear();
 	stats_view->puts(stats.summary());
-	
+}
+
+void E64::hud_t::update()
+{
 	cpu_view->clear();
 	cpu_view->printf("  pc  ac xr yr sp nv-bdizc I N\n");
 	cpu_view->printf(" %04x %02x %02x %02x %02x %c%c%c%c%c%c%c%c %c %c",
@@ -361,8 +354,6 @@ void E64::hud_t::execute()
 			   vicv.irq_line ? '1' : '0',
 			   machine.timer->irq_line ? '1' : '0',
 			   irq_line ? '1' : '0');
-	
-	refresh = true;
 }
 
 void E64::hud_t::run(uint16_t cycles)
@@ -396,7 +387,8 @@ void E64::hud_t::timer_0_event()
 
 void E64::hud_t::timer_1_event()
 {
-	execute();
+	process_keypress();
+	update();
 }
 
 void E64::hud_t::timer_2_event()
@@ -431,9 +423,9 @@ void E64::hud_t::timer_7_event()
 
 void E64::hud_t::redraw()
 {
-	if (stats_visible && (!overhead_visible))
+	if (stats_visible && paused)
 		blitter->draw_blit(hud.stats_view->blit_no, 128, 244);
-	if (hud.overhead_visible) {
+	if (!paused) {
 		blitter->draw_blit(hud.stats_view->blit_no, 0, 244);
 		blitter->draw_blit(hud.bar_single_height_small_2->blit_no, 0, 236);
 		blitter->draw_blit(hud.terminal->blit_no, 0, 12);
@@ -453,7 +445,6 @@ void E64::hud_t::flip_modes()
 	machine.paused = !machine.paused;
 	if (machine.paused) sdl2_stop_audio();
 	hud.paused = !machine.paused;
-	hud.overhead_visible = !hud.paused;
 }
 
 void E64::hud_t::process_command(char *buffer)
@@ -484,6 +475,18 @@ void E64::hud_t::process_command(char *buffer)
 			}
 			if (count == 0) {
 				terminal->puts("no breakpoints");
+			}
+		} else {
+			uint16_t temp_16bit;
+			if (hex_string_to_int(token1, &temp_16bit)) {
+				temp_16bit &= (RAM_SIZE - 1);
+				machine.cpu->breakpoints[temp_16bit] =
+					!machine.cpu->breakpoints[temp_16bit];
+				terminal->printf("breakpoint %s at $%04x",
+						machine.cpu->breakpoints[temp_16bit] ? "set" : "cleared",
+						temp_16bit);
+			} else {
+				terminal->puts("error: invalid address\n");
 			}
 		}
 	} else if (strcmp(token0, "bc") == 0 ) {
