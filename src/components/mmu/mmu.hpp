@@ -11,8 +11,9 @@
 #include <cstdint>
 #include <cstdlib>
 
+#define IO_BLITTER_PAGE		0xd1
 #define IO_SID_PAGE		0xd4
-#define IO_ROM_PAGE		0xE0
+#define IO_ROM_PAGE		0xe0
 
 #define IO_CIA_PAGE		0x03
 #define IO_VICV_PAGE		0xd0

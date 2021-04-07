@@ -169,8 +169,7 @@ void E64::hud_t::reset()
 	cia->set_keyboard_repeat_speed(5);
 	cia->generate_key_events();
 	
-	timer->set(0, 3600);	// check keyboard state etc...
-	timer->set(1, 3600);	// connected to execute
+	timer->set(0, 3600);	// check keyboard, generate key events...
 	
 	terminal->clear();
 	terminal->printf("E64 Virtual Computer System (C)%u elmerucr", E64_YEAR);
@@ -387,8 +386,7 @@ void E64::hud_t::timer_0_event()
 
 void E64::hud_t::timer_1_event()
 {
-	process_keypress();
-	update();
+
 }
 
 void E64::hud_t::timer_2_event()

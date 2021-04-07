@@ -19,27 +19,64 @@ E64::hud_t	hud;
 E64::stats_t	stats;
 E64::machine_t	machine;
 E64::vicv_ic	vicv;
-
-bool app_running;
-
+bool		app_running;
 std::chrono::time_point<std::chrono::steady_clock> refresh_moment;
+
+static void finish_frame();
+
+int main(int argc, char **argv)
+{
+	E64::sdl2_init();
+	
+	app_running = true;
+	
+	vicv.reset();
+	hud.reset();
+	machine.reset();
+	stats.reset();
+	
+	// if one is paused, the other shouldn't be
+	machine.paused = false;
+	hud.paused = true;
+	
+	refresh_moment = std::chrono::steady_clock::now();
+
+	while (app_running) {
+		vicv.run(CYCLES_PER_STEP);
+		
+		if (machine.paused) {
+			hud.run(CYCLES_PER_STEP);
+		} else {
+			machine.run(CYCLES_PER_STEP);
+		}
+		
+		if (vicv.frame_done())
+			finish_frame();
+	}
+
+	E64::sdl2_cleanup();
+	return 0;
+}
 
 static void finish_frame()
 {
 	if (E64::sdl2_process_events() == E64::QUIT_EVENT) app_running = false;
 	
-	/*
-	 * This partly needs replacement when machine is doing this
-	 */
-	
-	machine.blitter->swap_buffers();
-	machine.blitter->clear_framebuffer();
-	machine.blitter->draw_blit(0, 0, 16);
-	machine.blitter->draw_border();
+	if (!machine.paused) {
+		// this will be done machine internally
+		machine.blitter->swap_buffers();
+		machine.blitter->clear_framebuffer();
+		machine.blitter->draw_blit(0, 0, 16);
+		machine.blitter->draw_border();
+	}
 	machine.blitter->flush();
 	
-	hud.update_stats_view();
+	if (!hud.paused) {
+		hud.process_keypress();
+		hud.update();
+	}
 	
+	hud.update_stats_view();
 	hud.blitter->swap_buffers();
 	hud.blitter->clear_framebuffer();
 	hud.redraw();
@@ -75,40 +112,4 @@ static void finish_frame()
 	}
 	host.video->update_screen();
 	stats.end_idle_time();
-}
-
-int main(int argc, char **argv)
-{
-	E64::sdl2_init();
-	
-	app_running = true;
-	
-	vicv.reset();
-	hud.reset();
-	machine.reset();
-	stats.reset();
-	
-	// if one is paused, the other shouldn't be
-	machine.paused = false;
-	hud.paused = true;
-	
-	refresh_moment = std::chrono::steady_clock::now();
-
-	while (app_running) {
-		vicv.run(CYCLES_PER_STEP);
-		
-		if (!hud.paused) {
-			hud.run(CYCLES_PER_STEP);
-		}
-		
-		if (!machine.paused) {
-			machine.run(CYCLES_PER_STEP);
-		}
-		
-		if (vicv.frame_done())
-			finish_frame();
-	}
-
-	E64::sdl2_cleanup();
-	return 0;
 }

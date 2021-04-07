@@ -271,3 +271,48 @@ void E64::blitter_ic::swap_buffers()
 	frontbuffer = backbuffer;
 	backbuffer = tempbuffer;
 }
+
+void E64::blitter_ic::write_byte(uint8_t address, uint8_t byte)
+{
+	switch (address) {
+		case 0x00:
+			break;
+		case 0x02:
+			border_size = byte;
+			break;
+		case 0x08:
+			clear_color = (clear_color & 0xff00) | byte;
+			break;
+		case 0x09:
+			clear_color = (clear_color & 0x00ff) | (byte << 8);
+			break;
+		case 0x0a:
+			border_color = (border_color & 0xff00) | byte;
+			break;
+		case 0x0b:
+			border_color = (border_color & 0x00ff) | (byte << 8);
+			break;
+		default:
+			registers[address & 0xf] = byte;
+	}
+}
+
+uint8_t E64::blitter_ic::read_byte(uint8_t address)
+{
+	switch (address) {
+		case 0x00:
+			return 0;
+		case 0x02:
+			return border_size;
+		case 0x08:
+			return clear_color & 0xff;
+		case 0x09:
+			return (clear_color & 0xff00) >> 8;
+		case 0x0a:
+			return border_color & 0xff;
+		case 0x0b:
+			return (border_color & 0xff00) >> 8;
+		default:
+			return registers[address & 0xf];
+	}
+}

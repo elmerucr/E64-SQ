@@ -26,12 +26,19 @@ private:
     uint8_t status_bar_framecounter_interval;
     
     double alpha;                       // exponential smoothing constant
+	double alpha_cpu;
 
     double framerate;
     double smoothed_framerate;
     
     double mhz;
     double smoothed_mhz;
+	
+	double cpu_mhz;
+	uint32_t new_cpu_ticks;
+	uint32_t old_cpu_ticks;
+	uint32_t delta_cpu_ticks;
+	double smoothed_cpu_mhz;
     
     double audio_queue_size;
     double smoothed_audio_queue_size;

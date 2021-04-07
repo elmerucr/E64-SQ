@@ -70,8 +70,4 @@ void E64::machine_t::reset()
 	timer->reset();
 	cia->reset();
 	cpu->reset();
-	
-	blitter->set_clear_color(C64_BLUE);
-	blitter->set_border_color(C64_BLACK);
-	blitter->set_border_size(16);
 }

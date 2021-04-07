@@ -11,7 +11,7 @@ E64 is a virtual computer system that runs on macOS and linux. It's mainly inspi
 * Eight independent and programmable timers
 ## Screenshots
 ![E64](./docs/E64_2021-03-28.png)
-![E64](./docs/E64_monitor_2021-03-28.png)
+![E64](./docs/E64_hud_2021-04-05.png)
 ## Compiling
 ### Core application
 #### macOS

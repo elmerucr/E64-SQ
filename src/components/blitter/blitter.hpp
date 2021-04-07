@@ -4,6 +4,25 @@
 //  Copyright © 2020-2021 elmerucr. All rights reserved.
 
 /*
+ *
+ * I/O addresses blitter_ic
+ *
+ * 0x00: control register
+ * 0x01: blit_no
+ * 0x02: hor border size
+ * 0x03: -
+ * 0x04: x_pos blit, low byte
+ * 0x05: x_pos blit, high byte
+ * 0x06: y_pos blit, low byte
+ * 0x07: y_pos blit high byte
+ * 0x08: clearcolor, low byte
+ * 0x09: clearcolor, high byte
+ * 0x0a: hor border color, low byte
+ * 0x0b: hor border color, high byte
+ */
+
+
+/*
  * Blitter is able to copy data very fast from a video memory location to the
  * backbuffer (framebuffer). Copy operations run independently and can be added
  * to a FIFO linked list (blitter internally).
@@ -121,6 +140,7 @@ struct operation {
 
 class blitter_ic {
 private:
+	uint8_t	registers[16];
 	uint8_t *blit_memory;
 	uint16_t *blit_memory_as_words;
 	uint16_t *cbm_font;	// unpacked font
@@ -210,6 +230,9 @@ private:
 public:
 	blitter_ic();
 	~blitter_ic();
+	
+	void write_byte(uint8_t address, uint8_t byte);
+	uint8_t read_byte(uint8_t address);
 	
 	void swap_buffers();
 
