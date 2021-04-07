@@ -286,7 +286,7 @@ void E64::hud_t::update()
 	uint16_t pc = machine.cpu->get_pc();
 	for (int i=0; i<16; i++) {
 		uint16_t old_color = terminal->current_foreground_color;
-		if (machine.cpu->breakpoints[pc] == true) disassembly_view->current_foreground_color = AMBER_07;
+		if (machine.cpu->breakpoint[pc] == true) disassembly_view->current_foreground_color = AMBER_07;
 		if (disassembly_view->get_column() != 0)
 			disassembly_view->putchar('\n');
 		int ops = machine.cpu->disassemble(pc, text_buffer);
@@ -464,7 +464,7 @@ void E64::hud_t::process_command(char *buffer)
 		if (token1 == NULL) {
 			uint16_t count = 0;
 			for (int i=0; i< RAM_SIZE; i++) {
-				if (machine.cpu->breakpoints[i]) {
+				if (machine.cpu->breakpoint[i]) {
 					terminal->printf("%04x ", i);
 					count++;
 					if ((count % 4) == 0)
@@ -478,10 +478,10 @@ void E64::hud_t::process_command(char *buffer)
 			uint16_t temp_16bit;
 			if (hex_string_to_int(token1, &temp_16bit)) {
 				temp_16bit &= (RAM_SIZE - 1);
-				machine.cpu->breakpoints[temp_16bit] =
-					!machine.cpu->breakpoints[temp_16bit];
+				machine.cpu->breakpoint[temp_16bit] =
+					!machine.cpu->breakpoint[temp_16bit];
 				terminal->printf("breakpoint %s at $%04x",
-						machine.cpu->breakpoints[temp_16bit] ? "set" : "cleared",
+						machine.cpu->breakpoint[temp_16bit] ? "set" : "cleared",
 						temp_16bit);
 			} else {
 				terminal->puts("error: invalid address\n");

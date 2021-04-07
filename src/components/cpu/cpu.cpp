@@ -14,15 +14,14 @@ cpu_ic::cpu_ic()
 	nmi_line = true;
 	old_nmi_line = true;
 
-	breakpoints = nullptr;
-	breakpoints = new bool[65536];
+	breakpoint = nullptr;
+	breakpoint = new bool[65536];
 	clear_breakpoints();
-	//breakpoint_reached = false;
 }
 
 cpu_ic::~cpu_ic()
 {
-	delete [] breakpoints;
+	delete [] breakpoint;
 }
 
 void cpu_ic::reset()
@@ -33,63 +32,61 @@ void cpu_ic::reset()
 
 void cpu_ic::clear_breakpoints()
 {
-	if (breakpoints) {
-		for (int i=0; i<65536; i++) breakpoints[i] = false;
+	if (breakpoint) {
+		for (int i=0; i<65536; i++) breakpoint[i] = false;
 	}
 }
 
 void cpu_ic::toggle_breakpoint(uint16_t address)
 {
-	breakpoints[address] = !breakpoints[address];
+	breakpoint[address] = !breakpoint[address];
 }
 
-uint32_t cpu_ic::run(uint32_t cycles)
+bool cpu_ic::run(int32_t desired_cycles, int32_t *consumed_cycles)
 {
-	cycle_saldo += cycles;
+	cycle_saldo += desired_cycles;
 	
 	bool done = false;
 	bool breakpoint_reached = false;
-
-	int32_t cycles_done = 0;
+	
+	*consumed_cycles = 0;
 
 	if ((nmi_line == false) && (old_nmi_line = true)) {
 		nmi6502();
-		cycles_done += 7;
-		if (cycles_done >= cycle_saldo) done = true;
-		if (breakpoints[pc]) {
+		*consumed_cycles += 7;
+		if (*consumed_cycles >= cycle_saldo) done = true;
+		if (breakpoint[pc]) {
 			breakpoint_reached = true;
 			done = true;
 		}
 	} else if (!irq_line && !(status & FLAG_INTERRUPT)) {
 		irq6502();
-		cycles_done += 7;
-		if (cycles_done >= cycle_saldo) done = true;
-		if (breakpoints[pc]) {
+		*consumed_cycles += 7;
+		if (*consumed_cycles >= cycle_saldo) done = true;
+		if (breakpoint[pc]) {
 			breakpoint_reached = true;
 			done = true;
 		}
 	}
 
 	/*
-	 * This loop always runs one instruction, unless breakpoint was
-	 * already detected.
+	 * This loop runs at least one instruction, unless a breakpoint was
+	 * already detected at the start of an interrupt routine
 	 */
 	if (!done) {
 		do {
 			uint32_t old_clockticks6502 = clockticks6502;
 			step6502();
-			cycles_done += (clockticks6502 - old_clockticks6502);
-			if (breakpoints[pc]) {
-				breakpoint_reached = true;
-			}
-		} while ((cycles_done < cycle_saldo) && !breakpoint_reached);
+			*consumed_cycles += (clockticks6502 - old_clockticks6502);
+			breakpoint_reached = breakpoint[pc];
+		} while ((*consumed_cycles < cycle_saldo) && (!breakpoint_reached) && (desired_cycles > 0));
 	}
 
 	old_nmi_line = nmi_line;
 	
-	cycle_saldo -= cycles_done;
-
-	return cycles_done;
+	cycle_saldo -= *consumed_cycles;
+	
+	return breakpoint_reached;
 }
 
 uint32_t cpu_ic::clock_ticks()

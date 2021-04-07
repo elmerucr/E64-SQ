@@ -25,8 +25,7 @@ public:
 	cpu_ic();
 	~cpu_ic();
 	
-	bool *breakpoints;
-	//bool breakpoint_reached;
+	bool *breakpoint;
 
 	void reset();
 
@@ -34,7 +33,7 @@ public:
 	 * Basic run function. When run with 0 cycles, it runs 1 instruction
 	 * minimal. The return value contains the realized number of cycles.
 	 */
-	uint32_t run(uint32_t cycles);
+	bool run(int32_t desired_cycles, int32_t *consumed_cycles);
 
 	void pull_irq();
 	void release_irq();

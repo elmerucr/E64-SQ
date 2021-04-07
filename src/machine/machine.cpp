@@ -35,7 +35,8 @@ E64::machine_t::~machine_t()
 
 bool E64::machine_t::run(uint16_t cycles)
 {
-	uint16_t processed_cycles = cpu->run(cycles);
+	int32_t processed_cycles;
+	bool breakpoint_reached = cpu->run(cycles, &processed_cycles);
 	cia->run(processed_cycles);
 	timer->run(processed_cycles);
 	
@@ -55,7 +56,7 @@ bool E64::machine_t::run(uint16_t cycles)
 	if (audio_queue_size > (AUDIO_BUFFER_SIZE/2))
 		E64::sdl2_start_audio();
 	
-	return false;
+	return breakpoint_reached;
 }
 
 void E64::machine_t::reset()

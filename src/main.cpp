@@ -47,7 +47,12 @@ int main(int argc, char **argv)
 		if (machine.paused) {
 			hud.run(CYCLES_PER_STEP);
 		} else {
-			machine.run(CYCLES_PER_STEP);
+			if (machine.run(CYCLES_PER_STEP)) {
+				// ugly, needs better way...
+				hud.flip_modes();
+				hud.terminal->printf("breakpoint reached at $%04x\n",
+						     machine.cpu->get_pc());
+			}
 		}
 		
 		if (vicv.frame_done())
