@@ -10,8 +10,8 @@ extern "C" {
 
 cpu_ic::cpu_ic()
 {
-	irq_line = true;
-	nmi_line = true;
+//	*irq_line = true;
+//	*nmi_line = true;
 	old_nmi_line = true;
 
 	breakpoint = nullptr;
@@ -46,41 +46,29 @@ bool cpu_ic::run(int32_t desired_cycles, int32_t *consumed_cycles)
 {
 	cycle_saldo += desired_cycles;
 	
-	bool done = false;
 	bool breakpoint_reached = false;
 	
 	*consumed_cycles = 0;
 
-	if ((nmi_line == false) && (old_nmi_line = true)) {
-		nmi6502();
-		*consumed_cycles += 7;
-		if (*consumed_cycles >= cycle_saldo) done = true;
-		if (breakpoint[pc]) {
-			breakpoint_reached = true;
-			done = true;
-		}
-	} else if (!irq_line && !(status & FLAG_INTERRUPT)) {
-		irq6502();
-		*consumed_cycles += 7;
-		if (*consumed_cycles >= cycle_saldo) done = true;
-		if (breakpoint[pc]) {
-			breakpoint_reached = true;
-			done = true;
-		}
-	}
-
 	/*
-	 * This loop runs at least one instruction, unless a breakpoint was
-	 * already detected at the start of an interrupt routine
+	 * This loop runs always at least one instruction. If an irq or nmi is
+	 * triggered, that operation is run instead.
 	 */
-	if (!done) {
-		do {
-			uint32_t old_clockticks6502 = clockticks6502;
+	do {
+		uint32_t old_clockticks6502 = clockticks6502;
+		if ((*nmi_line == false) && (old_nmi_line = true)) {
+			nmi6502();
+			*consumed_cycles += 7;
+		} else if (!(*irq_line) && !(status & FLAG_INTERRUPT)) {
+			irq6502();
+			*consumed_cycles += 7;
+		} else {
 			step6502();
-			*consumed_cycles += (clockticks6502 - old_clockticks6502);
-			breakpoint_reached = breakpoint[pc];
-		} while ((*consumed_cycles < cycle_saldo) && (!breakpoint_reached) && (desired_cycles > 0));
-	}
+		}
+		*consumed_cycles += (clockticks6502 - old_clockticks6502);
+		breakpoint_reached = breakpoint[pc];
+	} while ((*consumed_cycles < cycle_saldo) && (!breakpoint_reached) && (desired_cycles > 0));
+	
 
 	old_nmi_line = nmi_line;
 	
@@ -92,16 +80,6 @@ bool cpu_ic::run(int32_t desired_cycles, int32_t *consumed_cycles)
 uint32_t cpu_ic::clock_ticks()
 {
 	return clockticks6502;
-}
-
-void cpu_ic::pull_irq()
-{
-	irq_line = false;
-}
-
-void cpu_ic::release_irq()
-{
-	irq_line = true;
 }
 
 void cpu_ic::dump_stack()
@@ -168,3 +146,65 @@ int cpu_ic::disassemble(char *buffer)
 {
 	return disassemble(pc, buffer);
 }
+
+void cpu_ic::assign_irq_pin(bool *pin)
+{
+	irq_line = pin;
+}
+
+void cpu_ic::assign_nmi_pin(bool *pin)
+{
+	nmi_line = pin;
+}
+
+
+
+
+//
+//
+//bool cpu_ic::run(int32_t desired_cycles, int32_t *consumed_cycles)
+//{
+//	cycle_saldo += desired_cycles;
+//
+//	bool done = false;
+//	bool breakpoint_reached = false;
+//
+//	*consumed_cycles = 0;
+//
+//	if ((*nmi_line == false) && (old_nmi_line = true)) {
+//		nmi6502();
+//		*consumed_cycles += 7;
+//		if (*consumed_cycles >= cycle_saldo) done = true;
+//		if (breakpoint[pc]) {
+//			breakpoint_reached = true;
+//			done = true;
+//		}
+//	} else if (!(*irq_line) && !(status & FLAG_INTERRUPT)) {
+//		irq6502();
+//		*consumed_cycles += 7;
+//		if (*consumed_cycles >= cycle_saldo) done = true;
+//		if (breakpoint[pc]) {
+//			breakpoint_reached = true;
+//			done = true;
+//		}
+//	}
+//
+//	/*
+//	 * This loop runs at least one instruction, unless a breakpoint was
+//	 * already detected at the start of an interrupt routine
+//	 */
+//	if (!done) {
+//		do {
+//			uint32_t old_clockticks6502 = clockticks6502;
+//			step6502();
+//			*consumed_cycles += (clockticks6502 - old_clockticks6502);
+//			breakpoint_reached = breakpoint[pc];
+//		} while ((*consumed_cycles < cycle_saldo) && (!breakpoint_reached) && (desired_cycles > 0));
+//	}
+//
+//	old_nmi_line = nmi_line;
+//
+//	cycle_saldo -= *consumed_cycles;
+//
+//	return breakpoint_reached;
+//}

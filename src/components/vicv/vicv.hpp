@@ -12,7 +12,8 @@
 
 /*
  * Register 0x00 is interrupt status register. Write to bit 0 means
- * acknowledge VBLANK interrupt.
+ * acknowledge VBLANK interrupt. When read and bit 0 is set, it means an irq
+ * is waiting and not yet acknowledged.
  */
 #define VICV_REG_ISR		0x00
 
@@ -31,7 +32,7 @@ public:
 	
 	uint8_t registers[2];
 	
-	bool irq_line;
+	uint8_t irq_number;
 	
 	void reset();
 	

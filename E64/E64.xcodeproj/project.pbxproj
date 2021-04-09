@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		46103A152610DF8800F7AB6F /* rom.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 46103A142610DF8800F7AB6F /* rom.cpp */; };
+		463A9A57262096170090312E /* exceptions.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 463A9A55262096170090312E /* exceptions.cpp */; };
 		463C0FD226175707003F6738 /* tty.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 463C0FCE26175706003F6738 /* tty.cpp */; };
 		463C0FD326175707003F6738 /* hud.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 463C0FD026175707003F6738 /* hud.cpp */; };
 		463C101226175734003F6738 /* lbaselib.c in Sources */ = {isa = PBXBuildFile; fileRef = 463C0FD426175731003F6738 /* lbaselib.c */; };
@@ -98,6 +99,8 @@
 
 /* Begin PBXFileReference section */
 		46103A142610DF8800F7AB6F /* rom.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = rom.cpp; path = ../../src/rom/rom.cpp; sourceTree = "<group>"; };
+		463A9A55262096170090312E /* exceptions.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = exceptions.cpp; path = ../../src/components/cpu/exceptions.cpp; sourceTree = "<group>"; };
+		463A9A56262096170090312E /* exceptions.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = exceptions.hpp; path = ../../src/components/cpu/exceptions.hpp; sourceTree = "<group>"; };
 		463C0FCE26175706003F6738 /* tty.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = tty.cpp; path = ../../src/hud/tty.cpp; sourceTree = "<group>"; };
 		463C0FCF26175707003F6738 /* tty.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = tty.hpp; path = ../../src/hud/tty.hpp; sourceTree = "<group>"; };
 		463C0FD026175707003F6738 /* hud.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = hud.cpp; path = ../../src/hud/hud.cpp; sourceTree = "<group>"; };
@@ -269,6 +272,8 @@
 				464F640126139B22005A3E51 /* cpu.hpp */,
 				464F63FE26139B22005A3E51 /* cpu.cpp */,
 				464F63FC26139B22005A3E51 /* 65c02.h */,
+				463A9A56262096170090312E /* exceptions.hpp */,
+				463A9A55262096170090312E /* exceptions.cpp */,
 				464F63FA26139B22005A3E51 /* fake6502.c */,
 				464F640226139B22005A3E51 /* fake6502.h */,
 				464F63FF26139B22005A3E51 /* instructions.h */,
@@ -664,6 +669,7 @@
 				463C101926175734003F6738 /* lvm.c in Sources */,
 				464F63EB26139A5C005A3E51 /* envelope.cc in Sources */,
 				4656019C25EAD0F600276691 /* host.cpp in Sources */,
+				463A9A57262096170090312E /* exceptions.cpp in Sources */,
 				463C101726175734003F6738 /* lmem.c in Sources */,
 				464F63E026139A5C005A3E51 /* wave6581_PST.cc in Sources */,
 				463C103326175734003F6738 /* lgc.c in Sources */,

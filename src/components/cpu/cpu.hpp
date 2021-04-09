@@ -15,9 +15,9 @@
 
 class cpu_ic {
 private:
-	bool irq_line;
+	bool *irq_line;
 	bool old_irq_line;
-	bool nmi_line;
+	bool *nmi_line;
 	bool old_nmi_line;
 	
 	int32_t cycle_saldo;
@@ -35,17 +35,15 @@ public:
 	 */
 	bool run(int32_t desired_cycles, int32_t *consumed_cycles);
 
-	void pull_irq();
-	void release_irq();
-	void pull_nmi();
-	void release_nmi();
-
 	uint16_t get_pc();
 	uint8_t  get_sp();
 	uint8_t  get_a();
 	uint8_t  get_x();
 	uint8_t  get_y();
 	uint8_t  get_status();
+	
+	void assign_irq_pin(bool *pin);
+	void assign_nmi_pin(bool *pin);
 	
 	inline bool get_irq_line() { return irq_line; }
 	inline bool get_nmi_line() { return nmi_line; }

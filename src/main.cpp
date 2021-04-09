@@ -31,6 +31,8 @@ int main(int argc, char **argv)
 	app_running = true;
 	
 	vicv.reset();
+	vicv.irq_number = machine.exceptions->connect_device();
+	
 	hud.reset();
 	machine.reset();
 	stats.reset();
@@ -69,8 +71,7 @@ static void finish_frame()
 	
 	if (!machine.paused) {
 		// this will be done machine internally
-		machine.blitter->swap_buffers();
-		machine.blitter->clear_framebuffer();
+		//machine.blitter->clear_framebuffer();
 		machine.blitter->draw_blit(0, 0, 16);
 		machine.blitter->draw_border();
 	}

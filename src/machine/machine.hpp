@@ -13,6 +13,7 @@
 #include "timer.hpp"
 #include "blitter.hpp"
 #include "cpu.hpp"
+#include "exceptions.hpp"
 
 namespace E64
 {
@@ -25,6 +26,7 @@ public:
 	bool paused;
 
 	mmu_ic		*mmu;
+	exceptions_ic	*exceptions;
 	cpu_ic		*cpu;
 	timer_ic	*timer;
 	blitter_ic	*blitter;

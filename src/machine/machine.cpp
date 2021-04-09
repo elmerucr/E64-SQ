@@ -10,8 +10,14 @@
 E64::machine_t::machine_t()
 {
 	mmu = new mmu_ic();
+	exceptions = new exceptions_ic();
+	
 	cpu = new cpu_ic();
+	cpu->assign_irq_pin(&exceptions->irq_output_pin);
+	cpu->assign_nmi_pin(&exceptions->nmi_output_pin);
+	
 	timer = new timer_ic();
+	//exceptions->connect_device(&timer->irq_line);
 	
 	blitter = new blitter_ic();
 	sids = new sids_ic();
@@ -30,11 +36,12 @@ E64::machine_t::~machine_t()
 	delete blitter;
 	delete timer;
 	delete cpu;
+	delete exceptions;
 	delete mmu;
 }
 
 bool E64::machine_t::run(uint16_t cycles)
-{
+{	
 	int32_t processed_cycles;
 	bool breakpoint_reached = cpu->run(cycles, &processed_cycles);
 	cia->run(processed_cycles);

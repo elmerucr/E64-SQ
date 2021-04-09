@@ -274,8 +274,8 @@ void E64::hud_t::update()
 			 machine.cpu->get_status() & 0x04 ? '*' : '.',
 			 machine.cpu->get_status() & 0x02 ? '*' : '.',
 			 machine.cpu->get_status() & 0x01 ? '*' : '.',
-			 machine.cpu->get_irq_line() ? '1' : '0',
-			 machine.cpu->get_nmi_line() ? '1' : '0');
+			 machine.exceptions->irq_output_pin ? '1' : '0',
+			 machine.exceptions->nmi_output_pin ? '1' : '0');
 	
 	cpu_view->current_foreground_color = GREEN_03;
 	cpu_view->putchar(machine.cpu->get_old_nmi_line() ? '1' : '0');
@@ -350,7 +350,7 @@ void E64::hud_t::update()
 			   "     hud-%c-+ |\n"
 			   "             |\n"
 			   "     xxx-1---+\n",
-			   vicv.irq_line ? '1' : '0',
+			   machine.exceptions->irq_input_pins[vicv.irq_number] ? '1' : '0',
 			   machine.timer->irq_line ? '1' : '0',
 			   irq_line ? '1' : '0');
 }

@@ -19,7 +19,6 @@ void E64::vicv_ic::reset()
 {
 	registers[0] = 0;
 	registers[1] = 0;
-	irq_line = true;
 }
 
 void E64::vicv_ic::run(uint32_t cycles)
@@ -49,7 +48,10 @@ void E64::vicv_ic::run(uint32_t cycles)
 		switch (cycle_clock) {
 			case (VICV_PIXELS_PER_SCANLINE+VICV_PIXELS_HBLANK)*VICV_SCANLINES:
 				// start of vblank
-				if (!machine.paused) irq_line = false;
+				if (!machine.paused) {
+					registers[0] = 0b00000001;
+					machine.exceptions->pull(irq_number);
+				}
 				break;
 			case (VICV_PIXELS_PER_SCANLINE+VICV_PIXELS_HBLANK)*(VICV_SCANLINES+VICV_SCANLINES_VBLANK):
 				// end of vblank
@@ -75,13 +77,14 @@ uint8_t E64::vicv_ic::read_byte(uint8_t address) { return registers[address & 0x
 void E64::vicv_ic::write_byte(uint8_t address, uint8_t byte)
 {
 	switch (address) {
-	case VICV_REG_ISR:
-		if (byte & 0b00000001)
-			// NEEDS WORK
-			//machine.TTL74LS148->release_line(vblank_interrupt_device_number);  // acknowledge pending irq
-		break;
-	default:
-		registers[address & 0x01] = byte;
-		break;
+		case VICV_REG_ISR:
+			if (byte & 0b00000001) {
+				registers[0] = 0b00000000;
+				machine.exceptions->release(irq_number);
+			}
+			break;
+		default:
+			registers[address & 0x01] = byte;
+			break;
 	}
 }

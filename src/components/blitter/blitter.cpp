@@ -276,6 +276,16 @@ void E64::blitter_ic::write_byte(uint8_t address, uint8_t byte)
 {
 	switch (address) {
 		case 0x00:
+			switch (byte) {
+				case 0b00000001:
+					swap_buffers();
+					break;
+				case 0b00000010:
+					clear_framebuffer();
+					break;
+				default:
+					break;
+			}
 			break;
 		case 0x02:
 			border_size = byte;
