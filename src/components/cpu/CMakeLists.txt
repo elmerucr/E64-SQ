@@ -1,1 +1,1 @@
-add_library(cpu STATIC cpu.cpp mem.cpp fake6502.c)
+add_library(cpu STATIC cpu.cpp exceptions.cpp mem.cpp fake6502.c)
