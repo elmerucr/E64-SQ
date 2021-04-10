@@ -35,7 +35,7 @@
  */
  
 /*
- * register 2 and 3 are respectively the high and low byte
+ * register 2 and 3 are respectively the low and high byte
  * of an unsigned 16bit data value
  */
 
@@ -43,6 +43,7 @@
 #define timer_hpp
 
 #include <cstdint>
+#include "exceptions.hpp"
 
 namespace E64
 {
@@ -61,10 +62,17 @@ private:
 	struct timer_unit timers[8];
 
 	uint32_t bpm_to_clock_interval(uint16_t bpm);
+	
+	exceptions_ic *exceptions;
 public:
+	timer_ic(exceptions_ic *unit);
 	void reset();
 	
+	// two different systems to deals with irq
+	// first for hud, second for machine
+	// to be improved later on
 	bool irq_line;
+	uint8_t irq_number;
 
 	// register access functions
 	uint8_t read_byte(uint8_t address);
@@ -79,6 +87,8 @@ public:
 	
 	// convenience function (turning on specific timer + bpm)
 	void set(uint8_t timer_no, uint16_t bpm);
+	
+	void status(char *buffer, uint8_t timer_no);
 };
 
 }

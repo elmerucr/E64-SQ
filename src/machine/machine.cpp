@@ -16,8 +16,7 @@ E64::machine_t::machine_t()
 	cpu->assign_irq_pin(&exceptions->irq_output_pin);
 	cpu->assign_nmi_pin(&exceptions->nmi_output_pin);
 	
-	timer = new timer_ic();
-	//exceptions->connect_device(&timer->irq_line);
+	timer = new timer_ic(exceptions);
 	
 	blitter = new blitter_ic();
 	sids = new sids_ic();

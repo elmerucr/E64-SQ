@@ -6,6 +6,7 @@
 #include "cia.hpp"
 #include "tty.hpp"
 #include "timer.hpp"
+#include "exceptions.hpp"
 
 #ifndef HUD_HPP
 #define HUD_HPP
@@ -31,6 +32,7 @@ public:
 	void enter_monitor_line(char *buffer);
 	bool hex_string_to_int(const char *temp_string, uint16_t *return_value);
 	
+	exceptions_ic *exceptions;
 	blitter_ic *blitter;
 	cia_ic *cia;
 	timer_ic *timer;

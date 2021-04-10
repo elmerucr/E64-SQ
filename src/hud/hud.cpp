@@ -49,9 +49,10 @@ E64::hud_t::hud_t()
 	luaopen_math(L);
 	luaopen_string(L);
 	
+	exceptions = new exceptions_ic();
 	blitter = new blitter_ic();
 	cia = new cia_ic();
-	timer = new timer_ic();
+	timer = new timer_ic(exceptions);
 	
 	stats_view = new tty_t(0b10001010,
 			       0b00000000,
@@ -153,6 +154,7 @@ E64::hud_t::~hud_t()
 	delete timer;
 	delete cia;
 	delete blitter;
+	delete exceptions;
 	
 	lua_close(L);
 }
@@ -351,7 +353,7 @@ void E64::hud_t::update()
 			   "             |\n"
 			   "     xxx-1---+\n",
 			   machine.exceptions->irq_input_pins[vicv.irq_number] ? '1' : '0',
-			   machine.timer->irq_line ? '1' : '0',
+			   machine.exceptions->irq_input_pins[machine.timer->irq_number] ? '1' : '0',
 			   irq_line ? '1' : '0');
 }
 
@@ -530,6 +532,12 @@ void E64::hud_t::process_command(char *buffer)
 	} else if (strcmp(token0, "reset") == 0) {
 		E64::sdl2_wait_until_enter_released();
 		machine.reset();
+	} else if (strcmp(token0, "timers") == 0) {
+		for (int i=0; i<8; i++) {
+			char text_buffer[64];
+			machine.timer->status(text_buffer, i);
+			terminal->puts(text_buffer);
+		}
 	} else if (strcmp(token0, "ver") == 0) {
 		terminal->printf("\nE64 (C)%i - version %i.%i (%i)", E64_YEAR, E64_MAJOR_VERSION, E64_MINOR_VERSION, E64_BUILD);
 	} else {
