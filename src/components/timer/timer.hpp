@@ -51,7 +51,9 @@ namespace E64
 struct timer_unit {
 	uint16_t bpm;
 	uint32_t clock_interval;
-	uint64_t counter;
+	
+	// NEEDS WORK? used to be 64 bit...
+	uint32_t counter;
 };
 
 class timer_ic
@@ -68,10 +70,6 @@ public:
 	timer_ic(exceptions_ic *unit);
 	void reset();
 	
-	// two different systems to deals with irq
-	// first for hud, second for machine
-	// to be improved later on
-	bool irq_line;
 	uint8_t irq_number;
 
 	// register access functions

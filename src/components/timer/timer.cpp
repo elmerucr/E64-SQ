@@ -28,8 +28,6 @@ void E64::timer_ic::reset()
 	}
 	
 	exceptions->release(irq_number);
-	
-	irq_line = true; // the old way
 }
 
 void E64::timer_ic::run(uint32_t number_of_cycles)
@@ -39,7 +37,6 @@ void E64::timer_ic::run(uint32_t number_of_cycles)
 		if ((timers[i].counter >= timers[i].clock_interval) &&
 		    (registers[1] & (0b1 << i))) {
 			timers[i].counter -= timers[i].clock_interval;
-			irq_line = false;
 			exceptions->pull(irq_number);
 			registers[0] |= (0b1 << i);
 		}
@@ -75,7 +72,6 @@ void E64::timer_ic::write_byte(uint8_t address, uint8_t byte)
 			registers[0] = (~byte) & registers[0];
 			if ((registers[0] & 0xff) == 0) {
 				// no timers left causing interrupts
-				irq_line = true;
 				exceptions->release(irq_number);
 			}
 			break;
@@ -126,5 +122,10 @@ void E64::timer_ic::status(char *buffer, uint8_t timer_no)
 {
 	timer_no &= 0b00000111;
 	
-	snprintf(buffer, 64, "\n%02x: %5u/%8u", timer_no, timers[timer_no].bpm, timers[timer_no].counter);
+	snprintf(buffer, 64, "\n%02x:%s/%5u/%08x/%08x",
+		 timer_no,
+		 registers[0x01] & (0b1 << timer_no) ? " on" : "off",
+		 timers[timer_no].bpm,
+		 timers[timer_no].counter,
+		 timers[timer_no].clock_interval);
 }

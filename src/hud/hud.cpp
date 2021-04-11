@@ -360,7 +360,7 @@ void E64::hud_t::update()
 void E64::hud_t::run(uint16_t cycles)
 {
 	timer->run(cycles);
-	if (timer->irq_line == false) {
+	if (exceptions->irq_output_pin == false) {
 		for (int i=0; i<8; i++) {
 			if (timer->read_byte(0x00) & (0b1 << i)) {
 				switch (i) {
