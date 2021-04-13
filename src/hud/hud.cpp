@@ -171,6 +171,7 @@ void E64::hud_t::reset()
 	cia->set_keyboard_repeat_speed(5);
 	cia->generate_key_events();
 	
+	timer->reset();
 	timer->set(0, 3600);	// check keyboard, generate key events...
 	
 	terminal->clear();
