@@ -5,41 +5,33 @@
 /*
  * hex2int
  * take a hex string and convert it to a 32bit number (max 8 hex digits)
- * from: https://stackoverflow.com/questions/10156409/convert-hex-string-char-to-int
+ * from https://stackoverflow.com/questions/10156409/convert-hex-string-char-to-int
  *
  * This function is slightly adopted to check for true values. It returns false
  * when there's wrong input.
  */
-bool E64::hud_t::hex_string_to_int(const char *temp_string, uint16_t *return_value)
+bool E64::hud_t::hex_string_to_int(const char *temp_string, uint32_t *return_value)
 {
-    uint32_t val = 0;
-    while (*temp_string)
-    {
-	// get current character then increment
-	uint8_t byte = *temp_string++;
-	// transform hex character to the 4bit equivalent number, using the ascii table indexes
-	if (byte >= '0' && byte <= '9')
-	{
-	    byte = byte - '0';
+	uint32_t val = 0;
+	while (*temp_string) {
+		/* Get current character then increment */
+		uint8_t byte = *temp_string++;
+		/* Transform hex character to the 4bit equivalent number */
+		if (byte >= '0' && byte <= '9') {
+			byte = byte - '0';
+		} else if (byte >= 'a' && byte <='f') {
+			byte = byte - 'a' + 10;
+		} else if (byte >= 'A' && byte <='F') {
+			byte = byte - 'A' + 10;
+		} else {
+			/* Problem, return false and do not write the return value */
+			return false;
+		}
+		/* Shift 4 to make space for new digit, and add the 4 bits of the new digit */
+		val = (val << 4) | (byte & 0xf);
 	}
-	else if (byte >= 'a' && byte <='f')
-	{
-	    byte = byte - 'a' + 10;
-	}
-	else if (byte >= 'A' && byte <='F')
-	{
-	    byte = byte - 'A' + 10;
-	}
-	else
-	{
-	    // we have a problem, return false and do not write the return value
-	    return false;
-	}
-	// shift 4 to make space for new digit, and add the 4 bits of the new digit
-	val = (val << 4) | (byte & 0xf);
-    }
-    *return_value = val;
-    return true;
+	*return_value = val;
+	return true;
 }
 
 E64::hud_t::hud_t()
@@ -54,14 +46,6 @@ E64::hud_t::hud_t()
 	cia = new cia_ic();
 	timer = new timer_ic(exceptions);
 	
-	stats_view = new tty_t(0b10001010,
-			       0b00000000,
-			       0x25,
-			       0,
-			       blitter,
-			       GREEN_05,
-			       (GREEN_02 & 0x0fff) | 0xa000);
-	
 	terminal = new tty_t(0b10001010,
 			     0b00000000,
 			     0x46,
@@ -69,6 +53,14 @@ E64::hud_t::hud_t()
 			     blitter,
 			     GREEN_05,
 			     (GREEN_02 & 0x0fff) | 0xa000);
+	
+	stats_view = new tty_t(0b10001010,
+			       0b00000000,
+			       0x25,
+			       0,
+			       blitter,
+			       GREEN_05,
+			       (GREEN_02 & 0x0fff) | 0xa000);
 	
 	cpu_view = new tty_t(0b10001010,
 			     0b00000000,
@@ -181,6 +173,8 @@ void E64::hud_t::reset()
 	terminal->activate_cursor();
 	
 	bar_single_height->clear();
+	for (int i=0; i<4096; i++)
+		blitter->blit[bar_single_height->blit_no].pixel_data[i] = 0x0000;
 	for (int i = 1536; i<2048; i++)
 		blitter->blit[bar_single_height->blit_no].pixel_data[i] = GREEN_05;
 	
@@ -478,14 +472,14 @@ void E64::hud_t::process_command(char *buffer)
 				terminal->puts("no breakpoints");
 			}
 		} else {
-			uint16_t temp_16bit;
-			if (hex_string_to_int(token1, &temp_16bit)) {
-				temp_16bit &= (RAM_SIZE - 1);
-				machine.cpu->breakpoint[temp_16bit] =
-					!machine.cpu->breakpoint[temp_16bit];
+			uint32_t temp_32bit;
+			if (hex_string_to_int(token1, &temp_32bit)) {
+				temp_32bit &= (RAM_SIZE - 1);
+				machine.cpu->breakpoint[temp_32bit] =
+					!machine.cpu->breakpoint[temp_32bit];
 				terminal->printf("breakpoint %s at $%04x",
-						machine.cpu->breakpoint[temp_16bit] ? "set" : "cleared",
-						temp_16bit);
+						machine.cpu->breakpoint[temp_32bit] ? "set" : "cleared",
+						temp_32bit);
 			} else {
 				terminal->puts("error: invalid address\n");
 			}
@@ -510,7 +504,7 @@ void E64::hud_t::process_command(char *buffer)
 		
 		if (lines_remaining == 0) lines_remaining = 1;
 
-		uint16_t temp_pc = machine.cpu->get_pc();
+		uint32_t temp_pc = machine.cpu->get_pc();
 	
 		if (token1 == NULL) {
 			for (int i=0; i<lines_remaining; i++) {
@@ -527,6 +521,34 @@ void E64::hud_t::process_command(char *buffer)
 					terminal->putchar('\n');
 					memory_dump(temp_pc & (RAM_SIZE - 1), 1);
 					temp_pc = (temp_pc + 8) & 0xffff;
+				}
+			}
+		}
+	} else if (strcmp(token0, "mb") == 0) {
+		have_prompt = false;
+		token1 = strtok(NULL, " ");
+
+		uint8_t lines_remaining = terminal->lines_remaining();
+
+		if (lines_remaining == 0) lines_remaining = 1;
+
+		uint32_t blit_memory_location = 0x000000;
+
+		if (token1 == NULL) {
+			for (int i=0; i<lines_remaining; i++) {
+				terminal->putchar('\n');
+				blit_memory_dump(blit_memory_location, 1);
+				blit_memory_location = (blit_memory_location + 8) & 0xfffff8;
+			}
+		} else {
+			if (!hex_string_to_int(token1, &blit_memory_location)) {
+				terminal->putchar('\n');
+				terminal->puts("error: invalid address\n");
+			} else {
+				for (int i=0; i<lines_remaining; i++) {
+					terminal->putchar('\n');
+					blit_memory_dump(blit_memory_location & 0x00fffff8, 1);
+					blit_memory_location = (blit_memory_location + 8) & 0xfffff8;
 				}
 			}
 		}
@@ -580,11 +602,42 @@ void E64::hud_t::memory_dump(uint16_t address, int rows)
 	}
 }
 
+void E64::hud_t::blit_memory_dump(uint32_t address, int rows)
+{
+    address = address & 0xfffff8;
+    
+	for (int i=0; i<rows; i++ ) {
+		uint32_t temp_address = address;
+		terminal->printf("\r;%06x ", temp_address);
+		for (int i=0; i<8; i++) {
+			terminal->printf("%02x ", machine.blitter->read_memory_8(temp_address));
+			temp_address++;
+		}
+	
+		terminal->current_foreground_color = GREEN_06;
+		terminal->current_background_color = (GREEN_02 & 0x0fff) | 0xc000;
+		
+		temp_address = address;
+		for (int i=0; i<8; i++) {
+			uint8_t temp_byte = machine.blitter->read_memory_8(temp_address);
+			terminal->putsymbol(temp_byte);
+			temp_address++;
+		}
+		address += 8;
+		address &= 0x00fffff8;
+	
+		terminal->current_foreground_color = GREEN_05;
+		terminal->current_background_color = (GREEN_02 & 0x0fff) | 0xa000;
+       
+		for (int i=0; i<32; i++) terminal->cursor_left();
+	}
+}
+
 void E64::hud_t::enter_monitor_line(char *buffer)
 {
-	uint16_t address;
-	uint16_t arg0, arg1, arg2, arg3;
-	uint16_t arg4, arg5, arg6, arg7;
+	uint32_t address;
+	uint32_t arg0, arg1, arg2, arg3;
+	uint32_t arg4, arg5, arg6, arg7;
     
 	buffer[5]  = '\0';
 	buffer[8]  = '\0';

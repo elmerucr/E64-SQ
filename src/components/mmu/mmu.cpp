@@ -35,10 +35,12 @@ uint8_t E64::mmu_ic::read_memory_8(uint16_t address)
 {
 	uint16_t page = address >> 8;
 	
-	if (page == IO_VICV_PAGE) {
+	if (page == IO_VICV) {
 		return vicv.read_byte(address & 0x01);
-	} else if (page == IO_BLITTER_PAGE) {
+	} else if (page == IO_BLIT) {
 		return machine.blitter->read_byte(address & 0xff);
+	} else if (page == IO_BLIT_MEMORY) {
+		return machine.blitter->memory_read_byte(address & 0xff);
 	} else if (page == IO_SID_PAGE) {
 		return machine.sids->read_byte(address & 0xff);
 	} else if (page == IO_TIMER_PAGE) {
@@ -47,6 +49,8 @@ uint8_t E64::mmu_ic::read_memory_8(uint16_t address)
 		return machine.cia->read_byte(address & 0xff);
 	} else if ((page & IO_ROM_PAGE) == IO_ROM_PAGE) {
 		return current_rom_image[address & 0x1fff];
+	} else if ((page & IO_BLIT_DESCRIPTOR) == IO_BLIT_DESCRIPTOR) {
+		return machine.blitter->read_descriptor_8(address & 0x07ff);
 	} else {
 		return ram[address & 0xffff];
 	}
@@ -56,16 +60,20 @@ void E64::mmu_ic::write_memory_8(uint16_t address, uint8_t value)
 {
 	uint16_t page = address >> 8;
 	
-	if (page == IO_VICV_PAGE) {
+	if (page == IO_VICV) {
 		vicv.write_byte(address & 0x01, value & 0xff);
-	} else if (page == IO_BLITTER_PAGE) {
+	} else if (page == IO_BLIT) {
 		machine.blitter->write_byte(address & 0xff, value & 0xff);
+	} else if (page == IO_BLIT_MEMORY) {
+		machine.blitter->memory_write_byte(address & 0xff, value & 0xff);
 	} else if (page == IO_SID_PAGE) {
 		machine.sids->write_byte(address & 0xff, value & 0xff);
 	} else if (page == IO_TIMER_PAGE) {
 		machine.timer->write_byte(address & 0xff, value & 0xff);
 	} else if (page == IO_CIA_PAGE) {
 		machine.cia->write_byte(address & 0xff, value & 0xff);
+	} else if ((page & IO_BLIT_DESCRIPTOR) == IO_BLIT_DESCRIPTOR) {
+		machine.blitter->write_descriptor_8(address & 0x07ff, value);
 	} else {
 		ram[address & 0xffff] = value & 0xff;
 	}

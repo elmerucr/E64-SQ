@@ -7,7 +7,8 @@ namespace E64 {
 
 enum output_type {
 	NOTHING,
-	ASCII
+	ASCII,
+	BLITTER
 };
 
 class tty_t {
@@ -26,7 +27,7 @@ private:
 	bool cursor_blink;	// current state
 	char *command_buffer;
 	
-	enum E64::output_type check_output(bool top_down, uint16_t *address);
+	enum E64::output_type check_output(bool top_down, uint32_t *address);
 	
 public:
 	tty_t(uint8_t flags_0, uint8_t flags_1, uint8_t size_in_tiles_log2, int _blit_no, blitter_ic *_blitter, uint16_t foreground_color, uint16_t background_color);

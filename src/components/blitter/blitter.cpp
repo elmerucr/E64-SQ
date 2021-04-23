@@ -12,12 +12,28 @@ E64::blitter_ic::blitter_ic()
 	fb0 = new uint16_t[VICV_PIXELS_PER_SCANLINE * VICV_SCANLINES];
 	fb1 = new uint16_t[VICV_PIXELS_PER_SCANLINE * VICV_SCANLINES];
 	
-	blit_memory = new uint8_t[256 * 65536];
-	blit_memory_as_words = (uint16_t *)blit_memory;
+	blit_memory = new uint8_t[256 * 65536];	// 16mb
+	
+	// fill blit memory with something
+	for (int i=0; i < (256 * 65536); i++) {
+//		blit_memory[i] = (i & 64) ? 0xff : 0x00; // alternating blocks with 0x00 and 0xff (hard reset)
+		if (i & 0b1) {
+			blit_memory[i] = (i & 0xff0000) >> 16;
+		} else {
+			blit_memory[i] = (i & 0x00ff00) >> 8;
+		}
+	}
+	
 	blit = new struct blit_t[256];
 	cbm_font = new uint16_t[256 * 64];
 	
 	for (int i=0; i<256; i++) {
+		blit[i].flags_0 = 0;
+		blit[i].flags_1 = 0;
+		blit[i].size_in_tiles_log2 = 0;
+		blit[i].currently_unused = 0;
+		blit[i].foreground_color = 0;
+		blit[i].background_color = 0;
 		blit[i].pixel_data                 = (uint16_t *)&blit_memory[(i << 16) | 0x0000];
 		blit[i].tile_data                  = (uint8_t  *)&blit_memory[(i << 16) | 0x8000]; // 4k block
 		blit[i].tile_color_data            = (uint16_t *)&blit_memory[(i << 16) | 0xc000]; // 8k block
@@ -86,9 +102,7 @@ inline void E64::blitter_ic::check_new_operation()
 				break;
 			case BLIT:
 				blitter_state = BLITTING;
-		    
-				// set up the blitting finite state machine
-		    
+
 				// check flags 0
 				bitmap_mode	= blit[operations[tail].blit_no].flags_0 & 0b00000001 ? true : false;
 				background      = blit[operations[tail].blit_no].flags_0 & 0b00000010 ? true : false;
@@ -209,15 +223,16 @@ void E64::blitter_ic::run(int no_of_cycles)
 				pixel_data[normalized_pixel_no & 0x3fff] : pixel_data[((tile_index << 6) | pixel_in_tile) & 0x3fff];
 				}
                             
-                            /*  If the source color has an alpha value of higher than 0x0 (there is a pixel),
-                             *  and we're not in multicolor mode, replace with foreground color.
+                            /*
+			     * If the source color has an alpha value of higher than 0x0 (there is a pixel),
+                             * and we're not in multicolor mode, replace with foreground color.
                              *
-                             *  If there's no alpha value (no pixel), and we have background 'on',
-                             *  replace the color with background color.
+                             * If there's no alpha value (no pixel), and we have background 'on',
+                             * replace the color with background color.
                              *
-                             *  At this stage, we have already checked for color per
-                             *  tile, and if so, the value of foreground and respectively
-                             *  background color have been replaced accordingly.
+                             * At this stage, we have already checked for color per
+                             * tile, and if so, the value of foreground and respectively
+                             * background color have been replaced accordingly.
                              */
                             if (source_color & 0xf000) {
                                 if (!multicolor_mode) source_color = foreground_color;
@@ -225,7 +240,7 @@ void E64::blitter_ic::run(int no_of_cycles)
                                 if (background) source_color = background_color;
                             }
                             
-                            /*  Finally, call the alpha blend function */
+                            /* Finally, call the alpha blend function */
                             alpha_blend(&backbuffer[scrn_x + (scrn_y * VICV_PIXELS_PER_SCANLINE)], &source_color);
                         }
                     }
@@ -274,7 +289,7 @@ void E64::blitter_ic::swap_buffers()
 
 void E64::blitter_ic::write_byte(uint8_t address, uint8_t byte)
 {
-	switch (address) {
+	switch (address & 0x1f) {
 		case 0x00:
 			switch (byte) {
 				case 0b00000001:
@@ -303,13 +318,13 @@ void E64::blitter_ic::write_byte(uint8_t address, uint8_t byte)
 			border_color = (border_color & 0x00ff) | (byte << 8);
 			break;
 		default:
-			registers[address & 0xf] = byte;
+			registers[address & 0x1f] = byte;
 	}
 }
 
 uint8_t E64::blitter_ic::read_byte(uint8_t address)
 {
-	switch (address) {
+	switch (address & 0x1f) {
 		case 0x00:
 			return 0;
 		case 0x02:
@@ -323,6 +338,6 @@ uint8_t E64::blitter_ic::read_byte(uint8_t address)
 		case 0x0b:
 			return (border_color & 0xff00) >> 8;
 		default:
-			return registers[address & 0xf];
+			return registers[address & 0x1f];
 	}
 }

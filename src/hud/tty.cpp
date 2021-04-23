@@ -196,7 +196,7 @@ void E64::tty_t::cursor_up()
 	cursor_position -= columns;
 
 	if (cursor_position >= tiles) {
-		uint16_t address;
+		uint32_t address;
 	
 		switch (check_output(true, &address)) {
 			case E64::NOTHING:
@@ -206,6 +206,10 @@ void E64::tty_t::cursor_up()
 				add_top_row();
 				//cursor_position += columns;
 				hud.memory_dump((address-8) & (RAM_SIZE - 1), 1);
+				break;
+			case E64::BLITTER:
+				add_top_row();
+				hud.blit_memory_dump((address - 8) & 0xffffff, 1);
 				break;
 		}
 	}
@@ -217,7 +221,7 @@ void E64::tty_t::cursor_down()
 	
 	// cursor out of current screen?
 	if (cursor_position >= tiles) {
-		uint16_t address;
+		uint32_t address;
 	
 		switch (check_output(false, &address)) {
 			case E64::NOTHING:
@@ -228,6 +232,11 @@ void E64::tty_t::cursor_down()
 				add_bottom_row();
 				cursor_position -= columns;
 				hud.memory_dump((address+8) & (RAM_SIZE - 1), 1);
+				break;
+			case E64::BLITTER:
+				add_bottom_row();
+				cursor_position -= columns;
+				hud.blit_memory_dump((address + 8) & 0xffffff, 1);
 				break;
 		}
 	}
@@ -265,7 +274,7 @@ char *E64::tty_t::enter_command()
 	return command_buffer;
 }
 
-enum E64::output_type E64::tty_t::check_output(bool top_down, uint16_t *address)
+enum E64::output_type E64::tty_t::check_output(bool top_down, uint32_t *address)
 {
 	enum output_type output = NOTHING;
 	
@@ -279,6 +288,17 @@ enum E64::output_type E64::tty_t::check_output(bool top_down, uint16_t *address)
 			}
 			potential_address[4] = 0;
 			hud.hex_string_to_int(potential_address, address);
+			if (top_down) break;
+		} else if (text_screen->tile_data[i] == ';') {
+			output = BLITTER;
+			char potential_address[7];
+			for (int j=0; j<6; j++) {
+				potential_address[j] =
+				text_screen->tile_data[i+1+j];
+			}
+			potential_address[6] = 0;
+			hud.hex_string_to_int(potential_address, address);
+			std::printf("%06x\n", *address);
 			if (top_down) break;
 		}
 	}

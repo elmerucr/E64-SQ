@@ -19,8 +19,8 @@
 #include "vicv.hpp"
 
 #define E64_MAJOR_VERSION    0
-#define E64_MINOR_VERSION    1
-#define E64_BUILD            20210416
+#define E64_MINOR_VERSION    2
+#define E64_BUILD            20210423
 #define E64_YEAR             2021
 
 /* Global objects */

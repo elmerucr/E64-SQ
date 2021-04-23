@@ -11,14 +11,19 @@
 #include <cstdint>
 #include <cstdlib>
 
-#define IO_VICV_PAGE		0xd0
-#define IO_BLITTER_PAGE		0xd1
-#define IO_TIMER_PAGE		0xd3
-#define IO_SID_PAGE		0xd4
-#define IO_BLITTER_PTS_PAGE	0xd8 // until 0xdfff
-#define IO_ROM_PAGE		0xe0
+#define IO_VICV			0xd0 // until 0xd0ff
 
-#define IO_CIA_PAGE		0x03
+#define IO_BLIT			0xd1 // until 0xd1ff
+#define IO_BLIT_MEMORY		0xd2 // until 0xd2ff
+#define IO_BLIT_DESCRIPTOR	0xd8 // until 0xdfff
+
+#define IO_TIMER_PAGE		0xd3 // until 0xd3ff
+
+#define IO_SID_PAGE		0xd4
+
+#define IO_CIA_PAGE		0xd5
+
+#define IO_ROM_PAGE		0xe0
 
 namespace E64
 {

@@ -29,8 +29,9 @@ public:
 	void flip_modes();
 
 	void memory_dump(uint16_t address, int rows);
+	void blit_memory_dump(uint32_t address, int rows);
 	void enter_monitor_line(char *buffer);
-	bool hex_string_to_int(const char *temp_string, uint16_t *return_value);
+	bool hex_string_to_int(const char *temp_string, uint32_t *return_value);
 	
 	exceptions_ic *exceptions;
 	blitter_ic *blitter;
@@ -44,10 +45,10 @@ public:
 	tty_t *cpu_view;
 	tty_t *disassembly_view;
 	tty_t *stack_view;
-	tty_t *bar_single_height_small_1;
-	tty_t *bar_single_height_small_2;
 	tty_t *bar_single_height;
 	tty_t *bar_double_height;
+	tty_t *bar_single_height_small_1;
+	tty_t *bar_single_height_small_2;
 	tty_t *other_info;
 	
 	bool stats_visible;

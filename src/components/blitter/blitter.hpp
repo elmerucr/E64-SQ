@@ -19,8 +19,10 @@
  * 0x09: clearcolor, high byte
  * 0x0a: hor border color, low byte
  * 0x0b: hor border color, high byte
+ *
+ * 0x10: memory access page (low byte)
+ * 0x11: memory access page (high byte)
  */
-
 
 /*
  * Blitter is able to copy data very fast from a video memory location to the
@@ -59,7 +61,7 @@ struct blit_t {
 	 *  |       | | +---- Background (0 = off, 1 = on)
 	 *  |       | +------ Simple Color (0) / Multi Color (1)
 	 *  |       +-------- Color per tile (0 = off, 1 = on)
-	 *  +---------------- Pixel data in video ram (0) / Or cbm font (1)
+	 *  +---------------- Pixel data video ram (0) / Or cbm font (1)
 	 *
 	 *  bits 4-7: Reserved
 	 */
@@ -140,9 +142,8 @@ struct operation {
 
 class blitter_ic {
 private:
-	uint8_t	registers[16];
+	uint8_t	registers[32];
 	uint8_t *blit_memory;
-	uint16_t *blit_memory_as_words;
 	uint16_t *cbm_font;	// unpacked font
 	
 	enum blitter_state_t blitter_state;
@@ -231,8 +232,103 @@ public:
 	blitter_ic();
 	~blitter_ic();
 	
+	// io access
 	void write_byte(uint8_t address, uint8_t byte);
 	uint8_t read_byte(uint8_t address);
+
+	// blitter memory acces
+	inline uint8_t read_memory_8(uint32_t address)
+	{
+		if (((blit[(address & 0x00ff0000) >> 16].flags_0) & 0b10000000)
+		    &&
+		    !(address & 0x00008000)) {
+			return ((uint8_t *)cbm_font)[address & 0x7fff];
+		} else {
+			return blit_memory[address & 0x00ffffff];
+		}
+	}
+	
+	inline void write_memory_8(uint32_t address, uint8_t value)
+	{
+		blit_memory[address & 0x00ffffff] = value;
+	}
+	
+	void memory_write_byte(uint8_t address, uint8_t byte)
+	{
+		uint32_t temp_address = registers[0x11] << 16 |
+					registers[0x10] << 8  |
+					address;
+		write_memory_8(temp_address, byte);
+	}
+	
+	uint8_t memory_read_byte(uint8_t address)
+	{
+		uint32_t temp_address = registers[0x11] << 16 |
+					registers[0x10] << 8  |
+					address;
+		return read_memory_8(temp_address);
+	}
+	
+	// blitter pointer access (256 * 8  = 2048 bytes)
+	inline uint8_t read_descriptor_8(uint16_t address)
+	{
+		switch (address & 0x07) {
+			case 0x00:
+				return blit[(address & 0b11111111000) >> 3].flags_0;
+			case 0x01:
+				return blit[(address & 0b11111111000) >> 3].flags_1;
+			case 0x02:
+				return blit[(address & 0b11111111000) >> 3].size_in_tiles_log2;
+			case 0x03:
+				return blit[(address & 0b11111111000) >> 3].currently_unused;
+			case 0x04:
+				return (blit[(address & 0b11111111000) >> 3].foreground_color) & 0x00ff;
+			case 0x05:
+				return ((blit[(address & 0b11111111000) >> 3].foreground_color) & 0xff00) >> 8;
+			case 0x06:
+				return (blit[(address & 0b11111111000) >> 3].background_color) & 0x00ff;
+			case 0x07:
+				return ((blit[(address & 0b11111111000) >> 3].background_color) & 0xff00) >> 8;
+			default:
+				return 0x00;
+		}
+	}
+	
+	inline void write_descriptor_8(uint16_t address, uint8_t value)
+	{
+		uint16_t temp_word;
+		
+		switch (address & 0x07) {
+			case 0x00:
+				blit[(address & 0b11111111000) >> 3].flags_0 = value;
+				break;
+			case 0x01:
+				blit[(address & 0b11111111000) >> 3].flags_1 = value;
+				break;
+			case 0x02:
+				blit[(address & 0b11111111000) >> 3].size_in_tiles_log2 = value;
+				break;
+			case 0x03:
+				blit[(address & 0b11111111000) >> 3].currently_unused = value;
+				break;
+			case 0x04:
+				temp_word = (blit[(address & 0b11111111000) >> 3].foreground_color) & 0xff00;
+				blit[(address & 0b11111111000) >> 3].foreground_color = temp_word | value;
+				break;
+			case 0x05:
+				temp_word = (blit[(address & 0b11111111000) >> 3].foreground_color) & 0x00ff;
+				blit[(address & 0b11111111000) >> 3].foreground_color = temp_word | (value << 8);
+				break;
+			case 0x06:
+				temp_word = (blit[(address & 0b11111111000) >> 3].background_color) & 0xff00;
+				blit[(address & 0b11111111000) >> 3].background_color = temp_word | value;
+				break;
+			case 0x07:
+				temp_word = (blit[(address & 0b11111111000) >> 3].background_color) & 0x00ff;
+				blit[(address & 0b11111111000) >> 3].background_color = temp_word | (value << 8);
+				break;
+		}
+	}
 	
 	void swap_buffers();
 
@@ -242,7 +338,7 @@ public:
 	
 	void reset();
 	void run(int no_of_cycles);
-	inline void make_idle() { blitter_state = IDLE; }
+	//inline void make_idle() { blitter_state = IDLE; }
 	
 	struct blit_t *blit;	// 2048 bytes (256 * 8) for E64, another 2048 for host
 	
