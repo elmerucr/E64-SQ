@@ -1,4 +1,4 @@
-//  blitter.hpp
+//  blit.hpp
 //  E64
 //
 //  Copyright © 2020-2021 elmerucr. All rights reserved.
@@ -25,20 +25,20 @@
  */
 
 /*
- * Blitter is able to copy data very fast from a video memory location to the
+ * Blit is able to copy data very fast from video memory location to
  * backbuffer (framebuffer). Copy operations run independently and can be added
  * to a FIFO linked list (blitter internally).
  */
 
-#ifndef BLITTER_HPP
-#define BLITTER_HPP
+#ifndef BLIT_HPP
+#define BLIT_HPP
 
 #include <cstdint>
 
 namespace E64
 {
 
-enum blitter_state_t {
+enum blit_state_t {
 	IDLE,
 	CLEARING,
 	DRAW_BORDER,
@@ -100,7 +100,8 @@ struct blit_t {
 	 */
 	uint8_t size_in_tiles_log2;
 	
-	/*  Reserved byte for future purposes related to e.g. wrapping
+	/*
+	 * Reserved byte for future purposes related to e.g. wrapping
 	 */
 	uint8_t currently_unused;
     
@@ -114,16 +115,24 @@ struct blit_t {
 	 */
 	uint16_t background_color;
     
-	/*  pointer to pixels (can be tile pixels or bitmap pixels) */
+	/*
+	 * Pointer to pixels (can be tile pixels or bitmap pixels)
+	 */
 	uint16_t *pixel_data;
     
-	/*  32 bit pointer to start of tiles */
+	/*
+	 * 32 bit pointer to start of tiles
+	 */
 	uint8_t *tile_data;
     
-	/*  32 bit pointer to start of tile color */
+	/*
+	 * 32 bit pointer to start of tile color
+	 */
 	uint16_t *tile_color_data;
     
-	/*  32 bit pointer to start of tile background color */
+	/*
+	 * 32 bit pointer to start of tile background color
+	 */
 	uint16_t *tile_background_color_data;
 };
 
@@ -140,13 +149,13 @@ struct operation {
 	int16_t y_pos;
 };
 
-class blitter_ic {
+class blit_ic {
 private:
 	uint8_t	registers[32];
 	uint8_t *blit_memory;
 	uint16_t *cbm_font;	// unpacked font
 	
-	enum blitter_state_t blitter_state;
+	enum blit_state_t blitter_state;
 	
 	// framebuffer pointers
 	uint16_t *fb0;
@@ -229,12 +238,12 @@ private:
 	
 	inline void check_new_operation();
 public:
-	blitter_ic();
-	~blitter_ic();
+	blit_ic();
+	~blit_ic();
 	
 	// io access
-	void write_byte(uint8_t address, uint8_t byte);
-	uint8_t read_byte(uint8_t address);
+	uint8_t	read_byte(uint8_t address);
+	void	write_byte(uint8_t address, uint8_t byte);
 
 	// blitter memory acces
 	inline uint8_t read_memory_8(uint32_t address)

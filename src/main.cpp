@@ -69,13 +69,7 @@ static void finish_frame()
 {
 	if (E64::sdl2_process_events() == E64::QUIT_EVENT) app_running = false;
 	
-	if (!machine.paused) {
-		// this will be done machine internally
-		//machine.blitter->clear_framebuffer();
-		machine.blitter->draw_blit(0, 0, 16);
-		machine.blitter->draw_border();
-	}
-	machine.blitter->flush();
+	machine.blit->flush();
 	
 	if (!hud.paused) {
 		hud.process_keypress();
@@ -83,14 +77,14 @@ static void finish_frame()
 	}
 	
 	hud.update_stats_view();
-	hud.blitter->swap_buffers();
-	hud.blitter->clear_framebuffer();
+	hud.blit->swap_buffers();
+	hud.blit->clear_framebuffer();
 	hud.redraw();
-	hud.blitter->flush();
+	hud.blit->flush();
 	
 	host.video->clear_frame_buffer();
-	host.video->merge_down_layer(machine.blitter->frontbuffer);
-	host.video->merge_down_layer(hud.blitter->frontbuffer);
+	host.video->merge_down_layer(machine.blit->frontbuffer);
+	host.video->merge_down_layer(hud.blit->frontbuffer);
 	
 	stats.process_parameters();
 	/*

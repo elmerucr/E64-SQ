@@ -42,7 +42,7 @@ E64::hud_t::hud_t()
 	luaopen_string(L);
 	
 	exceptions = new exceptions_ic();
-	blitter = new blitter_ic();
+	blit = new blit_ic();
 	cia = new cia_ic();
 	timer = new timer_ic(exceptions);
 	
@@ -50,7 +50,7 @@ E64::hud_t::hud_t()
 			     0b00000000,
 			     0x46,
 			     1,
-			     blitter,
+			     blit,
 			     GREEN_05,
 			     (GREEN_02 & 0x0fff) | 0xa000);
 	
@@ -58,7 +58,7 @@ E64::hud_t::hud_t()
 			       0b00000000,
 			       0x25,
 			       0,
-			       blitter,
+			       blit,
 			       GREEN_05,
 			       (GREEN_02 & 0x0fff) | 0xa000);
 	
@@ -66,7 +66,7 @@ E64::hud_t::hud_t()
 			     0b00000000,
 			     0x15,
 			     2,
-			     blitter,
+			     blit,
 			     GREEN_05,
 			     (GREEN_02 & 0x0fff) | 0xa000);
 	
@@ -74,7 +74,7 @@ E64::hud_t::hud_t()
 				     0b00000000,
 				     0x45,
 				     3,
-				     blitter,
+				     blit,
 				     GREEN_05,
 				     (GREEN_02 & 0x0fff) | 0xa000);
 	
@@ -82,7 +82,7 @@ E64::hud_t::hud_t()
 			       0b00000000,
 			       0x34,
 			       4,
-			       blitter,
+			       blit,
 			       GREEN_05,
 			       (GREEN_02 & 0x0fff) | 0xa000);
 	
@@ -90,7 +90,7 @@ E64::hud_t::hud_t()
 				      0b00000000,
 				      0x06,
 				      5,
-				      blitter,
+				      blit,
 				      GREEN_05,
 				      (GREEN_02 & 0x0fff) | 0xa000);
 	
@@ -98,7 +98,7 @@ E64::hud_t::hud_t()
 				      0b00000000,
 				      0x16,
 				      6,
-				      blitter,
+				      blit,
 				      GREEN_05,
 				      (GREEN_02 & 0x0fff) | 0xa000);
 	
@@ -106,7 +106,7 @@ E64::hud_t::hud_t()
 				      0b00000000,
 				      0x05,
 				      7,
-				      blitter,
+				      blit,
 				      GREEN_05,
 				      (GREEN_02 & 0x0fff) | 0xa000);
 	
@@ -114,7 +114,7 @@ E64::hud_t::hud_t()
 				      0b00000000,
 				      0x05,
 				      8,
-				      blitter,
+				      blit,
 				      GREEN_05,
 				      (GREEN_02 & 0x0fff) | 0xa000);
 	
@@ -122,7 +122,7 @@ E64::hud_t::hud_t()
 			       0b00000000,
 			       0x34,
 			       9,
-			       blitter,
+			       blit,
 			       GREEN_05,
 			       (GREEN_02 & 0x0fff) | 0xa000);
 	
@@ -145,7 +145,7 @@ E64::hud_t::~hud_t()
 	
 	delete timer;
 	delete cia;
-	delete blitter;
+	delete blit;
 	delete exceptions;
 	
 	lua_close(L);
@@ -153,10 +153,10 @@ E64::hud_t::~hud_t()
 
 void E64::hud_t::reset()
 {
-	blitter->reset();
-	blitter->set_clear_color(0x0000);
-	blitter->set_border_color(0x0000);
-	blitter->set_border_size(0);
+	blit->reset();
+	blit->set_clear_color(0x0000);
+	blit->set_border_color(0x0000);
+	blit->set_border_size(0);
 	
 	cia->reset();
 	cia->set_keyboard_repeat_delay(50);
@@ -174,9 +174,9 @@ void E64::hud_t::reset()
 	
 	bar_single_height->clear();
 	for (int i=0; i<4096; i++)
-		blitter->blit[bar_single_height->blit_no].pixel_data[i] = 0x0000;
+		blit->blit[bar_single_height->blit_no].pixel_data[i] = 0x0000;
 	for (int i = 1536; i<2048; i++)
-		blitter->blit[bar_single_height->blit_no].pixel_data[i] = GREEN_05;
+		blit->blit[bar_single_height->blit_no].pixel_data[i] = GREEN_05;
 	
 	bar_double_height->clear();
 	bar_single_height_small_1->clear();
@@ -419,19 +419,19 @@ void E64::hud_t::timer_7_event()
 void E64::hud_t::redraw()
 {
 	if (stats_visible && paused)
-		blitter->draw_blit(hud.stats_view->blit_no, 128, 244);
+		blit->draw_blit(hud.stats_view->blit_no, 128, 244);
 	if (!paused) {
-		blitter->draw_blit(hud.stats_view->blit_no, 0, 244);
-		blitter->draw_blit(hud.bar_single_height_small_2->blit_no, 0, 236);
-		blitter->draw_blit(hud.terminal->blit_no, 0, 12);
-		blitter->draw_blit(hud.cpu_view->blit_no, 0, 148);
-		blitter->draw_blit(hud.bar_single_height_small_1->blit_no, 0, 164);
-		blitter->draw_blit(hud.stack_view->blit_no, 0, 172);
-		blitter->draw_blit(hud.disassembly_view->blit_no, 256, 148);
-		blitter->draw_blit(hud.bar_single_height->blit_no, 0, 140);
-		blitter->draw_blit(hud.bar_double_height->blit_no, 0, -4);
-		blitter->draw_blit(hud.bar_double_height->blit_no, 0, 276);
-		blitter->draw_blit(hud.other_info->blit_no, 128, 172);
+		blit->draw_blit(hud.stats_view->blit_no, 0, 244);
+		blit->draw_blit(hud.bar_single_height_small_2->blit_no, 0, 236);
+		blit->draw_blit(hud.terminal->blit_no, 0, 12);
+		blit->draw_blit(hud.cpu_view->blit_no, 0, 148);
+		blit->draw_blit(hud.bar_single_height_small_1->blit_no, 0, 164);
+		blit->draw_blit(hud.stack_view->blit_no, 0, 172);
+		blit->draw_blit(hud.disassembly_view->blit_no, 256, 148);
+		blit->draw_blit(hud.bar_single_height->blit_no, 0, 140);
+		blit->draw_blit(hud.bar_double_height->blit_no, 0, -4);
+		blit->draw_blit(hud.bar_double_height->blit_no, 0, 276);
+		blit->draw_blit(hud.other_info->blit_no, 128, 172);
 	}
 }
 
@@ -455,6 +455,9 @@ void E64::hud_t::process_command(char *buffer)
 	} else if (token0[0] == ':') {
 		have_prompt = false;
 		enter_monitor_line(buffer);
+	} else if (token0[0] == ';') {
+		have_prompt = false;
+		enter_monitor_blit_line(buffer);
 	} else if (strcmp(token0, "b") == 0) {
 		token1 = strtok(NULL, " ");
 		terminal->putchar('\n');
@@ -486,6 +489,34 @@ void E64::hud_t::process_command(char *buffer)
 		}
 	} else if (strcmp(token0, "bc") == 0 ) {
 		terminal->puts("\nclearing all breakpoints");
+	} else if (strcmp(token0, "bm") == 0) {
+		have_prompt = false;
+		token1 = strtok(NULL, " ");
+
+		uint8_t lines_remaining = terminal->lines_remaining();
+
+		if (lines_remaining == 0) lines_remaining = 1;
+
+		uint32_t blit_memory_location = 0x000000;
+
+		if (token1 == NULL) {
+			for (int i=0; i<lines_remaining; i++) {
+				terminal->putchar('\n');
+				blit_memory_dump(blit_memory_location, 1);
+				blit_memory_location = (blit_memory_location + 8) & 0xfffff8;
+			}
+		} else {
+			if (!hex_string_to_int(token1, &blit_memory_location)) {
+				terminal->putchar('\n');
+				terminal->puts("error: invalid address\n");
+			} else {
+				for (int i=0; i<lines_remaining; i++) {
+					terminal->putchar('\n');
+					blit_memory_dump(blit_memory_location & 0x00fffff8, 1);
+					blit_memory_location = (blit_memory_location + 8) & 0xfffff8;
+				}
+			}
+		}
 		machine.cpu->clear_breakpoints();
 	} else if (strcmp(token0, "c") == 0 ) {
 		flip_modes();
@@ -521,34 +552,6 @@ void E64::hud_t::process_command(char *buffer)
 					terminal->putchar('\n');
 					memory_dump(temp_pc & (RAM_SIZE - 1), 1);
 					temp_pc = (temp_pc + 8) & 0xffff;
-				}
-			}
-		}
-	} else if (strcmp(token0, "mb") == 0) {
-		have_prompt = false;
-		token1 = strtok(NULL, " ");
-
-		uint8_t lines_remaining = terminal->lines_remaining();
-
-		if (lines_remaining == 0) lines_remaining = 1;
-
-		uint32_t blit_memory_location = 0x000000;
-
-		if (token1 == NULL) {
-			for (int i=0; i<lines_remaining; i++) {
-				terminal->putchar('\n');
-				blit_memory_dump(blit_memory_location, 1);
-				blit_memory_location = (blit_memory_location + 8) & 0xfffff8;
-			}
-		} else {
-			if (!hex_string_to_int(token1, &blit_memory_location)) {
-				terminal->putchar('\n');
-				terminal->puts("error: invalid address\n");
-			} else {
-				for (int i=0; i<lines_remaining; i++) {
-					terminal->putchar('\n');
-					blit_memory_dump(blit_memory_location & 0x00fffff8, 1);
-					blit_memory_location = (blit_memory_location + 8) & 0xfffff8;
 				}
 			}
 		}
@@ -610,7 +613,7 @@ void E64::hud_t::blit_memory_dump(uint32_t address, int rows)
 		uint32_t temp_address = address;
 		terminal->printf("\r;%06x ", temp_address);
 		for (int i=0; i<8; i++) {
-			terminal->printf("%02x ", machine.blitter->read_memory_8(temp_address));
+			terminal->printf("%02x ", machine.blit->read_memory_8(temp_address));
 			temp_address++;
 		}
 	
@@ -619,7 +622,7 @@ void E64::hud_t::blit_memory_dump(uint32_t address, int rows)
 		
 		temp_address = address;
 		for (int i=0; i<8; i++) {
-			uint8_t temp_byte = machine.blitter->read_memory_8(temp_address);
+			uint8_t temp_byte = machine.blit->read_memory_8(temp_address);
 			terminal->putsymbol(temp_byte);
 			temp_address++;
 		}
@@ -713,5 +716,88 @@ void E64::hud_t::enter_monitor_line(char *buffer)
 		original_address += 8;
 		original_address &= 0xffff;
 		terminal->printf("\n:%04x ", original_address);
+	}
+}
+
+void E64::hud_t::enter_monitor_blit_line(char *buffer)
+{
+	uint32_t address;
+	uint32_t arg0, arg1, arg2, arg3;
+	uint32_t arg4, arg5, arg6, arg7;
+    
+	buffer[7]  = '\0';
+	buffer[10]  = '\0';
+	buffer[13] = '\0';
+	buffer[16] = '\0';
+	buffer[19] = '\0';
+	buffer[22] = '\0';
+	buffer[25] = '\0';
+	buffer[28] = '\0';
+	buffer[31] = '\0';
+    
+	if (!hex_string_to_int(&buffer[1], &address)) {
+		terminal->putchar('\r');
+		terminal->cursor_right();
+		terminal->puts("??????\n");
+	} else if (!hex_string_to_int(&buffer[8], &arg0)) {
+		terminal->putchar('\r');
+		for (int i=0; i<8; i++) terminal->cursor_right();
+		terminal->puts("??\n");
+	} else if (!hex_string_to_int(&buffer[11], &arg1)) {
+		terminal->putchar('\r');
+		for (int i=0; i<11; i++) terminal->cursor_right();
+		terminal->puts("??\n");
+	} else if (!hex_string_to_int(&buffer[14], &arg2)) {
+		terminal->putchar('\r');
+		for (int i=0; i<14; i++) terminal->cursor_right();
+		terminal->puts("??\n");
+	} else if (!hex_string_to_int(&buffer[17], &arg3)) {
+		terminal->putchar('\r');
+		for (int i=0; i<17; i++) terminal->cursor_right();
+		terminal->puts("??\n");
+	} else if (!hex_string_to_int(&buffer[20], &arg4)) {
+		terminal->putchar('\r');
+		for (int i=0; i<20; i++) terminal->cursor_right();
+		terminal->puts("??\n");
+	} else if (!hex_string_to_int(&buffer[23], &arg5)) {
+		terminal->putchar('\r');
+		for (int i=0; i<23; i++) terminal->cursor_right();
+		terminal->puts("??\n");
+	} else if (!hex_string_to_int(&buffer[26], &arg6)) {
+		terminal->putchar('\r');
+		for (int i=0; i<26; i++) terminal->cursor_right();
+		terminal->puts("??\n");
+	} else if (!hex_string_to_int(&buffer[29], &arg7)) {
+		terminal->putchar('\r');
+		for (int i=0; i<29; i++) terminal->cursor_right();
+		terminal->puts("??\n");
+	} else {
+		uint32_t original_address = address;
+	
+		arg0 &= 0xff;
+		arg1 &= 0xff;
+		arg2 &= 0xff;
+		arg3 &= 0xff;
+		arg4 &= 0xff;
+		arg5 &= 0xff;
+		arg6 &= 0xff;
+		arg7 &= 0xff;
+	
+		machine.blit->write_memory_8(address, (uint8_t)arg0); address +=1; address &= 0xffffff;
+		machine.blit->write_memory_8(address, (uint8_t)arg1); address +=1; address &= 0xffffff;
+		machine.blit->write_memory_8(address, (uint8_t)arg2); address +=1; address &= 0xffffff;
+		machine.blit->write_memory_8(address, (uint8_t)arg3); address +=1; address &= 0xffffff;
+		machine.blit->write_memory_8(address, (uint8_t)arg4); address +=1; address &= 0xffffff;
+		machine.blit->write_memory_8(address, (uint8_t)arg5); address +=1; address &= 0xffffff;
+		machine.blit->write_memory_8(address, (uint8_t)arg6); address +=1; address &= 0xffffff;
+		machine.blit->write_memory_8(address, (uint8_t)arg7); address +=1; address &= 0xffffff;
+
+		terminal->putchar('\r');
+	
+		blit_memory_dump(original_address, 1);
+	
+		original_address += 8;
+		original_address &= 0xffffff;
+		terminal->printf("\n;%06x ", original_address);
 	}
 }

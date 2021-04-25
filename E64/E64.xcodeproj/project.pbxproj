@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		4601B89A2635816000012A86 /* blit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4601B8982635816000012A86 /* blit.cpp */; };
 		46103A152610DF8800F7AB6F /* rom.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 46103A142610DF8800F7AB6F /* rom.cpp */; };
 		463A9A57262096170090312E /* exceptions.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 463A9A55262096170090312E /* exceptions.cpp */; };
 		463C0FD226175707003F6738 /* tty.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 463C0FCE26175706003F6738 /* tty.cpp */; };
@@ -64,7 +65,6 @@
 		464F63EE26139A98005A3E51 /* sids.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 464F63ED26139A98005A3E51 /* sids.cpp */; };
 		464F63F126139AC0005A3E51 /* mmu.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 464F63F026139AC0005A3E51 /* mmu.cpp */; };
 		464F63F426139ADC005A3E51 /* cia.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 464F63F226139ADC005A3E51 /* cia.cpp */; };
-		464F63F726139AF9005A3E51 /* blitter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 464F63F526139AF9005A3E51 /* blitter.cpp */; };
 		464F640326139B22005A3E51 /* mem.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 464F63F926139B22005A3E51 /* mem.cpp */; };
 		464F640426139B22005A3E51 /* fake6502.c in Sources */ = {isa = PBXBuildFile; fileRef = 464F63FA26139B22005A3E51 /* fake6502.c */; };
 		464F640526139B22005A3E51 /* cpu.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 464F63FE26139B22005A3E51 /* cpu.cpp */; };
@@ -98,6 +98,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		4601B8982635816000012A86 /* blit.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = blit.cpp; path = ../../src/components/blit/blit.cpp; sourceTree = "<group>"; };
+		4601B8992635816000012A86 /* blit.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = blit.hpp; path = ../../src/components/blit/blit.hpp; sourceTree = "<group>"; };
 		46103A142610DF8800F7AB6F /* rom.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = rom.cpp; path = ../../src/rom/rom.cpp; sourceTree = "<group>"; };
 		463A9A55262096170090312E /* exceptions.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = exceptions.cpp; path = ../../src/components/cpu/exceptions.cpp; sourceTree = "<group>"; };
 		463A9A56262096170090312E /* exceptions.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = exceptions.hpp; path = ../../src/components/cpu/exceptions.hpp; sourceTree = "<group>"; };
@@ -201,8 +203,6 @@
 		464F63F026139AC0005A3E51 /* mmu.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = mmu.cpp; path = ../../src/components/mmu/mmu.cpp; sourceTree = "<group>"; };
 		464F63F226139ADC005A3E51 /* cia.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = cia.cpp; path = ../../src/components/cia/cia.cpp; sourceTree = "<group>"; };
 		464F63F326139ADC005A3E51 /* cia.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = cia.hpp; path = ../../src/components/cia/cia.hpp; sourceTree = "<group>"; };
-		464F63F526139AF9005A3E51 /* blitter.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = blitter.cpp; path = ../../src/components/blitter/blitter.cpp; sourceTree = "<group>"; };
-		464F63F626139AF9005A3E51 /* blitter.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = blitter.hpp; path = ../../src/components/blitter/blitter.hpp; sourceTree = "<group>"; };
 		464F63F826139B22005A3E51 /* tables.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = tables.h; path = ../../src/components/cpu/tables.h; sourceTree = "<group>"; };
 		464F63F926139B22005A3E51 /* mem.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = mem.cpp; path = ../../src/components/cpu/mem.cpp; sourceTree = "<group>"; };
 		464F63FA26139B22005A3E51 /* fake6502.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = fake6502.c; path = ../../src/components/cpu/fake6502.c; sourceTree = "<group>"; };
@@ -254,7 +254,7 @@
 		464F63B3261397D3005A3E51 /* components */ = {
 			isa = PBXGroup;
 			children = (
-				464F63BA26139820005A3E51 /* blitter */,
+				464F63BA26139820005A3E51 /* blit */,
 				464F63B5261397E9005A3E51 /* cia */,
 				464F63B4261397E3005A3E51 /* cpu */,
 				464F63B6261397F5005A3E51 /* mmu */,
@@ -332,13 +332,13 @@
 			name = vicv;
 			sourceTree = "<group>";
 		};
-		464F63BA26139820005A3E51 /* blitter */ = {
+		464F63BA26139820005A3E51 /* blit */ = {
 			isa = PBXGroup;
 			children = (
-				464F63F626139AF9005A3E51 /* blitter.hpp */,
-				464F63F526139AF9005A3E51 /* blitter.cpp */,
+				4601B8992635816000012A86 /* blit.hpp */,
+				4601B8982635816000012A86 /* blit.cpp */,
 			);
-			name = blitter;
+			name = blit;
 			sourceTree = "<group>";
 		};
 		464F63C226139A0D005A3E51 /* resid */ = {
@@ -612,7 +612,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				464F63DD26139A5C005A3E51 /* wave8580_PS_.cc in Sources */,
-				464F63F726139AF9005A3E51 /* blitter.cpp in Sources */,
 				463C102D26175734003F6738 /* ldblib.c in Sources */,
 				4656019925EAD0F600276691 /* sdl2.cpp in Sources */,
 				46103A152610DF8800F7AB6F /* rom.cpp in Sources */,
@@ -620,6 +619,7 @@
 				464F63EA26139A5C005A3E51 /* sid.cc in Sources */,
 				464F63F126139AC0005A3E51 /* mmu.cpp in Sources */,
 				463C101C26175734003F6738 /* lopcodes.c in Sources */,
+				4601B89A2635816000012A86 /* blit.cpp in Sources */,
 				463C101326175734003F6738 /* lstrlib.c in Sources */,
 				463C102F26175734003F6738 /* ltablib.c in Sources */,
 				4656014225EACE8D00276691 /* cbm_cp437_font.cpp in Sources */,

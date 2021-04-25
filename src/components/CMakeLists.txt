@@ -1,4 +1,4 @@
-add_subdirectory(blitter/)
+add_subdirectory(blit/)
 add_subdirectory(cia/)
 add_subdirectory(cpu/)
 add_subdirectory(mmu/)

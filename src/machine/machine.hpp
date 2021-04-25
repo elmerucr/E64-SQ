@@ -11,7 +11,7 @@
 #include "mmu.hpp"
 #include "sids.hpp"
 #include "timer.hpp"
-#include "blitter.hpp"
+#include "blit.hpp"
 #include "cpu.hpp"
 #include "exceptions.hpp"
 
@@ -29,7 +29,7 @@ public:
 	exceptions_ic	*exceptions;
 	cpu_ic		*cpu;
 	timer_ic	*timer;
-	blitter_ic	*blitter;
+	blit_ic		*blit;
 	sids_ic		*sids;
 	cia_ic		*cia;
 

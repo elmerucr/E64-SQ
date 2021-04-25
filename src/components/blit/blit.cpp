@@ -1,13 +1,13 @@
-//  blitter.cpp
+//  blit.cpp
 //  E64
 //
 //  Copyright © 2020-2021 elmerucr. All rights reserved.
 
-#include "blitter.hpp"
+#include "blit.hpp"
 #include "rom.hpp"
 #include "common.hpp"
 
-E64::blitter_ic::blitter_ic()
+E64::blit_ic::blit_ic()
 {
 	fb0 = new uint16_t[VICV_PIXELS_PER_SCANLINE * VICV_SCANLINES];
 	fb1 = new uint16_t[VICV_PIXELS_PER_SCANLINE * VICV_SCANLINES];
@@ -34,10 +34,10 @@ E64::blitter_ic::blitter_ic()
 		blit[i].currently_unused = 0;
 		blit[i].foreground_color = 0;
 		blit[i].background_color = 0;
-		blit[i].pixel_data                 = (uint16_t *)&blit_memory[(i << 16) | 0x0000];
-		blit[i].tile_data                  = (uint8_t  *)&blit_memory[(i << 16) | 0x8000]; // 4k block
-		blit[i].tile_color_data            = (uint16_t *)&blit_memory[(i << 16) | 0xc000]; // 8k block
-		blit[i].tile_background_color_data = (uint16_t *)&blit_memory[(i << 16) | 0xe000]; // 8k block
+		blit[i].pixel_data                 = (uint16_t *)&blit_memory[(i << 16) | 0x0000]; // 32k block
+		blit[i].tile_data                  = (uint8_t  *)&blit_memory[(i << 16) | 0x8000]; // 4k  block
+		blit[i].tile_color_data            = (uint16_t *)&blit_memory[(i << 16) | 0xc000]; // 8k  block
+		blit[i].tile_background_color_data = (uint16_t *)&blit_memory[(i << 16) | 0xe000]; // 8k  block
 	}
 	
 	// expand characters
@@ -53,7 +53,7 @@ E64::blitter_ic::blitter_ic()
 	}
 }
 
-E64::blitter_ic::~blitter_ic()
+E64::blit_ic::~blit_ic()
 {
 	delete [] cbm_font;
 	delete [] blit;
@@ -64,7 +64,7 @@ E64::blitter_ic::~blitter_ic()
 }
 
 
-void E64::blitter_ic::reset()
+void E64::blit_ic::reset()
 {
 	blitter_state = IDLE;
 
@@ -80,7 +80,7 @@ void E64::blitter_ic::reset()
 	backbuffer  = fb1;
 }
 
-inline void E64::blitter_ic::check_new_operation()
+inline void E64::blit_ic::check_new_operation()
 {
 	if (head != tail) {
 		switch (operations[tail].type) {
@@ -149,7 +149,7 @@ inline void E64::blitter_ic::check_new_operation()
 	}
 }
 
-void E64::blitter_ic::run(int no_of_cycles)
+void E64::blit_ic::run(int no_of_cycles)
 {
 	while (no_of_cycles > 0) {
 		no_of_cycles--;
@@ -253,25 +253,25 @@ void E64::blitter_ic::run(int no_of_cycles)
     }
 }
 
-void E64::blitter_ic::set_clear_color(uint16_t color)
+void E64::blit_ic::set_clear_color(uint16_t color)
 {
 //	clear_color = color | 0xf000;
 	clear_color = color;
 }
 
-void E64::blitter_ic::clear_framebuffer()
+void E64::blit_ic::clear_framebuffer()
 {
 	operations[head].type = CLEAR;
 	head++;
 }
 
-void E64::blitter_ic::draw_border()
+void E64::blit_ic::draw_border()
 {
 	operations[head].type = BORDER;
 	head++;
 }
 
-void E64::blitter_ic::draw_blit(int blit_no, int16_t x, int16_t y)
+void E64::blit_ic::draw_blit(int blit_no, int16_t x, int16_t y)
 {
 	operations[head].type = BLIT;
 	operations[head].blit_no = blit_no;
@@ -280,14 +280,34 @@ void E64::blitter_ic::draw_blit(int blit_no, int16_t x, int16_t y)
 	head++;
 }
 
-void E64::blitter_ic::swap_buffers()
+void E64::blit_ic::swap_buffers()
 {
 	uint16_t *tempbuffer = frontbuffer;
 	frontbuffer = backbuffer;
 	backbuffer = tempbuffer;
 }
 
-void E64::blitter_ic::write_byte(uint8_t address, uint8_t byte)
+uint8_t E64::blit_ic::read_byte(uint8_t address)
+{
+	switch (address & 0x1f) {
+		case 0x00:
+			return 0;
+		case 0x02:
+			return border_size;
+		case 0x08:
+			return clear_color & 0xff;
+		case 0x09:
+			return (clear_color & 0xff00) >> 8;
+		case 0x0a:
+			return border_color & 0xff;
+		case 0x0b:
+			return (border_color & 0xff00) >> 8;
+		default:
+			return registers[address & 0x1f];
+	}
+}
+
+void E64::blit_ic::write_byte(uint8_t address, uint8_t byte)
 {
 	switch (address & 0x1f) {
 		case 0x00:
@@ -297,6 +317,14 @@ void E64::blitter_ic::write_byte(uint8_t address, uint8_t byte)
 					break;
 				case 0b00000010:
 					clear_framebuffer();
+					break;
+				case 0b00000100:
+					draw_border();
+					break;
+				case 0b00001000:
+					draw_blit(registers[0x01],
+						  registers[0x04] | (registers[0x05] << 8),
+						  registers[0x06] | (registers[0x07] << 8));
 					break;
 				default:
 					break;
@@ -319,25 +347,5 @@ void E64::blitter_ic::write_byte(uint8_t address, uint8_t byte)
 			break;
 		default:
 			registers[address & 0x1f] = byte;
-	}
-}
-
-uint8_t E64::blitter_ic::read_byte(uint8_t address)
-{
-	switch (address & 0x1f) {
-		case 0x00:
-			return 0;
-		case 0x02:
-			return border_size;
-		case 0x08:
-			return clear_color & 0xff;
-		case 0x09:
-			return (clear_color & 0xff00) >> 8;
-		case 0x0a:
-			return border_color & 0xff;
-		case 0x0b:
-			return (border_color & 0xff00) >> 8;
-		default:
-			return registers[address & 0x1f];
 	}
 }

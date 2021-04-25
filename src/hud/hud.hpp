@@ -2,7 +2,7 @@
 #include <cstdint>
 
 #include "lua.hpp"
-#include "blitter.hpp"
+#include "blit.hpp"
 #include "cia.hpp"
 #include "tty.hpp"
 #include "timer.hpp"
@@ -31,10 +31,11 @@ public:
 	void memory_dump(uint16_t address, int rows);
 	void blit_memory_dump(uint32_t address, int rows);
 	void enter_monitor_line(char *buffer);
+	void enter_monitor_blit_line(char *buffer);
 	bool hex_string_to_int(const char *temp_string, uint32_t *return_value);
 	
 	exceptions_ic *exceptions;
-	blitter_ic *blitter;
+	blit_ic *blit;
 	cia_ic *cia;
 	timer_ic *timer;
 	

@@ -4,7 +4,7 @@
 
 #define COMMAND_BUFFER_SIZE 63+(3*64)
 
-E64::tty_t::tty_t(uint8_t flags_0, uint8_t flags_1, uint8_t size_in_tiles_log2, int _blit_no, blitter_ic *_blitter, uint16_t foreground_color, uint16_t background_color)
+E64::tty_t::tty_t(uint8_t flags_0, uint8_t flags_1, uint8_t size_in_tiles_log2, uint8_t _blit_no, blit_ic *_blitter, uint16_t foreground_color, uint16_t background_color)
 {
 	text_screen = &_blitter->blit[_blit_no];
 	
@@ -250,14 +250,19 @@ void E64::tty_t::backspace()
 	if (pos > min_pos) {
 		cursor_position--;
 		while (pos % columns) {
-			text_screen->tile_data[pos - 1] = text_screen->tile_data[pos];
-			text_screen->tile_color_data[pos - 1] = text_screen->tile_color_data[pos];
-			text_screen->tile_background_color_data[pos - 1] = text_screen->tile_background_color_data[pos];
+			text_screen->tile_data[pos - 1] =
+				text_screen->tile_data[pos];
+			text_screen->tile_color_data[pos - 1] =
+				text_screen->tile_color_data[pos];
+			text_screen->tile_background_color_data[pos - 1] =
+				text_screen->tile_background_color_data[pos];
 			pos++;
 		}
 		text_screen->tile_data[pos - 1] = ' ';
-		text_screen->tile_color_data[pos - 1] = current_foreground_color;
-		text_screen->tile_background_color_data[pos - 1] = current_background_color;
+		text_screen->tile_color_data[pos - 1] =
+			current_foreground_color;
+		text_screen->tile_background_color_data[pos - 1] =
+			current_background_color;
 	}
 }
 
@@ -298,7 +303,6 @@ enum E64::output_type E64::tty_t::check_output(bool top_down, uint32_t *address)
 			}
 			potential_address[6] = 0;
 			hud.hex_string_to_int(potential_address, address);
-			std::printf("%06x\n", *address);
 			if (top_down) break;
 		}
 	}
