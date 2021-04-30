@@ -489,6 +489,7 @@ void E64::hud_t::process_command(char *buffer)
 		}
 	} else if (strcmp(token0, "bc") == 0 ) {
 		terminal->puts("\nclearing all breakpoints");
+		machine.cpu->clear_breakpoints();
 	} else if (strcmp(token0, "bm") == 0) {
 		have_prompt = false;
 		token1 = strtok(NULL, " ");
@@ -517,7 +518,6 @@ void E64::hud_t::process_command(char *buffer)
 				}
 			}
 		}
-		machine.cpu->clear_breakpoints();
 	} else if (strcmp(token0, "c") == 0 ) {
 		flip_modes();
 	} else if (strcmp(token0, "clear") == 0 ) {
