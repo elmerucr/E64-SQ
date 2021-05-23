@@ -69,7 +69,7 @@ static void finish_frame()
 {
 	if (E64::sdl2_process_events() == E64::QUIT_EVENT) app_running = false;
 	
-	machine.blit->flush();
+	machine.blitter->flush();
 	
 	if (!hud.paused) {
 		hud.process_keypress();
@@ -77,14 +77,14 @@ static void finish_frame()
 	}
 	
 	hud.update_stats_view();
-	hud.blit->swap_buffers();
-	hud.blit->clear_framebuffer();
+	hud.blitter->swap_buffers();
+	hud.blitter->clear_framebuffer();
 	hud.redraw();
-	hud.blit->flush();
+	hud.blitter->flush();
 	
 	host.video->clear_frame_buffer();
-	host.video->merge_down_layer(machine.blit->frontbuffer);
-	host.video->merge_down_layer(hud.blit->frontbuffer);
+	host.video->merge_down_layer(machine.blitter->frontbuffer);
+	host.video->merge_down_layer(hud.blitter->frontbuffer);
 	
 	stats.process_parameters();
 	/*

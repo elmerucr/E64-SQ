@@ -18,7 +18,7 @@ E64::machine_t::machine_t()
 	
 	timer = new timer_ic(exceptions);
 	
-	blit = new blit_ic();
+	blitter = new blitter_ic();
 	sids = new sids_ic();
 	cia = new cia_ic();
 	
@@ -32,7 +32,7 @@ E64::machine_t::~machine_t()
 	
 	delete cia;
 	delete sids;
-	delete blit;
+	delete blitter;
 	delete timer;
 	delete cpu;
 	delete exceptions;
@@ -73,7 +73,7 @@ void E64::machine_t::reset()
 	
 	mmu->reset();
 	sids->reset();
-	blit->reset();
+	blitter->reset();
 	timer->reset();
 	cia->reset();
 	cpu->reset();

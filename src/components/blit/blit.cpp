@@ -7,7 +7,7 @@
 #include "rom.hpp"
 #include "common.hpp"
 
-E64::blit_ic::blit_ic()
+E64::blitter_ic::blitter_ic()
 {
 	fb0 = new uint16_t[VICV_PIXELS_PER_SCANLINE * VICV_SCANLINES];
 	fb1 = new uint16_t[VICV_PIXELS_PER_SCANLINE * VICV_SCANLINES];
@@ -16,7 +16,6 @@ E64::blit_ic::blit_ic()
 	
 	// fill blit memory with something
 	for (int i=0; i < (256 * 65536); i++) {
-//		blit_memory[i] = (i & 64) ? 0xff : 0x00; // alternating blocks with 0x00 and 0xff (hard reset)
 		if (i & 0b1) {
 			blit_memory[i] = (i & 0xff0000) >> 16;
 		} else {
@@ -30,7 +29,7 @@ E64::blit_ic::blit_ic()
 	for (int i=0; i<256; i++) {
 		blit[i].flags_0 = 0;
 		blit[i].flags_1 = 0;
-		blit[i].size_in_tiles_log2 = 0;
+		blit[i].set_size_in_tiles_log2(0);
 		blit[i].currently_unused = 0;
 		blit[i].foreground_color = 0;
 		blit[i].background_color = 0;
@@ -53,7 +52,7 @@ E64::blit_ic::blit_ic()
 	}
 }
 
-E64::blit_ic::~blit_ic()
+E64::blitter_ic::~blitter_ic()
 {
 	delete [] cbm_font;
 	delete [] blit;
@@ -64,7 +63,7 @@ E64::blit_ic::~blit_ic()
 }
 
 
-void E64::blit_ic::reset()
+void E64::blitter_ic::reset()
 {
 	blitter_state = IDLE;
 
@@ -80,7 +79,7 @@ void E64::blit_ic::reset()
 	backbuffer  = fb1;
 }
 
-inline void E64::blit_ic::check_new_operation()
+inline void E64::blitter_ic::check_new_operation()
 {
 	if (head != tail) {
 		switch (operations[tail].type) {
@@ -116,8 +115,8 @@ inline void E64::blit_ic::check_new_operation()
 				hor_flip = blit[operations[tail].blit_no].flags_1 & 0b00010000 ? true : false;
 				ver_flip = blit[operations[tail].blit_no].flags_1 & 0b00100000 ? true : false;
 
-				width_in_tiles_log2 = blit[operations[tail].blit_no].size_in_tiles_log2 & 0b00000111;
-				height_in_tiles_log2 = (blit[operations[tail].blit_no].size_in_tiles_log2 & 0b01110000) >> 4;
+				width_in_tiles_log2 = blit[operations[tail].blit_no].get_size_in_tiles_log2() & 0b00000111;
+				height_in_tiles_log2 = (blit[operations[tail].blit_no].get_size_in_tiles_log2() & 0b01110000) >> 4;
 		    
 				width_log2 = width_in_tiles_log2 + 3;
 				height_log2 = height_in_tiles_log2 + 3;
@@ -149,7 +148,7 @@ inline void E64::blit_ic::check_new_operation()
 	}
 }
 
-void E64::blit_ic::run(int no_of_cycles)
+void E64::blitter_ic::run(int no_of_cycles)
 {
 	while (no_of_cycles > 0) {
 		no_of_cycles--;
@@ -253,25 +252,25 @@ void E64::blit_ic::run(int no_of_cycles)
     }
 }
 
-void E64::blit_ic::set_clear_color(uint16_t color)
+void E64::blitter_ic::set_clear_color(uint16_t color)
 {
 //	clear_color = color | 0xf000;
 	clear_color = color;
 }
 
-void E64::blit_ic::clear_framebuffer()
+void E64::blitter_ic::clear_framebuffer()
 {
 	operations[head].type = CLEAR;
 	head++;
 }
 
-void E64::blit_ic::draw_border()
+void E64::blitter_ic::draw_border()
 {
 	operations[head].type = BORDER;
 	head++;
 }
 
-void E64::blit_ic::draw_blit(int blit_no, int16_t x, int16_t y)
+void E64::blitter_ic::draw_blit(int blit_no, int16_t x, int16_t y)
 {
 	operations[head].type = BLIT;
 	operations[head].blit_no = blit_no;
@@ -280,14 +279,14 @@ void E64::blit_ic::draw_blit(int blit_no, int16_t x, int16_t y)
 	head++;
 }
 
-void E64::blit_ic::swap_buffers()
+void E64::blitter_ic::swap_buffers()
 {
 	uint16_t *tempbuffer = frontbuffer;
 	frontbuffer = backbuffer;
 	backbuffer = tempbuffer;
 }
 
-uint8_t E64::blit_ic::read_byte(uint8_t address)
+uint8_t E64::blitter_ic::read_byte(uint8_t address)
 {
 	switch (address & 0x1f) {
 		case 0x00:
@@ -307,7 +306,7 @@ uint8_t E64::blit_ic::read_byte(uint8_t address)
 	}
 }
 
-void E64::blit_ic::write_byte(uint8_t address, uint8_t byte)
+void E64::blitter_ic::write_byte(uint8_t address, uint8_t byte)
 {
 	switch (address & 0x1f) {
 		case 0x00:

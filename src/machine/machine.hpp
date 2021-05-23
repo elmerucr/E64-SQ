@@ -29,7 +29,7 @@ public:
 	exceptions_ic	*exceptions;
 	cpu_ic		*cpu;
 	timer_ic	*timer;
-	blit_ic		*blit;
+	blitter_ic	*blitter;
 	sids_ic		*sids;
 	cia_ic		*cia;
 

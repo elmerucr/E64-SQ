@@ -5,7 +5,7 @@
 
 /*
  *
- * I/O addresses blitter_ic
+ * I/O addresses blit_ic
  *
  * 0x00: control register
  * 0x01: blit_no
@@ -52,7 +52,32 @@ enum blit_state_t {
  * into finite state machine data of the blitter.
  */
 
-struct blit_t {
+class blit_t {
+private:
+	/*  Size of blit in tiles log2, 8 bit unsigned number.
+	 *
+	 *  7 6 5 4 3 2 1 0
+	 *    | | |   | | |
+	 *    | | |   +-+-+-- Low nibble  (just 3 of 4 bits)
+	 *    | | |
+	 *    +-+-+---------- High nibble (just 3 of 4 bits)
+	 *
+	 *  Low nibble codes for width (in tiles log2) of the blit.
+	 *  High nibble codes for height.
+	 *
+	 *  Bits 3 and 7: Reserved.
+	 *
+	 *  The 3 least significant bits of each nibble indicate a number of
+	 *  0 - 7 (n). Finally, a bit shift occurs: 0b00000001 << n (2^n)
+	 *  Resulting in the final width/height in 'tiles' (8 pixels per tile)
+	 *  { 1, 2, 4, 8, 16, 32, 64, 128 }
+	 */
+	uint8_t size_in_tiles_log2;
+	
+	uint8_t  columns;
+	uint16_t rows;
+	uint16_t tiles;
+public:
 	/*  Flags 0
 	 *
 	 *  7 6 5 4 3 2 1 0
@@ -79,26 +104,6 @@ struct blit_t {
 	 *  bits 1, 3, 6 and 7: Reserved
 	 */
 	uint8_t     flags_1;
-    
-	/*  Size of blit in tiles log2, 8 bit unsigned number.
-	 *
-	 *  7 6 5 4 3 2 1 0
-	 *    | | |   | | |
-	 *    | | |   +-+-+-- Low nibble  (just 3 of 4 bits)
-	 *    | | |
-	 *    +-+-+---------- High nibble (just 3 of 4 bits)
-	 *
-	 *  Low nibble codes for width (in tiles log2) of the blit.
-	 *  High nibble codes for height.
-	 *
-	 *  Bits 3 and 7: Reserved.
-	 *
-	 *  The 3 least significant bits of each nibble indicate a number of
-	 *  0 - 7 (n). Finally, a bit shift occurs: 0b00000001 << n (2^n)
-	 *  Resulting in the final width/height in 'tiles' (8 pixels per tile)
-	 *  { 1, 2, 4, 8, 16, 32, 64, 128 }
-	 */
-	uint8_t size_in_tiles_log2;
 	
 	/*
 	 * Reserved byte for future purposes related to e.g. wrapping
@@ -106,12 +111,12 @@ struct blit_t {
 	uint8_t currently_unused;
     
 	/*
-	 * Contains the foreground color if single color.
+	 * Contains the foreground color (both single color AND current color)
 	 */
 	uint16_t foreground_color;
     
 	/*
-	 * Contains the background color if single color.
+	 * Contains the background color (both single color AND current color)
 	 */
 	uint16_t background_color;
     
@@ -134,6 +139,23 @@ struct blit_t {
 	 * 32 bit pointer to start of tile background color
 	 */
 	uint16_t *tile_background_color_data;
+	
+	inline void set_size_in_tiles_log2(uint8_t size)
+	{
+		size_in_tiles_log2 = size & 0b01110111;
+		columns = (0b1 << (size_in_tiles_log2 & 0b00000111));
+		rows = (0b1 << ((size_in_tiles_log2 & 0b01110000) >> 4));
+		tiles = columns * rows;
+	}
+	
+	inline uint8_t get_size_in_tiles_log2()
+	{
+		return size_in_tiles_log2;
+	}
+	
+	inline uint8_t get_columns() { return columns; }
+	inline uint16_t get_rows() { return rows; }
+	inline uint16_t get_tiles() { return tiles; }
 };
 
 enum operation_type {
@@ -149,7 +171,7 @@ struct operation {
 	int16_t y_pos;
 };
 
-class blit_ic {
+class blitter_ic {
 private:
 	uint8_t	registers[32];
 	uint8_t *blit_memory;
@@ -217,10 +239,10 @@ private:
 	uint16_t tile_y;
 	
 	
-	uint16_t    tile_number;
-	uint8_t     tile_index;
-	uint16_t    current_background_color;
-	uint8_t     pixel_in_tile;
+	uint16_t tile_number;
+	uint8_t  tile_index;
+	uint16_t current_background_color;
+	uint8_t  pixel_in_tile;
 	
 	uint16_t source_color;
 	
@@ -238,8 +260,8 @@ private:
 	
 	inline void check_new_operation();
 public:
-	blit_ic();
-	~blit_ic();
+	blitter_ic();
+	~blitter_ic();
 	
 	// io access
 	uint8_t	read_byte(uint8_t address);
@@ -249,8 +271,7 @@ public:
 	inline uint8_t read_memory_8(uint32_t address)
 	{
 		if (((blit[(address & 0x00ff0000) >> 16].flags_0) & 0b10000000)
-		    &&
-		    !(address & 0x00008000)) {
+		    && !(address & 0x00008000)) {
 			return ((uint8_t *)cbm_font)[address & 0x7fff];
 		} else {
 			return blit_memory[address & 0x00ffffff];
@@ -287,7 +308,7 @@ public:
 			case 0x01:
 				return blit[(address & 0b11111111000) >> 3].flags_1;
 			case 0x02:
-				return blit[(address & 0b11111111000) >> 3].size_in_tiles_log2;
+				return blit[(address & 0b11111111000) >> 3].get_size_in_tiles_log2();
 			case 0x03:
 				return blit[(address & 0b11111111000) >> 3].currently_unused;
 			case 0x04:
@@ -315,7 +336,7 @@ public:
 				blit[(address & 0b11111111000) >> 3].flags_1 = value;
 				break;
 			case 0x02:
-				blit[(address & 0b11111111000) >> 3].size_in_tiles_log2 = value;
+				blit[(address & 0b11111111000) >> 3].set_size_in_tiles_log2(value);
 				break;
 			case 0x03:
 				blit[(address & 0b11111111000) >> 3].currently_unused = value;

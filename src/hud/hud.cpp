@@ -42,31 +42,32 @@ E64::hud_t::hud_t()
 	luaopen_string(L);
 	
 	exceptions = new exceptions_ic();
-	blit = new blit_ic();
+	blitter = new blitter_ic();
 	cia = new cia_ic();
 	timer = new timer_ic(exceptions);
-	
-	terminal = new tty_t(0b10001010,
-			     0b00000000,
-			     0x46,
-			     1,
-			     blit,
-			     GREEN_05,
-			     (GREEN_02 & 0x0fff) | 0xa000);
 	
 	stats_view = new tty_t(0b10001010,
 			       0b00000000,
 			       0x25,
 			       0,
-			       blit,
+			       blitter,
 			       GREEN_05,
 			       (GREEN_02 & 0x0fff) | 0xa000);
+	
+	terminal = new tty_t(0b10001010,
+			     0b00000000,
+			     0x46,
+			     1,
+			     blitter,
+			     GREEN_05,
+			     (GREEN_02 & 0x0fff) | 0xa000);
+	
 	
 	cpu_view = new tty_t(0b10001010,
 			     0b00000000,
 			     0x15,
 			     2,
-			     blit,
+			     blitter,
 			     GREEN_05,
 			     (GREEN_02 & 0x0fff) | 0xa000);
 	
@@ -74,7 +75,7 @@ E64::hud_t::hud_t()
 				     0b00000000,
 				     0x45,
 				     3,
-				     blit,
+				     blitter,
 				     GREEN_05,
 				     (GREEN_02 & 0x0fff) | 0xa000);
 	
@@ -82,7 +83,7 @@ E64::hud_t::hud_t()
 			       0b00000000,
 			       0x34,
 			       4,
-			       blit,
+			       blitter,
 			       GREEN_05,
 			       (GREEN_02 & 0x0fff) | 0xa000);
 	
@@ -90,7 +91,7 @@ E64::hud_t::hud_t()
 				      0b00000000,
 				      0x06,
 				      5,
-				      blit,
+				      blitter,
 				      GREEN_05,
 				      (GREEN_02 & 0x0fff) | 0xa000);
 	
@@ -98,7 +99,7 @@ E64::hud_t::hud_t()
 				      0b00000000,
 				      0x16,
 				      6,
-				      blit,
+				      blitter,
 				      GREEN_05,
 				      (GREEN_02 & 0x0fff) | 0xa000);
 	
@@ -106,7 +107,7 @@ E64::hud_t::hud_t()
 				      0b00000000,
 				      0x05,
 				      7,
-				      blit,
+				      blitter,
 				      GREEN_05,
 				      (GREEN_02 & 0x0fff) | 0xa000);
 	
@@ -114,7 +115,7 @@ E64::hud_t::hud_t()
 				      0b00000000,
 				      0x05,
 				      8,
-				      blit,
+				      blitter,
 				      GREEN_05,
 				      (GREEN_02 & 0x0fff) | 0xa000);
 	
@@ -122,7 +123,7 @@ E64::hud_t::hud_t()
 			       0b00000000,
 			       0x34,
 			       9,
-			       blit,
+			       blitter,
 			       GREEN_05,
 			       (GREEN_02 & 0x0fff) | 0xa000);
 	
@@ -145,7 +146,7 @@ E64::hud_t::~hud_t()
 	
 	delete timer;
 	delete cia;
-	delete blit;
+	delete blitter;
 	delete exceptions;
 	
 	lua_close(L);
@@ -153,10 +154,10 @@ E64::hud_t::~hud_t()
 
 void E64::hud_t::reset()
 {
-	blit->reset();
-	blit->set_clear_color(0x0000);
-	blit->set_border_color(0x0000);
-	blit->set_border_size(0);
+	blitter->reset();
+	blitter->set_clear_color(0x0000);
+	blitter->set_border_color(0x0000);
+	blitter->set_border_size(0);
 	
 	cia->reset();
 	cia->set_keyboard_repeat_delay(50);
@@ -174,9 +175,9 @@ void E64::hud_t::reset()
 	
 	bar_single_height->clear();
 	for (int i=0; i<4096; i++)
-		blit->blit[bar_single_height->blit_no].pixel_data[i] = 0x0000;
+		blitter->blit[bar_single_height->blit_no].pixel_data[i] = 0x0000;
 	for (int i = 1536; i<2048; i++)
-		blit->blit[bar_single_height->blit_no].pixel_data[i] = GREEN_05;
+		blitter->blit[bar_single_height->blit_no].pixel_data[i] = GREEN_05;
 	
 	bar_double_height->clear();
 	bar_single_height_small_1->clear();
@@ -274,17 +275,17 @@ void E64::hud_t::update()
 			 machine.exceptions->irq_output_pin ? '1' : '0',
 			 machine.exceptions->nmi_output_pin ? '1' : '0');
 	
-	cpu_view->current_foreground_color = GREEN_03;
+	cpu_view->text_screen->foreground_color = GREEN_03;
 	cpu_view->putchar(machine.cpu->get_old_nmi_line() ? '1' : '0');
-	cpu_view->current_foreground_color = GREEN_05;
+	cpu_view->text_screen->foreground_color = GREEN_05;
 	
 	disassembly_view->clear();
 	char text_buffer[256];
 	uint16_t pc = machine.cpu->get_pc();
 	for (int i=0; i<16; i++) {
-		uint16_t old_color = terminal->current_foreground_color;
-		if (machine.cpu->breakpoint[pc] == true) disassembly_view->current_foreground_color = AMBER_07;
-		if (disassembly_view->get_column() != 0)
+		uint16_t old_color = terminal->text_screen->foreground_color;
+		if (machine.cpu->breakpoint[pc] == true) disassembly_view->text_screen->foreground_color = AMBER_07;
+		if (disassembly_view->get_current_column() != 0)
 			disassembly_view->putchar('\n');
 		int ops = machine.cpu->disassemble(pc, text_buffer);
 		switch (ops) {
@@ -311,19 +312,19 @@ void E64::hud_t::update()
 			break;
 		}
 		pc += ops;
-		disassembly_view->current_foreground_color = old_color;
+		disassembly_view->text_screen->foreground_color = old_color;
 	}
 	
 	stack_view->clear();
 	uint8_t temp_sp = machine.cpu->get_sp();
 	
-	stack_view->current_foreground_color = GREEN_03;
+	stack_view->text_screen->foreground_color = GREEN_03;
 	stack_view->printf("  %04x: %02x %04x\n",
 			   0x0100 | temp_sp,
 			   machine.mmu->read_memory_8(0x0100 | temp_sp),
 			   machine.mmu->read_memory_8(0x0100 | temp_sp) |
 			   machine.mmu->read_memory_8(0x0100 | ((temp_sp+1) & 0xff)) << 8);
-	stack_view->current_foreground_color = GREEN_05;
+	stack_view->text_screen->foreground_color = GREEN_05;
 	temp_sp++;
 	
 	for (int i=0; i<6; i++) {
@@ -419,19 +420,19 @@ void E64::hud_t::timer_7_event()
 void E64::hud_t::redraw()
 {
 	if (stats_visible && paused)
-		blit->draw_blit(hud.stats_view->blit_no, 128, 244);
+		blitter->draw_blit(hud.stats_view->blit_no, 128, 244);
 	if (!paused) {
-		blit->draw_blit(hud.stats_view->blit_no, 0, 244);
-		blit->draw_blit(hud.bar_single_height_small_2->blit_no, 0, 236);
-		blit->draw_blit(hud.terminal->blit_no, 0, 12);
-		blit->draw_blit(hud.cpu_view->blit_no, 0, 148);
-		blit->draw_blit(hud.bar_single_height_small_1->blit_no, 0, 164);
-		blit->draw_blit(hud.stack_view->blit_no, 0, 172);
-		blit->draw_blit(hud.disassembly_view->blit_no, 256, 148);
-		blit->draw_blit(hud.bar_single_height->blit_no, 0, 140);
-		blit->draw_blit(hud.bar_double_height->blit_no, 0, -4);
-		blit->draw_blit(hud.bar_double_height->blit_no, 0, 276);
-		blit->draw_blit(hud.other_info->blit_no, 128, 172);
+		blitter->draw_blit(hud.stats_view->blit_no, 0, 244);
+		blitter->draw_blit(hud.bar_single_height_small_2->blit_no, 0, 236);
+		blitter->draw_blit(hud.terminal->blit_no, 0, 12);
+		blitter->draw_blit(hud.cpu_view->blit_no, 0, 148);
+		blitter->draw_blit(hud.bar_single_height_small_1->blit_no, 0, 164);
+		blitter->draw_blit(hud.stack_view->blit_no, 0, 172);
+		blitter->draw_blit(hud.disassembly_view->blit_no, 256, 148);
+		blitter->draw_blit(hud.bar_single_height->blit_no, 0, 140);
+		blitter->draw_blit(hud.bar_double_height->blit_no, 0, -4);
+		blitter->draw_blit(hud.bar_double_height->blit_no, 0, 276);
+		blitter->draw_blit(hud.other_info->blit_no, 128, 172);
 	}
 }
 
@@ -586,8 +587,8 @@ void E64::hud_t::memory_dump(uint16_t address, int rows)
 			temp_address &= RAM_SIZE - 1;
 		}
 	
-		terminal->current_foreground_color = GREEN_06;
-		terminal->current_background_color = (GREEN_02 & 0x0fff) | 0xc000;
+		terminal->text_screen->foreground_color = GREEN_06;
+		terminal->text_screen->background_color = (GREEN_02 & 0x0fff) | 0xc000;
 		
 		temp_address = address;
 		for (int i=0; i<8; i++) {
@@ -598,8 +599,8 @@ void E64::hud_t::memory_dump(uint16_t address, int rows)
 		address += 8;
 		address &= RAM_SIZE - 1;
 	
-		terminal->current_foreground_color = GREEN_05;
-		terminal->current_background_color = (GREEN_02 & 0x0fff) | 0xa000;
+		terminal->text_screen->foreground_color = GREEN_05;
+		terminal->text_screen->background_color = (GREEN_02 & 0x0fff) | 0xa000;
        
 		for (int i=0; i<32; i++) terminal->cursor_left();
 	}
@@ -613,24 +614,24 @@ void E64::hud_t::blit_memory_dump(uint32_t address, int rows)
 		uint32_t temp_address = address;
 		terminal->printf("\r;%06x ", temp_address);
 		for (int i=0; i<8; i++) {
-			terminal->printf("%02x ", machine.blit->read_memory_8(temp_address));
+			terminal->printf("%02x ", machine.blitter->read_memory_8(temp_address));
 			temp_address++;
 		}
 	
-		terminal->current_foreground_color = GREEN_06;
-		terminal->current_background_color = (GREEN_02 & 0x0fff) | 0xc000;
+		terminal->text_screen->foreground_color = GREEN_06;
+		terminal->text_screen->background_color = (GREEN_02 & 0x0fff) | 0xc000;
 		
 		temp_address = address;
 		for (int i=0; i<8; i++) {
-			uint8_t temp_byte = machine.blit->read_memory_8(temp_address);
+			uint8_t temp_byte = machine.blitter->read_memory_8(temp_address);
 			terminal->putsymbol(temp_byte);
 			temp_address++;
 		}
 		address += 8;
 		address &= 0x00fffff8;
 	
-		terminal->current_foreground_color = GREEN_05;
-		terminal->current_background_color = (GREEN_02 & 0x0fff) | 0xa000;
+		terminal->text_screen->foreground_color = GREEN_05;
+		terminal->text_screen->background_color = (GREEN_02 & 0x0fff) | 0xa000;
        
 		for (int i=0; i<32; i++) terminal->cursor_left();
 	}
@@ -783,14 +784,14 @@ void E64::hud_t::enter_monitor_blit_line(char *buffer)
 		arg6 &= 0xff;
 		arg7 &= 0xff;
 	
-		machine.blit->write_memory_8(address, (uint8_t)arg0); address +=1; address &= 0xffffff;
-		machine.blit->write_memory_8(address, (uint8_t)arg1); address +=1; address &= 0xffffff;
-		machine.blit->write_memory_8(address, (uint8_t)arg2); address +=1; address &= 0xffffff;
-		machine.blit->write_memory_8(address, (uint8_t)arg3); address +=1; address &= 0xffffff;
-		machine.blit->write_memory_8(address, (uint8_t)arg4); address +=1; address &= 0xffffff;
-		machine.blit->write_memory_8(address, (uint8_t)arg5); address +=1; address &= 0xffffff;
-		machine.blit->write_memory_8(address, (uint8_t)arg6); address +=1; address &= 0xffffff;
-		machine.blit->write_memory_8(address, (uint8_t)arg7); address +=1; address &= 0xffffff;
+		machine.blitter->write_memory_8(address, (uint8_t)arg0); address +=1; address &= 0xffffff;
+		machine.blitter->write_memory_8(address, (uint8_t)arg1); address +=1; address &= 0xffffff;
+		machine.blitter->write_memory_8(address, (uint8_t)arg2); address +=1; address &= 0xffffff;
+		machine.blitter->write_memory_8(address, (uint8_t)arg3); address +=1; address &= 0xffffff;
+		machine.blitter->write_memory_8(address, (uint8_t)arg4); address +=1; address &= 0xffffff;
+		machine.blitter->write_memory_8(address, (uint8_t)arg5); address +=1; address &= 0xffffff;
+		machine.blitter->write_memory_8(address, (uint8_t)arg6); address +=1; address &= 0xffffff;
+		machine.blitter->write_memory_8(address, (uint8_t)arg7); address +=1; address &= 0xffffff;
 
 		terminal->putchar('\r');
 	
