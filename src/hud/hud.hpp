@@ -2,7 +2,7 @@
 #include <cstdint>
 
 #include "lua.hpp"
-#include "blit.hpp"
+#include "blitter.hpp"
 #include "cia.hpp"
 #include "tty.hpp"
 #include "timer.hpp"

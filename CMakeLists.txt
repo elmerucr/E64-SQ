@@ -13,7 +13,7 @@ include_directories(
     src/hud/
     src/hud/lua-5.4.2/src/
     src/components/
-    src/components/blit/
+    src/components/blitter/
     src/components/cia/
     src/components/cpu/
     src/components/mmu/

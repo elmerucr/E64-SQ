@@ -1,9 +1,9 @@
-//  blit.cpp
+//  blitter.cpp
 //  E64
 //
 //  Copyright © 2020-2021 elmerucr. All rights reserved.
 
-#include "blit.hpp"
+#include "blitter.hpp"
 #include "rom.hpp"
 #include "common.hpp"
 

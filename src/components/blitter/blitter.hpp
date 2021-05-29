@@ -1,4 +1,4 @@
-//  blit.hpp
+//  blitter.hpp
 //  E64
 //
 //  Copyright © 2020-2021 elmerucr. All rights reserved.
@@ -38,7 +38,7 @@
 namespace E64
 {
 
-enum blit_state_t {
+enum blitter_state_t {
 	IDLE,
 	CLEARING,
 	DRAW_BORDER,
@@ -111,12 +111,12 @@ public:
 	uint8_t currently_unused;
     
 	/*
-	 * Contains the foreground color (both single color AND current color)
+	 * Contains the foreground color (for both single color AND current color)
 	 */
 	uint16_t foreground_color;
     
 	/*
-	 * Contains the background color (both single color AND current color)
+	 * Contains the background color (for both single color AND current color)
 	 */
 	uint16_t background_color;
     
@@ -156,6 +156,11 @@ public:
 	inline uint8_t get_columns() { return columns; }
 	inline uint16_t get_rows() { return rows; }
 	inline uint16_t get_tiles() { return tiles; }
+	
+	// terminal interface NEEDS WORK
+	void terminal_init(uint8_t flags_0, uint8_t flags_1,
+			   uint8_t size_in_tiles_log2, uint16_t foreground_color,
+			   uint16_t background_color);
 };
 
 enum operation_type {
@@ -177,7 +182,7 @@ private:
 	uint8_t *blit_memory;
 	uint16_t *cbm_font;	// unpacked font
 	
-	enum blit_state_t blitter_state;
+	enum blitter_state_t blitter_state;
 	
 	// framebuffer pointers
 	uint16_t *fb0;

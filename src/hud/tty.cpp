@@ -161,7 +161,7 @@ void E64::tty_t::deactivate_cursor()
 	text_screen->tile_background_color_data[cursor_position] = cursor_original_background_color;
 }
 
-void E64::tty_t::timer_callback()
+void E64::tty_t::process_cursor_state()
 {
 	if (cursor_blinking == true) {
 		if (cursor_countdown == 0) {

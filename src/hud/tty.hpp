@@ -1,7 +1,7 @@
 #ifndef TTY_HPP
 #define TTY_HPP
 
-#include "blit.hpp"
+#include "blitter.hpp"
 
 namespace E64 {
 
@@ -63,7 +63,7 @@ public:
 
 	char *enter_command();
 	
-	void timer_callback();
+	void process_cursor_state();
 	
 	void add_bottom_row();
 	void add_top_row();

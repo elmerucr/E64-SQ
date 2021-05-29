@@ -379,7 +379,7 @@ void E64::hud_t::run(uint16_t cycles)
 
 void E64::hud_t::timer_0_event()
 {
-	terminal->timer_callback();
+	terminal->process_cursor_state();
 }
 
 void E64::hud_t::timer_1_event()

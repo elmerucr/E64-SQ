@@ -11,7 +11,7 @@
 #include "mmu.hpp"
 #include "sids.hpp"
 #include "timer.hpp"
-#include "blit.hpp"
+#include "blitter.hpp"
 #include "cpu.hpp"
 #include "exceptions.hpp"
 
