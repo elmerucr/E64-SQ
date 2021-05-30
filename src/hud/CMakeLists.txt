@@ -1,4 +1,4 @@
-add_library(hud STATIC hud.cpp tty.cpp)
+add_library(hud STATIC hud.cpp)
 add_library(lua STATIC
 	lua-5.4.2/src/lapi.c
 	lua-5.4.2/src/lauxlib.c

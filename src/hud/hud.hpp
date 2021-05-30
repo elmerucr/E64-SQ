@@ -4,7 +4,6 @@
 #include "lua.hpp"
 #include "blitter.hpp"
 #include "cia.hpp"
-#include "tty.hpp"
 #include "timer.hpp"
 #include "exceptions.hpp"
 
@@ -41,17 +40,16 @@ public:
 	
 	lua_State *L;
 	
-	blit_t *tiepding;
-	tty_t *terminal;
-	tty_t *stats_view;
-	tty_t *cpu_view;
-	tty_t *disassembly_view;
-	tty_t *stack_view;
-	tty_t *bar_single_height;
-	tty_t *bar_double_height;
-	tty_t *bar_single_height_small_1;
-	tty_t *bar_single_height_small_2;
-	tty_t *other_info;
+	blit_t *stats_view;
+	blit_t *terminal;
+	blit_t *cpu_view;
+	blit_t *disassembly_view;
+	blit_t *stack_view;
+	blit_t *bar_single_height;
+	blit_t *bar_double_height;
+	blit_t *bar_single_height_small_1;
+	blit_t *bar_single_height_small_2;
+	blit_t *other_info;
 	
 	bool stats_visible;
 	

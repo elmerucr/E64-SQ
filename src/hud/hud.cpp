@@ -46,89 +46,45 @@ E64::hud_t::hud_t()
 	cia = new cia_ic();
 	timer = new timer_ic(exceptions);
 	
-	stats_view = new tty_t(0b10001010,
-			       0b00000000,
-			       0x25,
-			       0,
-			       blitter,
-			       GREEN_05,
-			       (GREEN_02 & 0x0fff) | 0xa000);
+	stats_view = &blitter->blit[0];
+	stats_view->terminal_init(0b10001010, 0b00000000, 0x25, GREEN_05,
+				  (GREEN_02 & 0x0fff) | 0xa000);
 	
-	tiepding = &blitter->blit[1];
-	tiepding->clear();
-	terminal = new tty_t(0b10001010,
-			     0b00000000,
-			     0x46,
-			     1,
-			     blitter,
-			     GREEN_05,
-			     (GREEN_02 & 0x0fff) | 0xa000);
-	tiepding->terminal_init(0b10001010, 0b0, 0x36, GREEN_05, GREEN_02);
+	terminal = &blitter->blit[1];
+	terminal->terminal_init(0b10001010, 0b00000000, 0x46, GREEN_05,
+				(GREEN_02 & 0x0fff) | 0xa000);
 	
+	cpu_view = &blitter->blit[2];
+	cpu_view->terminal_init(0b10001010, 0b00000000, 0x15, GREEN_05,
+				(GREEN_02 & 0x0fff) | 0xa000);
 	
-	cpu_view = new tty_t(0b10001010,
-			     0b00000000,
-			     0x15,
-			     2,
-			     blitter,
-			     GREEN_05,
-			     (GREEN_02 & 0x0fff) | 0xa000);
+	disassembly_view = &blitter->blit[3];
+	disassembly_view->terminal_init(0b10001010, 0b00000000, 0x45, GREEN_05,
+					(GREEN_02 & 0x0fff) | 0xa000);
+
+	stack_view = &blitter->blit[4];
+	stack_view->terminal_init(0b10001010, 0b00000000, 0x34, GREEN_05,
+					(GREEN_02 & 0x0fff) | 0xa000);
+
+	bar_single_height = &blitter->blit[5];
+	bar_single_height->terminal_init(0b00001111, 0b00000000, 0x06, GREEN_05,
+					(GREEN_02 & 0x0fff) | 0xa000);
+
+	bar_double_height = &blitter->blit[6];
+	bar_double_height->terminal_init(0b10001010, 0b00000000, 0x16, GREEN_05,
+					(GREEN_02 & 0x0fff) | 0xa000);
+
+	bar_single_height_small_1 = &blitter->blit[7];
+	bar_single_height_small_1->terminal_init(0b10001010, 0b00000000, 0x05, GREEN_05,
+					(GREEN_02 & 0x0fff) | 0xa000);
+
+	bar_single_height_small_2 = &blitter->blit[8];
+	bar_single_height_small_2->terminal_init(0b10001010, 0b00000000, 0x05, GREEN_05,
+					(GREEN_02 & 0x0fff) | 0xa000);
 	
-	disassembly_view = new tty_t(0b10001010,
-				     0b00000000,
-				     0x45,
-				     3,
-				     blitter,
-				     GREEN_05,
-				     (GREEN_02 & 0x0fff) | 0xa000);
-	
-	stack_view = new tty_t(0b10001010,
-			       0b00000000,
-			       0x34,
-			       4,
-			       blitter,
-			       GREEN_05,
-			       (GREEN_02 & 0x0fff) | 0xa000);
-	
-	bar_single_height = new tty_t(0b00001111,
-				      0b00000000,
-				      0x06,
-				      5,
-				      blitter,
-				      GREEN_05,
-				      (GREEN_02 & 0x0fff) | 0xa000);
-	
-	bar_double_height = new tty_t(0b10001010,
-				      0b00000000,
-				      0x16,
-				      6,
-				      blitter,
-				      GREEN_05,
-				      (GREEN_02 & 0x0fff) | 0xa000);
-	
-	bar_single_height_small_1 = new tty_t(0b10001010,
-				      0b00000000,
-				      0x05,
-				      7,
-				      blitter,
-				      GREEN_05,
-				      (GREEN_02 & 0x0fff) | 0xa000);
-	
-	bar_single_height_small_2 = new tty_t(0b10001010,
-				      0b00000000,
-				      0x05,
-				      8,
-				      blitter,
-				      GREEN_05,
-				      (GREEN_02 & 0x0fff) | 0xa000);
-	
-	other_info = new tty_t(0b10001010,
-			       0b00000000,
-			       0x34,
-			       9,
-			       blitter,
-			       GREEN_05,
-			       (GREEN_02 & 0x0fff) | 0xa000);
+	other_info = &blitter->blit[9];
+	other_info->terminal_init(0b10001010, 0b00000000, 0x34, GREEN_05,
+				  (GREEN_02 & 0x0fff) | 0xa000);
 	
 	stats_visible = false;
 	irq_line = true;
@@ -136,17 +92,6 @@ E64::hud_t::hud_t()
 
 E64::hud_t::~hud_t()
 {
-	delete other_info;
-	delete bar_single_height_small_1;
-	delete bar_single_height_small_2;
-	delete bar_double_height;
-	delete bar_single_height;
-	delete stack_view;
-	delete disassembly_view;
-	delete cpu_view;
-	delete terminal;
-	delete stats_view;
-	
 	delete timer;
 	delete cia;
 	delete blitter;
@@ -178,9 +123,9 @@ void E64::hud_t::reset()
 	
 	bar_single_height->clear();
 	for (int i=0; i<4096; i++)
-		blitter->blit[bar_single_height->blit_no].pixel_data[i] = 0x0000;
+		blitter->blit[6].pixel_data[i] = 0x0000; // bar single height
 	for (int i = 1536; i<2048; i++)
-		blitter->blit[bar_single_height->blit_no].pixel_data[i] = GREEN_05;
+		blitter->blit[6].pixel_data[i] = GREEN_05; // bar single height
 	
 	bar_double_height->clear();
 	bar_single_height_small_1->clear();
@@ -278,16 +223,16 @@ void E64::hud_t::update()
 			 machine.exceptions->irq_output_pin ? '1' : '0',
 			 machine.exceptions->nmi_output_pin ? '1' : '0');
 	
-	cpu_view->text_screen->foreground_color = GREEN_03;
+	cpu_view->foreground_color = GREEN_03;
 	cpu_view->putchar(machine.cpu->get_old_nmi_line() ? '1' : '0');
-	cpu_view->text_screen->foreground_color = GREEN_05;
+	cpu_view->foreground_color = GREEN_05;
 	
 	disassembly_view->clear();
 	char text_buffer[256];
 	uint16_t pc = machine.cpu->get_pc();
 	for (int i=0; i<16; i++) {
-		uint16_t old_color = terminal->text_screen->foreground_color;
-		if (machine.cpu->breakpoint[pc] == true) disassembly_view->text_screen->foreground_color = AMBER_07;
+		uint16_t old_color = terminal->foreground_color;
+		if (machine.cpu->breakpoint[pc] == true) disassembly_view->foreground_color = AMBER_07;
 		if (disassembly_view->get_current_column() != 0)
 			disassembly_view->putchar('\n');
 		int ops = machine.cpu->disassemble(pc, text_buffer);
@@ -315,19 +260,19 @@ void E64::hud_t::update()
 			break;
 		}
 		pc += ops;
-		disassembly_view->text_screen->foreground_color = old_color;
+		disassembly_view->foreground_color = old_color;
 	}
 	
 	stack_view->clear();
 	uint8_t temp_sp = machine.cpu->get_sp();
 	
-	stack_view->text_screen->foreground_color = GREEN_03;
+	stack_view->foreground_color = GREEN_03;
 	stack_view->printf("  %04x: %02x %04x\n",
 			   0x0100 | temp_sp,
 			   machine.mmu->read_memory_8(0x0100 | temp_sp),
 			   machine.mmu->read_memory_8(0x0100 | temp_sp) |
 			   machine.mmu->read_memory_8(0x0100 | ((temp_sp+1) & 0xff)) << 8);
-	stack_view->text_screen->foreground_color = GREEN_05;
+	stack_view->foreground_color = GREEN_05;
 	temp_sp++;
 	
 	for (int i=0; i<6; i++) {
@@ -423,19 +368,19 @@ void E64::hud_t::timer_7_event()
 void E64::hud_t::redraw()
 {
 	if (stats_visible && paused)
-		blitter->draw_blit(hud.stats_view->blit_no, 128, 244);
+		blitter->draw_blit(0, 128, 244); // NEEDS WORK (1st parameter)
 	if (!paused) {
-		blitter->draw_blit(hud.stats_view->blit_no, 0, 244);
-		blitter->draw_blit(hud.bar_single_height_small_2->blit_no, 0, 236);
-		blitter->draw_blit(hud.terminal->blit_no, 0, 12);
-		blitter->draw_blit(hud.cpu_view->blit_no, 0, 148);
-		blitter->draw_blit(hud.bar_single_height_small_1->blit_no, 0, 164);
-		blitter->draw_blit(hud.stack_view->blit_no, 0, 172);
-		blitter->draw_blit(hud.disassembly_view->blit_no, 256, 148);
-		blitter->draw_blit(hud.bar_single_height->blit_no, 0, 140);
-		blitter->draw_blit(hud.bar_double_height->blit_no, 0, -4);
-		blitter->draw_blit(hud.bar_double_height->blit_no, 0, 276);
-		blitter->draw_blit(hud.other_info->blit_no, 128, 172);
+		blitter->draw_blit(0, 0, 244); // stats
+		blitter->draw_blit(8, 0, 236); // single g small 2
+		blitter->draw_blit(1, 0, 12);	// NEEDS WORK - terminal
+		blitter->draw_blit(2, 0, 148);  // cpu view
+		blitter->draw_blit(3, 256, 148); // disassembly view
+		blitter->draw_blit(4, 0, 172); // stack view
+		blitter->draw_blit(7, 0, 164); // s height small 1
+		blitter->draw_blit(5, 0, 140); // bar single height
+		blitter->draw_blit(6, 0, -4); // bar double height
+		blitter->draw_blit(6, 0, 276); // bar double height
+		blitter->draw_blit(9, 128, 172); // other info
 	}
 }
 
@@ -590,8 +535,8 @@ void E64::hud_t::memory_dump(uint16_t address, int rows)
 			temp_address &= RAM_SIZE - 1;
 		}
 	
-		terminal->text_screen->foreground_color = GREEN_06;
-		terminal->text_screen->background_color = (GREEN_02 & 0x0fff) | 0xc000;
+		terminal->foreground_color = GREEN_06;
+		terminal->background_color = (GREEN_02 & 0x0fff) | 0xc000;
 		
 		temp_address = address;
 		for (int i=0; i<8; i++) {
@@ -602,8 +547,8 @@ void E64::hud_t::memory_dump(uint16_t address, int rows)
 		address += 8;
 		address &= RAM_SIZE - 1;
 	
-		terminal->text_screen->foreground_color = GREEN_05;
-		terminal->text_screen->background_color = (GREEN_02 & 0x0fff) | 0xa000;
+		terminal->foreground_color = GREEN_05;
+		terminal->background_color = (GREEN_02 & 0x0fff) | 0xa000;
        
 		for (int i=0; i<32; i++) terminal->cursor_left();
 	}
@@ -621,8 +566,8 @@ void E64::hud_t::blit_memory_dump(uint32_t address, int rows)
 			temp_address++;
 		}
 	
-		terminal->text_screen->foreground_color = GREEN_06;
-		terminal->text_screen->background_color = (GREEN_02 & 0x0fff) | 0xc000;
+		terminal->foreground_color = GREEN_06;
+		terminal->background_color = (GREEN_02 & 0x0fff) | 0xc000;
 		
 		temp_address = address;
 		for (int i=0; i<8; i++) {
@@ -633,8 +578,8 @@ void E64::hud_t::blit_memory_dump(uint32_t address, int rows)
 		address += 8;
 		address &= 0x00fffff8;
 	
-		terminal->text_screen->foreground_color = GREEN_05;
-		terminal->text_screen->background_color = (GREEN_02 & 0x0fff) | 0xa000;
+		terminal->foreground_color = GREEN_05;
+		terminal->background_color = (GREEN_02 & 0x0fff) | 0xa000;
        
 		for (int i=0; i<32; i++) terminal->cursor_left();
 	}

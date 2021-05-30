@@ -9,7 +9,6 @@
 /* Begin PBXBuildFile section */
 		46103A152610DF8800F7AB6F /* rom.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 46103A142610DF8800F7AB6F /* rom.cpp */; };
 		463A9A57262096170090312E /* exceptions.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 463A9A55262096170090312E /* exceptions.cpp */; };
-		463C0FD226175707003F6738 /* tty.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 463C0FCE26175706003F6738 /* tty.cpp */; };
 		463C0FD326175707003F6738 /* hud.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 463C0FD026175707003F6738 /* hud.cpp */; };
 		463C101226175734003F6738 /* lbaselib.c in Sources */ = {isa = PBXBuildFile; fileRef = 463C0FD426175731003F6738 /* lbaselib.c */; };
 		463C101326175734003F6738 /* lstrlib.c in Sources */ = {isa = PBXBuildFile; fileRef = 463C0FD726175731003F6738 /* lstrlib.c */; };
@@ -101,8 +100,6 @@
 		46103A142610DF8800F7AB6F /* rom.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = rom.cpp; path = ../../src/rom/rom.cpp; sourceTree = "<group>"; };
 		463A9A55262096170090312E /* exceptions.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = exceptions.cpp; path = ../../src/components/cpu/exceptions.cpp; sourceTree = "<group>"; };
 		463A9A56262096170090312E /* exceptions.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = exceptions.hpp; path = ../../src/components/cpu/exceptions.hpp; sourceTree = "<group>"; };
-		463C0FCE26175706003F6738 /* tty.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = tty.cpp; path = ../../src/hud/tty.cpp; sourceTree = "<group>"; };
-		463C0FCF26175707003F6738 /* tty.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = tty.hpp; path = ../../src/hud/tty.hpp; sourceTree = "<group>"; };
 		463C0FD026175707003F6738 /* hud.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = hud.cpp; path = ../../src/hud/hud.cpp; sourceTree = "<group>"; };
 		463C0FD126175707003F6738 /* hud.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = hud.hpp; path = ../../src/hud/hud.hpp; sourceTree = "<group>"; };
 		463C0FD426175731003F6738 /* lbaselib.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = lbaselib.c; path = "../../src/hud/lua-5.4.2/src/lbaselib.c"; sourceTree = "<group>"; };
@@ -440,8 +437,6 @@
 				46892FF625F7D5C90087BE61 /* lua-5.4.2 */,
 				463C0FD126175707003F6738 /* hud.hpp */,
 				463C0FD026175707003F6738 /* hud.cpp */,
-				463C0FCF26175707003F6738 /* tty.hpp */,
-				463C0FCE26175706003F6738 /* tty.cpp */,
 			);
 			name = hud;
 			sourceTree = "<group>";
@@ -649,7 +644,6 @@
 				4656013925EACDED00276691 /* main.cpp in Sources */,
 				464F640426139B22005A3E51 /* fake6502.c in Sources */,
 				463C102126175734003F6738 /* loslib.c in Sources */,
-				463C0FD226175707003F6738 /* tty.cpp in Sources */,
 				463C103026175734003F6738 /* liolib.c in Sources */,
 				464F63E926139A5C005A3E51 /* version.cc in Sources */,
 				464F63E226139A5C005A3E51 /* wave6581__ST.cc in Sources */,
