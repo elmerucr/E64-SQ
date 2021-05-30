@@ -5,11 +5,11 @@
 
 namespace E64 {
 
-enum output_type {
-	NOTHING,
-	ASCII,
-	BLITTER
-};
+//enum output_type {
+//	NOTHING,
+//	ASCII,
+//	BLITTER
+//};
 
 class tty_t {
 private:

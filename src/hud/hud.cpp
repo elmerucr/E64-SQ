@@ -54,6 +54,8 @@ E64::hud_t::hud_t()
 			       GREEN_05,
 			       (GREEN_02 & 0x0fff) | 0xa000);
 	
+	tiepding = &blitter->blit[1];
+	tiepding->clear();
 	terminal = new tty_t(0b10001010,
 			     0b00000000,
 			     0x46,
@@ -61,6 +63,7 @@ E64::hud_t::hud_t()
 			     blitter,
 			     GREEN_05,
 			     (GREEN_02 & 0x0fff) | 0xa000);
+	tiepding->terminal_init(0b10001010, 0b0, 0x36, GREEN_05, GREEN_02);
 	
 	
 	cpu_view = new tty_t(0b10001010,

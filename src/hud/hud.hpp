@@ -41,6 +41,7 @@ public:
 	
 	lua_State *L;
 	
+	blit_t *tiepding;
 	tty_t *terminal;
 	tty_t *stats_view;
 	tty_t *cpu_view;
