@@ -215,7 +215,7 @@ enum operation_type {
 
 struct operation {
 	enum operation_type type;
-	int blit_no;
+	blit_t *blit_pointer;
 	int16_t x_pos;
 	int16_t y_pos;
 };
@@ -427,7 +427,7 @@ public:
 	
 	void clear_framebuffer();
 	void draw_border();
-	void draw_blit(int blit_no, int16_t x, int16_t y);
+	void draw_blit(blit_t *blit, int16_t x, int16_t y);
 	
 	inline bool busy() { return blitter_state == IDLE ? false : true; }
 	

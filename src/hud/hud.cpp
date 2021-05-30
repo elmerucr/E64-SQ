@@ -123,9 +123,9 @@ void E64::hud_t::reset()
 	
 	bar_single_height->clear();
 	for (int i=0; i<4096; i++)
-		blitter->blit[6].pixel_data[i] = 0x0000; // bar single height
+		blitter->blit[5].pixel_data[i] = 0x0000; // bar single height
 	for (int i = 1536; i<2048; i++)
-		blitter->blit[6].pixel_data[i] = GREEN_05; // bar single height
+		blitter->blit[5].pixel_data[i] = GREEN_05; // bar single height
 	
 	bar_double_height->clear();
 	bar_single_height_small_1->clear();
@@ -368,19 +368,19 @@ void E64::hud_t::timer_7_event()
 void E64::hud_t::redraw()
 {
 	if (stats_visible && paused)
-		blitter->draw_blit(0, 128, 244); // NEEDS WORK (1st parameter)
+		blitter->draw_blit(stats_view, 128, 244);
 	if (!paused) {
-		blitter->draw_blit(0, 0, 244); // stats
-		blitter->draw_blit(8, 0, 236); // single g small 2
-		blitter->draw_blit(1, 0, 12);	// NEEDS WORK - terminal
-		blitter->draw_blit(2, 0, 148);  // cpu view
-		blitter->draw_blit(3, 256, 148); // disassembly view
-		blitter->draw_blit(4, 0, 172); // stack view
-		blitter->draw_blit(7, 0, 164); // s height small 1
-		blitter->draw_blit(5, 0, 140); // bar single height
-		blitter->draw_blit(6, 0, -4); // bar double height
-		blitter->draw_blit(6, 0, 276); // bar double height
-		blitter->draw_blit(9, 128, 172); // other info
+		blitter->draw_blit(stats_view, 0, 244);
+		blitter->draw_blit(bar_single_height_small_2, 0, 236);
+		blitter->draw_blit(terminal, 0, 12);
+		blitter->draw_blit(cpu_view, 0, 148);
+		blitter->draw_blit(disassembly_view, 256, 148);
+		blitter->draw_blit(stack_view, 0, 172);
+		blitter->draw_blit(bar_single_height_small_1, 0, 164);
+		blitter->draw_blit(bar_single_height, 0, 140);
+		blitter->draw_blit(bar_double_height, 0, -4);
+		blitter->draw_blit(bar_double_height, 0, 276);
+		blitter->draw_blit(other_info, 128, 172);
 	}
 }
 

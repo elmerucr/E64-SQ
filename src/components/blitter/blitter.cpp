@@ -103,20 +103,20 @@ inline void E64::blitter_ic::check_new_operation()
 				blitter_state = BLITTING;
 
 				// check flags 0
-				bitmap_mode	= blit[operations[tail].blit_no].flags_0 & 0b00000001 ? true : false;
-				background      = blit[operations[tail].blit_no].flags_0 & 0b00000010 ? true : false;
-				multicolor_mode = blit[operations[tail].blit_no].flags_0 & 0b00000100 ? true : false;
-				color_per_tile  = blit[operations[tail].blit_no].flags_0 & 0b00001000 ? true : false;
-				use_cbm_font    = blit[operations[tail].blit_no].flags_0 & 0b10000000 ? true : false;
+				bitmap_mode	= operations[tail].blit_pointer->flags_0 & 0b00000001 ? true : false;
+				background      = operations[tail].blit_pointer->flags_0 & 0b00000010 ? true : false;
+				multicolor_mode = operations[tail].blit_pointer->flags_0 & 0b00000100 ? true : false;
+				color_per_tile  = operations[tail].blit_pointer->flags_0 & 0b00001000 ? true : false;
+				use_cbm_font    = operations[tail].blit_pointer->flags_0 & 0b10000000 ? true : false;
 		    
 				// check flags 1
-				double_width	= blit[operations[tail].blit_no].flags_1 & 0b00000001 ? 1 : 0;
-				double_height   = blit[operations[tail].blit_no].flags_1 & 0b00000100 ? 1 : 0;
-				hor_flip = blit[operations[tail].blit_no].flags_1 & 0b00010000 ? true : false;
-				ver_flip = blit[operations[tail].blit_no].flags_1 & 0b00100000 ? true : false;
+				double_width	= operations[tail].blit_pointer->flags_1 & 0b00000001 ? 1 : 0;
+				double_height   = operations[tail].blit_pointer->flags_1 & 0b00000100 ? 1 : 0;
+				hor_flip = operations[tail].blit_pointer->flags_1 & 0b00010000 ? true : false;
+				ver_flip = operations[tail].blit_pointer->flags_1 & 0b00100000 ? true : false;
 
-				width_in_tiles_log2 = blit[operations[tail].blit_no].get_size_in_tiles_log2() & 0b00000111;
-				height_in_tiles_log2 = (blit[operations[tail].blit_no].get_size_in_tiles_log2() & 0b01110000) >> 4;
+				width_in_tiles_log2 = operations[tail].blit_pointer->get_size_in_tiles_log2() & 0b00000111;
+				height_in_tiles_log2 = (operations[tail].blit_pointer->get_size_in_tiles_log2() & 0b01110000) >> 4;
 		    
 				width_log2 = width_in_tiles_log2 + 3;
 				height_log2 = height_in_tiles_log2 + 3;
@@ -136,12 +136,12 @@ inline void E64::blitter_ic::check_new_operation()
 				total_no_of_pix = width_on_screen * height_on_screen;
 				x = operations[tail].x_pos;
 				y = operations[tail].y_pos;
-				foreground_color = blit[operations[tail].blit_no].foreground_color;
-				background_color = blit[operations[tail].blit_no].background_color;
-				pixel_data = blit[operations[tail].blit_no].pixel_data;
-				tile_data = blit[operations[tail].blit_no].tile_data;
-				tile_color_data = blit[operations[tail].blit_no].tile_color_data;
-				tile_background_color_data = blit[operations[tail].blit_no].tile_background_color_data;
+				foreground_color = operations[tail].blit_pointer->foreground_color;
+				background_color = operations[tail].blit_pointer->background_color;
+				pixel_data = operations[tail].blit_pointer->pixel_data;
+				tile_data = operations[tail].blit_pointer->tile_data;
+				tile_color_data = operations[tail].blit_pointer->tile_color_data;
+				tile_background_color_data = operations[tail].blit_pointer->tile_background_color_data;
 				tail++;
 				break;
 		}
@@ -270,10 +270,10 @@ void E64::blitter_ic::draw_border()
 	head++;
 }
 
-void E64::blitter_ic::draw_blit(int blit_no, int16_t x, int16_t y)
+void E64::blitter_ic::draw_blit(blit_t *blit, int16_t x, int16_t y)
 {
 	operations[head].type = BLIT;
-	operations[head].blit_no = blit_no;
+	operations[head].blit_pointer = blit;
 	operations[head].x_pos = x;
 	operations[head].y_pos = y;
 	head++;
@@ -321,7 +321,7 @@ void E64::blitter_ic::write_byte(uint8_t address, uint8_t byte)
 					draw_border();
 					break;
 				case 0b00001000:
-					draw_blit(registers[0x01],
+					draw_blit(&blit[registers[0x01]],
 						  registers[0x04] | (registers[0x05] << 8),
 						  registers[0x06] | (registers[0x07] << 8));
 					break;
