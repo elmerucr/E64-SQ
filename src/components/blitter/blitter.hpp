@@ -46,18 +46,9 @@ enum output_type {
 	BLITTER
 };
 
-enum blitter_state_t {
-	IDLE,
-	CLEARING,
-	DRAW_BORDER,
-	BLITTING
-};
-
 /*
- * The next structure is a description of the surface blit how it appears
- * in the video memory of E64. Once a pointer to this structure is passed to
- * the blitter (addition of an operation), the structure is read and converted
- * into finite state machine data of the blitter.
+ * The next structure is a surface blit. It is also used for terminal type
+ * operations.
  */
 
 class blit_t {
@@ -218,6 +209,13 @@ struct operation {
 	blit_t *blit_pointer;
 	int16_t x_pos;
 	int16_t y_pos;
+};
+
+enum blitter_state_t {
+	IDLE,
+	CLEARING,
+	DRAW_BORDER,
+	BLITTING
 };
 
 class blitter_ic {
