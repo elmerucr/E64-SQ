@@ -286,7 +286,7 @@ void E64::blitter_ic::swap_buffers()
 	backbuffer = tempbuffer;
 }
 
-uint8_t E64::blitter_ic::read_byte(uint8_t address)
+uint8_t E64::blitter_ic::io_read_8(uint8_t address)
 {
 	switch (address & 0x1f) {
 		case 0x00:
@@ -301,12 +301,22 @@ uint8_t E64::blitter_ic::read_byte(uint8_t address)
 			return border_color & 0xff;
 		case 0x0b:
 			return (border_color & 0xff00) >> 8;
+		case 0x10:
+			return blit[registers[0x01]].tiles & 0xff;
+		case 0x11:
+			return (blit[registers[0x01]].tiles & 0xff00) >> 8;
+		case 0x12:
+			// cursor position of current blit (reg 0x01), low byte
+			return blit[registers[0x01]].cursor_position & 0xff;
+		case 0x13:
+			// cursor position of current blit (reg 0x01), high byte
+			return (blit[registers[0x01]].cursor_position & 0xff00) >> 8;
 		default:
 			return registers[address & 0x1f];
 	}
 }
 
-void E64::blitter_ic::write_byte(uint8_t address, uint8_t byte)
+void E64::blitter_ic::io_write_8(uint8_t address, uint8_t byte)
 {
 	switch (address & 0x1f) {
 		case 0x00:
@@ -324,6 +334,12 @@ void E64::blitter_ic::write_byte(uint8_t address, uint8_t byte)
 					draw_blit(&blit[registers[0x01]],
 						  registers[0x04] | (registers[0x05] << 8),
 						  registers[0x06] | (registers[0x07] << 8));
+					break;
+				case 0b00010000:
+					// reset cursor position
+					blit[registers[0x01]].cursor_position = 0;
+					break;
+				case 0b00010001:
 					break;
 				default:
 					break;
@@ -343,6 +359,14 @@ void E64::blitter_ic::write_byte(uint8_t address, uint8_t byte)
 			break;
 		case 0x0b:
 			border_color = (border_color & 0x00ff) | (byte << 8);
+			break;
+		case 0x12:
+			blit[registers[0x01]].cursor_position =
+				(blit[registers[0x01]].cursor_position & 0xff00) | byte;
+			break;
+		case 0x13:
+			blit[registers[0x01]].cursor_position =
+				(blit[registers[0x01]].cursor_position & 0x00ff) | (byte << 8);
 			break;
 		default:
 			registers[address & 0x1f] = byte;

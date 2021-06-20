@@ -562,7 +562,7 @@ void E64::hud_t::blit_memory_dump(uint32_t address, int rows)
 		uint32_t temp_address = address;
 		terminal->printf("\r;%06x ", temp_address);
 		for (int i=0; i<8; i++) {
-			terminal->printf("%02x ", machine.blitter->read_memory_8(temp_address));
+			terminal->printf("%02x ", machine.blitter->memory_read_8(temp_address));
 			temp_address++;
 		}
 	
@@ -571,7 +571,7 @@ void E64::hud_t::blit_memory_dump(uint32_t address, int rows)
 		
 		temp_address = address;
 		for (int i=0; i<8; i++) {
-			uint8_t temp_byte = machine.blitter->read_memory_8(temp_address);
+			uint8_t temp_byte = machine.blitter->memory_read_8(temp_address);
 			terminal->putsymbol(temp_byte);
 			temp_address++;
 		}
@@ -732,14 +732,14 @@ void E64::hud_t::enter_monitor_blit_line(char *buffer)
 		arg6 &= 0xff;
 		arg7 &= 0xff;
 	
-		machine.blitter->write_memory_8(address, (uint8_t)arg0); address +=1; address &= 0xffffff;
-		machine.blitter->write_memory_8(address, (uint8_t)arg1); address +=1; address &= 0xffffff;
-		machine.blitter->write_memory_8(address, (uint8_t)arg2); address +=1; address &= 0xffffff;
-		machine.blitter->write_memory_8(address, (uint8_t)arg3); address +=1; address &= 0xffffff;
-		machine.blitter->write_memory_8(address, (uint8_t)arg4); address +=1; address &= 0xffffff;
-		machine.blitter->write_memory_8(address, (uint8_t)arg5); address +=1; address &= 0xffffff;
-		machine.blitter->write_memory_8(address, (uint8_t)arg6); address +=1; address &= 0xffffff;
-		machine.blitter->write_memory_8(address, (uint8_t)arg7); address +=1; address &= 0xffffff;
+		machine.blitter->memory_write_8(address, (uint8_t)arg0); address +=1; address &= 0xffffff;
+		machine.blitter->memory_write_8(address, (uint8_t)arg1); address +=1; address &= 0xffffff;
+		machine.blitter->memory_write_8(address, (uint8_t)arg2); address +=1; address &= 0xffffff;
+		machine.blitter->memory_write_8(address, (uint8_t)arg3); address +=1; address &= 0xffffff;
+		machine.blitter->memory_write_8(address, (uint8_t)arg4); address +=1; address &= 0xffffff;
+		machine.blitter->memory_write_8(address, (uint8_t)arg5); address +=1; address &= 0xffffff;
+		machine.blitter->memory_write_8(address, (uint8_t)arg6); address +=1; address &= 0xffffff;
+		machine.blitter->memory_write_8(address, (uint8_t)arg7); address +=1; address &= 0xffffff;
 
 		terminal->putchar('\r');
 	

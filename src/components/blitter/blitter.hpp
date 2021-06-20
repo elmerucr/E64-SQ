@@ -19,13 +19,20 @@
  * 0x09: clearcolor, high byte
  * 0x0a: hor border color, low byte
  * 0x0b: hor border color, high byte
+ * 0x0c:
+ * 0x0d:
+ * 0x0e: memory access page (low byte)
+ * 0x0f: memory access page (high byte)
  *
- * 0x10: memory access page (low byte)
- * 0x11: memory access page (high byte)
+ * 0x10: console related variables (based on blit_no @ 0x01)
+ * =========================================================
+ * 0x10/0x11: no of tiles
+ * 0x12/0x13: cursor position
+ *
  */
 
 /*
- * Blit is able to copy data very fast from video memory location to
+ * Blitter is able to copy data very fast from video memory location to
  * backbuffer (framebuffer). Copy operations run independently and can be added
  * to a FIFO linked list (blitter internally).
  */
@@ -75,8 +82,9 @@ private:
 	
 	uint8_t  columns;
 	uint16_t rows;
+public:
 	uint16_t tiles;
-	
+
 	uint16_t cursor_position;
 	uint8_t  cursor_interval;
 	uint8_t  cursor_countdown;
@@ -86,7 +94,7 @@ private:
 	bool     cursor_blinking;
 	char     command_buffer[COMMAND_BUFFER_SIZE];
 	enum     E64::output_type check_output(bool top_down, uint32_t *address);
-public:
+
 	/*  Flags 0
 	 *
 	 *  7 6 5 4 3 2 1 0
@@ -222,7 +230,7 @@ class blitter_ic {
 private:
 	uint8_t	registers[32];
 	uint8_t *blit_memory;
-	uint16_t *cbm_font;	// unpacked font
+	uint16_t *cbm_font;	// pointer to unpacked font
 	
 	enum blitter_state_t blitter_state;
 	
@@ -310,12 +318,14 @@ public:
 	blitter_ic();
 	~blitter_ic();
 	
-	// io access
-	uint8_t	read_byte(uint8_t address);
-	void	write_byte(uint8_t address, uint8_t byte);
+	/* io access to blitter_ic (mapped to a specific page in memory) */
+	uint8_t	io_read_8(uint8_t address);
+	void	io_write_8(uint8_t address, uint8_t byte);
 
-	// blitter memory acces
-	inline uint8_t read_memory_8(uint32_t address)
+	
+	// direct blitter memory acces (a 16mb memory block)
+	// takes into account if rom font is activated
+	inline uint8_t memory_read_8(uint32_t address)
 	{
 		if (((blit[(address & 0x00ff0000) >> 16].flags_0) & 0b10000000)
 		    && !(address & 0x00008000)) {
@@ -325,29 +335,31 @@ public:
 		}
 	}
 	
-	inline void write_memory_8(uint32_t address, uint8_t value)
+	inline void memory_write_8(uint32_t address, uint8_t value)
 	{
 		blit_memory[address & 0x00ffffff] = value;
 	}
 	
-	void memory_write_byte(uint8_t address, uint8_t byte)
+	// used from inside the machine (which can not access 16mb of flat memory)
+	void indirect_memory_write_8(uint8_t address, uint8_t byte)
 	{
-		uint32_t temp_address = registers[0x11] << 16 |
-					registers[0x10] << 8  |
+		uint32_t temp_address = registers[0x0f] << 16 |
+					registers[0x0e] << 8  |
 					address;
-		write_memory_8(temp_address, byte);
+		memory_write_8(temp_address, byte);
 	}
 	
-	uint8_t memory_read_byte(uint8_t address)
+	uint8_t indirect_memory_read_8(uint8_t address)
 	{
-		uint32_t temp_address = registers[0x11] << 16 |
-					registers[0x10] << 8  |
+		uint32_t temp_address = registers[0x0f] << 16 |
+					registers[0x0e] << 8  |
 					address;
-		return read_memory_8(temp_address);
+		return memory_read_8(temp_address);
 	}
+	
 	
 	// blitter pointer access (256 * 8  = 2048 bytes)
-	inline uint8_t read_descriptor_8(uint16_t address)
+	inline uint8_t descriptor_read_8(uint16_t address)
 	{
 		switch (address & 0x07) {
 			case 0x00:
@@ -371,7 +383,7 @@ public:
 		}
 	}
 	
-	inline void write_descriptor_8(uint16_t address, uint8_t value)
+	inline void descriptor_write_8(uint16_t address, uint8_t value)
 	{
 		uint16_t temp_word;
 		
