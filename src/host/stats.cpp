@@ -28,7 +28,7 @@ void E64::stats_t::reset()
 	
 	smoothed_framerate = FPS;
 	
-	smoothed_mhz = VICV_DOT_CLOCK_SPEED/(1000*1000);
+	smoothed_mhz = VICV_CLOCK_SPEED/(1000*1000);
 	
 	smoothed_cpu_mhz = smoothed_mhz;
 	old_cpu_ticks = machine.cpu->clock_ticks();
@@ -56,7 +56,7 @@ void E64::stats_t::process_parameters()
 		framerate = (double)(framecounter_interval * 1000000) / total_time;
 		smoothed_framerate = (alpha * smoothed_framerate) + ((1.0 - alpha) * framerate);
 
-		mhz = (double)(framerate * (VICV_DOT_CLOCK_SPEED / FPS) )/1000000;
+		mhz = (double)(framerate * (VICV_CLOCK_SPEED / FPS) )/1000000;
 		smoothed_mhz = (alpha * smoothed_mhz) + ((1.0 - alpha) * mhz);
 		
 		new_cpu_ticks = machine.cpu->clock_ticks();

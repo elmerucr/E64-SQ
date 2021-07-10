@@ -69,7 +69,8 @@ static void finish_frame()
 {
 	if (E64::sdl2_process_events() == E64::QUIT_EVENT) app_running = false;
 	
-	machine.blitter->flush();
+	//machine.blitter->flush();
+	machine.blitter->run(BLITTER_CYCLES_PER_FRAME);
 	
 	if (!hud.paused) {
 		hud.process_keypress();

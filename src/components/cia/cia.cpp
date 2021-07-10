@@ -225,7 +225,7 @@ inline char event_to_ascii(uint8_t scancode, uint8_t modifiers)
 
 E64::cia_ic::cia_ic()
 {
-    cycles_per_interval = VICV_DOT_CLOCK_SPEED / 100; // no of cycles @ vicv clockspeed for a total of 10 ms
+    cycles_per_interval = VICV_CLOCK_SPEED / 100; // no of cycles @ vicv clockspeed for a total of 10 ms
     reset();
 }
 

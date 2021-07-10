@@ -45,7 +45,7 @@ void E64::timer_ic::run(uint32_t number_of_cycles)
 
 uint32_t E64::timer_ic::bpm_to_clock_interval(uint16_t bpm)
 {
-	return (60.0 / bpm) * VICV_DOT_CLOCK_SPEED;
+	return (60.0 / bpm) * VICV_CLOCK_SPEED;
 }
 
 uint8_t E64::timer_ic::read_byte(uint8_t address)
