@@ -341,7 +341,7 @@ public:
 	}
 	
 	// used from inside the machine (which can not access 16mb of flat memory)
-	void indirect_memory_write_8(uint8_t address, uint8_t byte)
+	inline void indirect_memory_write_8(uint8_t address, uint8_t byte)
 	{
 		uint32_t temp_address = registers[0x0f] << 16 |
 					registers[0x0e] << 8  |
@@ -349,7 +349,7 @@ public:
 		memory_write_8(temp_address, byte);
 	}
 	
-	uint8_t indirect_memory_read_8(uint8_t address)
+	inline uint8_t indirect_memory_read_8(uint8_t address)
 	{
 		uint32_t temp_address = registers[0x0f] << 16 |
 					registers[0x0e] << 8  |
